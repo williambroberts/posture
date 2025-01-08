@@ -1,7 +1,7 @@
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { DeviceMotion, DeviceMotionMeasurement } from 'expo-sensors';
 import * as Haptics from 'expo-haptics';
-
+import BackgroundService from 'react-native-background-actions';
 import { useEffect, useState } from "react";
 
 export default function Index() {
@@ -21,15 +21,24 @@ export default function Index() {
       }
     })()
   },[])
+  // useEffect(()=>{
+  //   if (!isGranted){
+  //     return;
+  //   }
+  //   DeviceMotion.addListener(data => {
+  //     setData(data)
+  //   })
+  //   return () => {
+  //     DeviceMotion.removeAllListeners();
+  //   }
+  // },[isGranted])
   useEffect(()=>{
     if (!isGranted){
       return;
     }
-    DeviceMotion.addListener(data => {
-      setData(data)
-    })
+    BackgroundService.start(veryIntensiveTask, options);
     return () => {
-      DeviceMotion.removeAllListeners();
+      BackgroundService.stop();
     }
   },[isGranted])
   return (
@@ -47,3 +56,35 @@ export default function Index() {
     </View>
   )
 }
+
+
+const veryIntensiveTask = async () => {
+  DeviceMotion.addListener(data => {
+    if (data){
+      console.log(data);
+      Haptics.notificationAsync(
+        Haptics.NotificationFeedbackType.Success
+      )
+    } else{
+      console.log("err");
+      Haptics.notificationAsync(
+        Haptics.NotificationFeedbackType.Error
+      )
+    }
+  })
+}
+
+const options = {
+  taskName: 'Example',
+  taskTitle: 'ExampleTask title',
+  taskDesc: 'ExampleTask description',
+  taskIcon: {
+      name: 'ic_launcher',
+      type: 'mipmap',
+  },
+  color: '#ff00ff',
+  // linkingURI: 'yourSchemeHere://chat/jane', // See Deep Linking for more info
+  parameters: {
+      delay: 1000,
+  },
+};
