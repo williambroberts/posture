@@ -1,5 +1,6 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { DeviceMotion, DeviceMotionMeasurement } from 'expo-sensors';
+import * as Haptics from 'expo-haptics';
 
 import { useEffect, useState } from "react";
 
@@ -20,9 +21,29 @@ export default function Index() {
       }
     })()
   },[])
+  useEffect(()=>{
+    if (!isGranted){
+      return;
+    }
+    DeviceMotion.addListener(data => {
+      setData(data)
+    })
+    return () => {
+      DeviceMotion.removeAllListeners();
+    }
+  },[isGranted])
   return (
     <View>
       <Text>{JSON.stringify(data,null,2)}.</Text>
+      <Button
+          title="Success"
+          onPress={
+            () =>
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
+              )
+          }
+        />
     </View>
   )
 }
