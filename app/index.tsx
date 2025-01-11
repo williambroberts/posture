@@ -27,6 +27,7 @@ export default function Index() {
     }
     DeviceMotion.addListener(data => {
       setData(data)
+      //todow check if landscape and sitting
       if (data.rotation.beta < 0.6){
         // Haptics.notificationAsync(
         //   Haptics.NotificationFeedbackType.Warning
@@ -37,15 +38,15 @@ export default function Index() {
       DeviceMotion.removeAllListeners();
     }
   },[isGranted])
-  // useEffect(()=>{
-  //   if (!isGranted){
-  //     return;
-  //   }
-  //   BackgroundService.start(veryIntensiveTask, options);
-  //   return () => {
-  //     BackgroundService.stop(); 
-  //   }
-  // },[isGranted])
+  useEffect(()=>{
+    if (!isGranted){
+      return;
+    }
+    BackgroundService.start(veryIntensiveTask, options);
+    return () => {
+      BackgroundService.stop(); 
+    }
+  },[isGranted])
   return (
     <View>
       <Text>{JSON.stringify(data,null,2)}.</Text>
@@ -61,22 +62,35 @@ export default function Index() {
     </View>
   )
 }
-
-
+type Interval = NodeJS.Timeout | null;
 const veryIntensiveTask = async () => {
+  let intervalId:Interval = null;
+  const startLogging = () => {
+    if (!intervalId) {
+      intervalId = setInterval(() => {
+        Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Error
+        )
+      }, 1000);
+    }
+  };
+  const stopLogging = () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  };
   DeviceMotion.addListener(data => {
-    if (data){
-      console.log(data);
-      Haptics.notificationAsync(
-        Haptics.NotificationFeedbackType.Success
-      )
-    } else{
-      console.log("err");
-      Haptics.notificationAsync(
-        Haptics.NotificationFeedbackType.Error
-      )
+    if (data.rotation.beta < 0.6){
+      startLogging();
+    } else {
+      stopLogging();
     }
   })
+    // return () => {
+    //   stopLogging();
+    //   DeviceMotion.removeAllListeners();
+    // }
 }
 
 const options = {
