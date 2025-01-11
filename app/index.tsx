@@ -21,26 +21,31 @@ export default function Index() {
       }
     })()
   },[])
-  // useEffect(()=>{
-  //   if (!isGranted){
-  //     return;
-  //   }
-  //   DeviceMotion.addListener(data => {
-  //     setData(data)
-  //   })
-  //   return () => {
-  //     DeviceMotion.removeAllListeners();
-  //   }
-  // },[isGranted])
   useEffect(()=>{
     if (!isGranted){
       return;
     }
-    BackgroundService.start(veryIntensiveTask, options);
+    DeviceMotion.addListener(data => {
+      setData(data)
+      if (data.rotation.beta < 0.6){
+        // Haptics.notificationAsync(
+        //   Haptics.NotificationFeedbackType.Warning
+        // )
+      }
+    })
     return () => {
-      BackgroundService.stop();
+      DeviceMotion.removeAllListeners();
     }
   },[isGranted])
+  // useEffect(()=>{
+  //   if (!isGranted){
+  //     return;
+  //   }
+  //   BackgroundService.start(veryIntensiveTask, options);
+  //   return () => {
+  //     BackgroundService.stop(); 
+  //   }
+  // },[isGranted])
   return (
     <View>
       <Text>{JSON.stringify(data,null,2)}.</Text>
@@ -88,3 +93,4 @@ const options = {
       delay: 1000,
   },
 };
+// npx expo start --tunnel
