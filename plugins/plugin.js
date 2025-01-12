@@ -1,30 +1,30 @@
 // const { withAndroidManifest, AndroidConfig } = require("expo/config-plugins");
-const {withAndroidManifest,AndroidConfig} =  require("@expo/config-plugins")
-// import { ExpoConfig } from "@expo/config-types";
-const { getMainApplicationOrThrow } = AndroidConfig.Manifest;
+import {withAndroidManifest,AndroidConfig} from "@expo/config-plugins"
+import { ExpoConfig } from "@expo/config-types";
+const { getMainApplicationOrThrow, } = AndroidConfig.Manifest;
+const  {withPermissions} = AndroidConfig.Permissions
 
-module.exports = function withBackgroundActions(config) {
-    return withAndroidManifest(config, async config => {
-        const application = getMainApplicationOrThrow(config.modResults);
-        const service = !!application.service ? application.service : [];
+// export const
 
-        config.modResults = {
-            "manifest": {
-                ...config.modResults.manifest,
-                "application": [{
-                    ...application,
-                    "service": [
-                        ...service,
-                        {
-                            $:{
-                                "android:name": "com.asterinet.react.bgactions.RNBackgroundActionsTask"
-                            }
-                        }
-                    ]
-                }]
-            }
+module.exports =  function withBackgroundActions(config) {
+    config = withPermissions(config, [
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.WAKE_LOCK",
+      ]);
+    return withAndroidManifest(config, (config) => {
+        if (!config.modResults.manifest.application){
+            return config;
         }
-        console.log("👍🏻👍🏻👍🏻👍🏻")
+        if (!config.modResults.manifest.application[0].service){
+            config.modResults.manifest.application[0].service = [];
+        }
+        config.modResults.manifest.application[0].service.push({
+            $: {
+                "android:name": "com.asterinet.react.bgactions.RNBackgroundActionsTask",
+                "android:foregroundServiceType": "shortService", // Add this line
+              },
+          });
+       console.log("🐻")
         return config;
     })
 }

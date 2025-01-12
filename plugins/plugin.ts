@@ -24,33 +24,7 @@ export default function withBackgroundActions(config:ExpoConfig) {
                 "android:foregroundServiceType": "shortService", // Add this line
               },
           });
-          
-        // config.modResults.manifest["uses-permission"]
-        // config.modResults.manifest.application?.[0].service
-        // const application = getMainApplicationOrThrow(config.modResults);
-        // const service = !!application.service ? application.service : [];
-
-        // config.modResults = {
-        //     "manifest": {
-        //         ...config.modResults.manifest,
-        //         "uses-permission": [{
-                    
-        //         }],
-        //         "application": [{
-        //             ...application,
-        //             "service": [
-        //                 ...service,
-        //                 {
-        //                     $:{
-        //                         "android:name": "com.asterinet.react.bgactions.RNBackgroundActionsTask",
-        //                     },
-                            
-        //                 }
-        //             ]
-        //         }]
-        //     }
-        // }
-
+       console.log("🧧")
         return config;
     })
 }

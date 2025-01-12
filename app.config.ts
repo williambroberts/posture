@@ -43,7 +43,7 @@ const config:ExpoConfig = {
         {
           "motionPermission": "Allow the app to access your device motion"
         }
-      ]
+      ],
     ],
     "experiments": {
       "typedRoutes": true
