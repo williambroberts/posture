@@ -22,3 +22,4 @@ export default function Index(){
   </View>
   )
 }
+// prebuild and re build try again (using 2 yr old unmaintained package)
