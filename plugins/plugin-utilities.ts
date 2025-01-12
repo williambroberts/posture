@@ -13,3 +13,7 @@ export function insertTextAfterSubstring(originalString:string, substring:string
 export function appendToString(originalString:string,textToInsert:string){
     return originalString + textToInsert;
 }
+
+export function replaceSubstring(originalString:string,textToReplace:string,replacement:string){
+    return originalString.replace(textToReplace, replacement);
+}

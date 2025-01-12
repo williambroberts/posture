@@ -1,20 +1,24 @@
 import {withAndroidManifest,AndroidConfig,withMainApplication,withSettingsGradle,withAppBuildGradle} from "@expo/config-plugins"
 import { ExpoConfig } from "@expo/config-types";
-import { insertTextAfterSubstring } from "./plugin-utilities";
+import { insertTextAfterSubstring, replaceSubstring } from "./plugin-utilities";
 
 
 export function withSensorsMainApplication(config:ExpoConfig){
     return withMainApplication(config, config => {
         config.modResults.contents = insertTextAfterSubstring(
             config.modResults.contents,
-            "val packages = PackageList(this).packages",
-            `\n${" ".repeat(12)}packages.add(new RNSensorsPackage())`,
+            "package com.thew1lego.posture",
+            "\nimport com.sensors.RNSensorsPackage"
         )
         config.modResults.contents = insertTextAfterSubstring(
             config.modResults.contents,
-            "package com.thew1lego.posture",
-            "\nimport com.sensors.RNSensorsPackage;"
-
+            "val packages = PackageList(this).packages",
+            `\n${" ".repeat(12)}packages.add(RNSensorsPackage())`,
+        )
+        config.modResults.contents = replaceSubstring(
+            config.modResults.contents,
+             "val packages = PackageList(this).packages",
+             "val packages = PackageList(this).packages.toMutableList()"
         )
         console.log("withSensorsMainApplication")
         return config;
