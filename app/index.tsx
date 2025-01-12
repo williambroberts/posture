@@ -42,10 +42,12 @@ export default function Index() {
     if (!isGranted){
       return;
     }
-    BackgroundService.start(veryIntensiveTask, options);
-    // return () => {
-    //   BackgroundService.stop(); 
-    // }
+    (async()=>{
+      await BackgroundService.start(veryIntensiveTask, options);
+    })()
+    return () => {
+      BackgroundService.stop(); 
+    }
   },[isGranted])
   return (
     <View>
@@ -107,4 +109,6 @@ const options = {
       delay: 1000,
   },
 };
+//npm i -g @expo/ngrok
+
 // npx expo start --tunnel 
