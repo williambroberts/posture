@@ -43,9 +43,9 @@ export default function Index() {
       return;
     }
     BackgroundService.start(veryIntensiveTask, options);
-    return () => {
-      BackgroundService.stop(); 
-    }
+    // return () => {
+    //   BackgroundService.stop(); 
+    // }
   },[isGranted])
   return (
     <View>
@@ -107,4 +107,4 @@ const options = {
       delay: 1000,
   },
 };
-// npx expo start --tunnel
+// npx expo start --tunnel 
