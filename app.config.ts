@@ -1,5 +1,9 @@
-{
-  "expo": {
+// const {withBackgroundActions} = require("./plugins/plugin")
+import 'ts-node/register'; // Add this to import TypeScript files
+import { ExpoConfig } from 'expo/config';
+import withBackgroundActions from './plugins/plugin';
+
+const config:ExpoConfig = {
     "name": "posture",
     "slug": "posture",
     "version": "1.0.0",
@@ -53,4 +57,5 @@
       }
     }
   }
-}
+export default withBackgroundActions(config);
+// module.exports = withBackgroundActions(config)
