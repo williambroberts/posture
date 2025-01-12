@@ -59,12 +59,9 @@ const config:ExpoConfig = {
       }
     }
   }
-export default withPlugins(config,[
-  //background
-  withBackgroundActions,
-  //sensors
-  withSensorsAppBuildGradle,
-  withSensorsMainApplication,
-  withSensorsSettingsGradle,
-]);
+export default withSensorsMainApplication(
+  withSensorsSettingsGradle(
+  withSensorsAppBuildGradle(
+  withBackgroundActions(config)
+)))
 // module.exports = withBackgroundActions(config)

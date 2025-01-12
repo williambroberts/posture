@@ -8,7 +8,7 @@ export function withSensorsMainApplication(config:ExpoConfig){
         config.modResults.contents = insertTextAfterSubstring(
             config.modResults.contents,
             "val packages = PackageList(this).packages",
-            `\npackages.add(new RNSensorsPackage())`,
+            `\n${" ".repeat(12)}packages.add(new RNSensorsPackage())`,
         )
         config.modResults.contents = insertTextAfterSubstring(
             config.modResults.contents,
@@ -16,14 +16,16 @@ export function withSensorsMainApplication(config:ExpoConfig){
             "\nimport com.sensors.RNSensorsPackage;"
 
         )
+        console.log("withSensorsMainApplication")
         return config;
     })
 }
 
 export function withSensorsSettingsGradle(config:ExpoConfig) {
     return withSettingsGradle(config,config =>{
-        config.modResults.contents = config.modResults.contents + `\n\n include ':react-native-sensors'`
-        config.modResults.contents = config.modResults.contents + `\n project(':react-native-sensors').projectDir = new File(rootProject.projectDir,  '../node_modules/react-native-sensors/android')`
+        config.modResults.contents = config.modResults.contents + `\n\ninclude ':react-native-sensors'`
+        config.modResults.contents = config.modResults.contents + `\nproject(':react-native-sensors').projectDir = new File(rootProject.projectDir,  '../node_modules/react-native-sensors/android')`
+        console.log("withSensorsSettingsGradle")
         return config;
     })
 }
@@ -32,8 +34,9 @@ export function withSensorsAppBuildGradle (config:ExpoConfig){
         config.modResults.contents = insertTextAfterSubstring(
             config.modResults.contents,
             "dependencies {",
-            `\n  implementation project(':react-native-sensors')\n`
+            `\n  ${" ".repeat(2)}implementation project(':react-native-sensors')\n`
         )
+        console.log("withSensorsAppBuildGradle")
         return config;
     })
 }
