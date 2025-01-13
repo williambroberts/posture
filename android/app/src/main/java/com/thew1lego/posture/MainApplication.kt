@@ -1,4 +1,5 @@
 package com.thew1lego.posture
+import com.sensors.RNSensorsPackage
 
 import android.app.Application
 import android.content.res.Configuration
@@ -22,7 +23,8 @@ class MainApplication : Application(), ReactApplication {
         this,
         object : DefaultReactNativeHost(this) {
           override fun getPackages(): List<ReactPackage> {
-            val packages = PackageList(this).packages
+            val packages = PackageList(this).packages.toMutableList()
+            packages.add(RNSensorsPackage())
             // Packages that cannot be autolinked yet can be added manually here, for example:
             // packages.add(new MyReactNativePackage());
             return packages

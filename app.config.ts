@@ -40,12 +40,12 @@ const config:ExpoConfig = {
           "backgroundColor": "#ffffff"
         }
       ],
-      [
-        "expo-sensors",
-        {
-          "motionPermission": "Allow the app to access your device motion"
-        }
-      ],
+      // [
+      //   "expo-sensors",
+      //   {
+      //     "motionPermission": "Allow the app to access your device motion"
+      //   }
+      // ],
     ],
     "experiments": {
       "typedRoutes": true
@@ -59,10 +59,10 @@ const config:ExpoConfig = {
       }
     }
   }
-// export default withSensorsMainApplication(
-//   withSensorsSettingsGradle(
-//   withSensorsAppBuildGradle(
-//   withBackgroundActions(config)
-// )))
-export default withBackgroundActions(config)
+export default withSensorsMainApplication(
+  withSensorsSettingsGradle(
+  withSensorsAppBuildGradle(
+  withBackgroundActions(config)
+)))
+// export default withBackgroundActions(config)
 // module.exports = withBackgroundActions(config)
