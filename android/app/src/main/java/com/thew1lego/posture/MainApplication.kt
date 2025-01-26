@@ -1,5 +1,4 @@
 package com.thew1lego.posture
-package com.thew1lego.posture
 
 import android.app.Application
 import android.content.res.Configuration

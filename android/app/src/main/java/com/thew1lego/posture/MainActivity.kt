@@ -1,5 +1,4 @@
 package com.thew1lego.posture
-package com.thew1lego.posture
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
