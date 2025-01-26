@@ -1,4 +1,6 @@
 package com.thew1lego.posture
+import com.thew1lego.posture.GyroscopeModule
+
 
 import android.app.Application
 import android.content.res.Configuration
