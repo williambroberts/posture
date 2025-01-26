@@ -138,7 +138,13 @@ export function withGyroscopeMainApplication(config:ExpoConfig) {
     // Write the Kotlin file
     const gyroscopeFilePath = path.join(mainJavaPath, 'GyroscopeModule.kt');
     fs.writeFileSync(gyroscopeFilePath, GYROSCOPE_KOTLIN_CODE, { encoding: 'utf8' });
-    //config.modResults.contents = `package com.thew1lego.posture\n` + config.modResults.contents
+    // config.modResults.contents = `import com.thew1lego.posture.GyroscopeModule\n` + config.modResults.contents
+    config.modResults.contents = insertTextAfterSubstring(
+        config.modResults.contents,
+        "package com.thew1lego.posture",
+        "\nimport com.thew1lego.posture.GyroscopeModule\n"
+    )
+    
     config.modResults.contents = insertTextAfterSubstring(
             config.modResults.contents,
             "val packages = PackageList(this).packages",
