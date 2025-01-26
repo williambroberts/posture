@@ -1,5 +1,5 @@
 package com.thew1lego.posture
-import com.example.gyroscopemodule.GyroscopeModule
+package com.thew1lego.posture
 
 import android.app.Application
 import android.content.res.Configuration
@@ -24,8 +24,9 @@ class MainApplication : Application(), ReactApplication {
         object : DefaultReactNativeHost(this) {
           override fun getPackages(): List<ReactPackage> {
             val packages = PackageList(this).packages
+            packages.add(GyroscopeModule())
             // Packages that cannot be autolinked yet can be added manually here, for example:
-            //packages.add(GyroscopeModule());
+            // packages.add(new MyReactNativePackage());
             return packages
           }
 

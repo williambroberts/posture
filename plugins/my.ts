@@ -122,7 +122,7 @@ class GyroscopeModule(reactContext: ReactApplicationContext) : ReactContextBaseJ
 }
 `;
 
-export function withGyroscopeModule(config:ExpoConfig) {
+export function withGyroscopeMainApplication(config:ExpoConfig) {
   return withMainApplication(config, async (config) => {
     // Define the path where the Kotlin file will be written
     const mainJavaPath = path.join(
@@ -138,7 +138,7 @@ export function withGyroscopeModule(config:ExpoConfig) {
     // Write the Kotlin file
     const gyroscopeFilePath = path.join(mainJavaPath, 'GyroscopeModule.kt');
     fs.writeFileSync(gyroscopeFilePath, GYROSCOPE_KOTLIN_CODE, { encoding: 'utf8' });
-    config.modResults.contents = `package com.thew1lego.posture\n` + config.modResults.contents
+    //config.modResults.contents = `package com.thew1lego.posture\n` + config.modResults.contents
     config.modResults.contents = insertTextAfterSubstring(
             config.modResults.contents,
             "val packages = PackageList(this).packages",
@@ -150,7 +150,7 @@ export function withGyroscopeModule(config:ExpoConfig) {
 }
 export function withGyroscopeMainActivity(config:ExpoConfig){
     return withMainActivity(config,config => {
-        config.modResults.contents = `package com.thew1lego.posture\n` + config.modResults.contents
+        //config.modResults.contents = `package com.thew1lego.posture\n` + config.modResults.contents
         return config
     })
 }
