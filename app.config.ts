@@ -4,6 +4,7 @@ import { ExpoConfig } from 'expo/config';
 import withBackgroundActions from './plugins/withBackgroundActions';
 import { withPlugins } from '@expo/config-plugins';
 import { withSensorsAppBuildGradle, withSensorsMainApplication, withSensorsSettingsGradle } from './plugins/sensors';
+import { withGyroscopeMainActivity, withGyroscopeMainApplication } from './plugins/my';
 
 const config:ExpoConfig = {
     "name": "posture",
@@ -59,10 +60,13 @@ const config:ExpoConfig = {
       }
     }
   }
-export default withSensorsMainApplication(
-  withSensorsSettingsGradle(
-  withSensorsAppBuildGradle(
+// export default withSensorsMainApplication(
+//   withSensorsSettingsGradle(
+//   withSensorsAppBuildGradle(
+//   withBackgroundActions(config)
+// )))
+export default withGyroscopeMainApplication(
+  withGyroscopeMainActivity(
   withBackgroundActions(config)
-)))
-// export default withBackgroundActions(config)
+))
 // module.exports = withBackgroundActions(config)

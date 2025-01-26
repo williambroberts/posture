@@ -1,33 +1,48 @@
 import React, { useEffect, useState } from 'react'
 import { Text, View } from 'react-native'
-import { gyroscope, SensorData } from "react-native-sensors";
+// import { gyroscope, SensorData } from "react-native-sensors";
 import BackgroundService from 'react-native-background-actions';
+import { NativeModules, DeviceEventEmitter } from 'react-native';
+
+// Access the GyroscopeModule
+const { GyroscopeModule } = NativeModules;
+
+// Start listening for gyroscope data
 
 export default function Index(){
-  const [data,setData] = useState<SensorData>()
-  
-  useEffect(()=>{
-    const subscription = gyroscope.subscribe((data) =>
-      setData(data)
-    );
-    return () =>{
-      subscription.remove(()=>{
-        console.log("unsubsribed")
-      });
-    }
+  // const [data,setData] = useState<SensorData>()
+  //
+  // useEffect(()=>{
+  //   const subscription = gyroscope.subscribe((data) =>
+  //     setData(data)
+  //   );
+  //   return () =>{
+  //     subscription.remove(()=>{
+  //       console.log("unsubsribed")
+  //     });
+  //   }
     
-  },[])
-  useEffect(()=>{
-    (async()=>{
-      await BackgroundService.start(veryIntensiveTask, options);
-    })()
+  // },[])
+  useEffect(()=> {
+    GyroscopeModule.startListening();
+    DeviceEventEmitter.addListener('GyroscopeData', (data) => {
+      console.log("Gyroscope data:", data);  // {x, y, z}
+    });
     return () => {
-      BackgroundService.stop(); 
+      GyroscopeModule.stopListening();
     }
   },[])
+  // useEffect(()=>{
+  //   (async()=>{
+  //     await BackgroundService.start(veryIntensiveTask, options);
+  //   })()
+  //   return () => {
+  //     BackgroundService.stop(); 
+  //   }
+  // },[])
   return (
   <View>
-    <Text>{JSON.stringify(data,null,2)}</Text>
+    {/* <Text>{JSON.stringify(data,null,2)}</Text> */}
   </View>
   )
 }
