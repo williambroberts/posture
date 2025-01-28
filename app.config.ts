@@ -65,8 +65,8 @@ const config:ExpoConfig = {
 //   withSensorsAppBuildGradle(
 //   withBackgroundActions(config)
 // )))
-export default withGyroscopeMainApplication(
-  withGyroscopeMainActivity(
+export default (
+  (
   withBackgroundActions(config)
 ))
 // module.exports = withBackgroundActions(config)
