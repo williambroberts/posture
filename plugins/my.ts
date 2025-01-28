@@ -121,7 +121,28 @@ class GyroscopeModule(reactContext: ReactApplicationContext) : ReactContextBaseJ
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }
 `;
+const MY_CODE = `
+package com.mynumbermodule
 
+import expo.modules.kotlin.modules.Module
+import expo.modules.kotlin.modules.ModuleDefinition
+
+class MyNumberModule : Module() {
+    override fun definition() = ModuleDefinition {
+        Name("MyNumberModule")
+
+        // Simple function that returns a number
+        Function("getNumber") {
+            return@Function 42
+        }
+
+        // Optional: Async version if you need it
+        AsyncFunction("getNumberAsync") {
+            return@AsyncFunction 42
+        }
+    }
+}
+`
 export function withGyroscopeMainApplication(config:ExpoConfig) {
   return withMainApplication(config, async (config) => {
     // Define the path where the Kotlin file will be written
@@ -137,7 +158,7 @@ export function withGyroscopeMainApplication(config:ExpoConfig) {
 
     // Write the Kotlin file
     const gyroscopeFilePath = path.join(mainJavaPath, 'GyroscopeModule.kt');
-    fs.writeFileSync(gyroscopeFilePath, GYROSCOPE_KOTLIN_CODE, { encoding: 'utf8' });
+    fs.writeFileSync(gyroscopeFilePath, MY_CODE, { encoding: 'utf8' });
     // config.modResults.contents = `import com.thew1lego.posture.GyroscopeModule\n` + config.modResults.contents
     config.modResults.contents = insertTextAfterSubstring(
         config.modResults.contents,
