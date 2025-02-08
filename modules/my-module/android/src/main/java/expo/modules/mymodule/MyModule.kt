@@ -1,13 +1,12 @@
 package expo.modules.mymodule
 
-import expo.modules.kotlin.modules.Module
-import expo.modules.kotlin.modules.ModuleDefinition
-import java.net.URL
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import expo.modules.kotlin.modules.Module
+import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.Promise
 
 class MyModule : Module() {
@@ -15,17 +14,10 @@ class MyModule : Module() {
     private var gyroscope: Sensor? = null
     private var gyroscopeListener: SensorEventListener? = null
 
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
-  override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('MyModule')` in JavaScript.
-    Name("MyModule")
+    override fun definition() = ModuleDefinition {
+        Name("MyModule")
 
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants(
+        Constants(
             "PI" to Math.PI,
             "SENSOR_DELAY_NORMAL" to SensorManager.SENSOR_DELAY_NORMAL,
             "SENSOR_DELAY_UI" to SensorManager.SENSOR_DELAY_UI,
@@ -33,10 +25,8 @@ class MyModule : Module() {
             "SENSOR_DELAY_FASTEST" to SensorManager.SENSOR_DELAY_FASTEST
         )
 
-    // Defines event names that the module can send to JavaScript.
-     Events("onGyroscopeChange")
+        Events("onGyroscopeChange")
 
-    // Function to start listening to gyroscope
         AsyncFunction("startGyroscope") { promise: Promise ->
             try {
                 startGyroscope()
@@ -46,7 +36,6 @@ class MyModule : Module() {
             }
         }
 
-        // Function to stop listening to gyroscope
         AsyncFunction("stopGyroscope") { promise: Promise ->
             try {
                 stopGyroscope()
@@ -56,14 +45,13 @@ class MyModule : Module() {
             }
         }
 
-        // Function to check if gyroscope is available
         Function("isGyroscopeAvailable") {
-            val sensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null
+            sensorManager?.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null
         }
 
         OnCreate {
-            sensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            // Initialize sensor manager using appContext
+            sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
             gyroscope = sensorManager?.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
         }
 
@@ -88,7 +76,7 @@ class MyModule : Module() {
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-                // You can handle accuracy changes if needed
+                // Handle accuracy changes if needed
             }
         }
 
@@ -105,5 +93,4 @@ class MyModule : Module() {
             gyroscopeListener = null
         }
     }
-  }
-
+}
