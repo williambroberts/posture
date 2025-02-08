@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Text, View } from 'react-native'
+import { Button, Text, View } from 'react-native'
 // import { gyroscope, SensorData } from "react-native-sensors";
 import BackgroundService from 'react-native-background-actions';
 // import { NativeModules, DeviceEventEmitter } from 'react-native';
@@ -15,7 +15,13 @@ export default function Index(){
   // const [data,setData] = useState<SensorData>()
   //
   useEffect(()=>{
-    console.log(myModule.hello(),myModule.PI)
+    myModule.addListener("onChange",(val)=>{
+      console.warn("val",val)
+    })
+    return () => {
+      myModule.removeAllListeners("onChange");
+    }
+    // console.log(myModule.hello(),myModule.PI)
   },[])
   
   // useEffect(()=>{
@@ -28,7 +34,13 @@ export default function Index(){
   // },[])
   return (
   <View>
-    {/* <Text>{JSON.stringify(data,null,2)}</Text> */}
+    <Text>{myModule.PI}</Text>
+    <Text>{myModule.hello()}</Text>
+    <Button onPress={()=>{
+      myModule.setValueAsync("ok")
+    }}
+      title='set valye'
+      />
   </View>
   )
 }
@@ -56,3 +68,6 @@ const options = {
       delay: 1000,
   },
 };
+
+//npm i -g @expo/ngrok
+//npx expo start --tunnel
