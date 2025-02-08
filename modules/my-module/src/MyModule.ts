@@ -15,3 +15,7 @@ declare class MyModule extends NativeModule<MyModuleEvents> {
 
 // This call loads the native module object from the JSI.
 export default requireNativeModule<MyModule>('MyModule');
+
+// clean up
+// permission
+//rate
