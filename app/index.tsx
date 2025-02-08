@@ -15,12 +15,7 @@ export default function Index(){
   // const [data,setData] = useState<SensorData>()
   //
   useEffect(()=>{
-    myModule.addListener("onChange",(val)=>{
-      console.warn("val",val)
-    })
-    return () => {
-      myModule.removeAllListeners("onChange");
-    }
+    console.log(myModule.PI)
     // console.log(myModule.hello(),myModule.PI)
   },[])
   
@@ -35,11 +30,10 @@ export default function Index(){
   return (
   <View>
     <Text>{myModule.PI}</Text>
-    <Text>{myModule.hello()}</Text>
     <Button onPress={()=>{
-      myModule.setValueAsync("ok")
+     console.log("ok")
     }}
-      title='set valye'
+      title='click'
       />
   </View>
   )
