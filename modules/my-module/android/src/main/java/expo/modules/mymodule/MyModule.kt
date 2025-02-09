@@ -32,7 +32,7 @@ class MyModule : Module() {
                 startGyroscope()
                 promise.resolve(null)
             } catch (e: Exception) {
-                promise.reject("GYROSCOPE_ERROR", "Failed to start gyroscope: ${e.message}")
+                promise.reject("GYROSCOPE_ERROR", e.message, e)
             }
         }
 
@@ -41,7 +41,7 @@ class MyModule : Module() {
                 stopGyroscope()
                 promise.resolve(null)
             } catch (e: Exception) {
-                promise.reject("GYROSCOPE_ERROR", "Failed to stop gyroscope: ${e.message}")
+                promise.reject("GYROSCOPE_ERROR", e.message, e)
             }
         }
 
@@ -51,8 +51,13 @@ class MyModule : Module() {
 
         OnCreate {
             // Initialize sensor manager using appContext
-            sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+            val activity = appContext.activityProvider?.currentActivity
+            val applicationContext = activity?.applicationContext
+            if(applicationContext != null) {
+            sensorManager = applicationContext.applicationContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
             gyroscope = sensorManager?.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+            }
+           
         }
 
         OnDestroy {
@@ -83,7 +88,7 @@ class MyModule : Module() {
         sensorManager?.registerListener(
             gyroscopeListener,
             gyroscope,
-            SensorManager.SENSOR_DELAY_NORMAL
+            SensorManager.SENSOR_DELAY_UI
         )
     }
 

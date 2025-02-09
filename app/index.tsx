@@ -5,6 +5,7 @@ import BackgroundService from 'react-native-background-actions';
 // import { NativeModules, DeviceEventEmitter } from 'react-native';
 // import MyModule from '../modules/my-module';
 import myModule from '../modules/my-module';
+import { GyroscopeEvent } from '@/modules/my-module/src/MyModule';
 
 // // Access the GyroscopeModule
 // const { GyroscopeModule } = NativeModules;
@@ -12,10 +13,15 @@ import myModule from '../modules/my-module';
 // Start listening for gyroscope data
 
 export default function Index(){
-  // const [data,setData] = useState<SensorData>()
+  const [data,setData] = useState<GyroscopeEvent | null>()
   //
+  const [tog,setTog] = useState(false)
   useEffect(()=>{
-    console.log(myModule.PI)
+    
+    return () => {
+      myModule.removeAllListeners("onGyroscopeChange")
+      myModule.stopGyroscope();
+    }
     // console.log(myModule.hello(),myModule.PI)
   },[])
   
@@ -27,14 +33,37 @@ export default function Index(){
   //     BackgroundService.stop(); 
   //   }
   // },[])
+
+  useEffect(() => {
+    console.log(tog)
+    return () => {
+      console.log(tog,"return")
+    }
+  },[tog])
   return (
   <View>
     <Text>{myModule.PI}</Text>
     <Button onPress={()=>{
-     console.log("ok")
+     if (myModule.isGyroscopeAvailable()){
+      myModule.startGyroscope(); 
+      myModule.addListener("onGyroscopeChange",(e)=>setData(e))
+    }
     }}
-      title='click'
+      title='start'
       />
+    <Text>{JSON.stringify(data,null,2)}</Text>
+
+      <Button onPress={()=>{
+        myModule.removeAllListeners("onGyroscopeChange")
+        myModule.stopGyroscope().catch(e => console.log(e)).finally(()=>console.log("stopped"))
+        setData(null)
+    }}
+      title='stop'
+      />
+      {/* <Button
+      title='tog'
+      onPress={()=>setTog(p => !p)}
+      /> */}
   </View>
   )
 }
