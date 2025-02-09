@@ -11,34 +11,42 @@ import expo.modules.kotlin.Promise
 
 class MyModule : Module() {
     private var sensorManager: SensorManager? = null
-    private var gravitySensor: Sensor? = null
-    private var gravityListener: SensorEventListener? = null
+    private var gyroscope: Sensor? = null
+    private var gyroscopeListener: SensorEventListener? = null
 
     override fun definition() = ModuleDefinition {
         Name("MyModule")
 
-        Events("onOrientationChange")
+        Constants(
+            "PI" to Math.PI,
+            "SENSOR_DELAY_NORMAL" to SensorManager.SENSOR_DELAY_NORMAL,
+            "SENSOR_DELAY_UI" to SensorManager.SENSOR_DELAY_UI,
+            "SENSOR_DELAY_GAME" to SensorManager.SENSOR_DELAY_GAME,
+            "SENSOR_DELAY_FASTEST" to SensorManager.SENSOR_DELAY_FASTEST
+        )
 
-        AsyncFunction("startOrientation") { promise: Promise ->
+        Events("onGyroscopeChange")
+
+        AsyncFunction("startGyroscope") { promise: Promise ->
             try {
-                startGravitySensor()
+                startGyroscope()
                 promise.resolve(null)
             } catch (e: Exception) {
-                promise.reject("SENSOR_ERROR", e.message, e)
+                promise.reject("GYROSCOPE_ERROR", e.message, e)
             }
         }
 
-        AsyncFunction("stopOrientation") { promise: Promise ->
+        AsyncFunction("stopGyroscope") { promise: Promise ->
             try {
-                stopGravitySensor()
+                stopGyroscope()
                 promise.resolve(null)
             } catch (e: Exception) {
-                promise.reject("SENSOR_ERROR", e.message, e)
+                promise.reject("GYROSCOPE_ERROR", e.message, e)
             }
         }
 
-        Function("isOrientationAvailable") {
-            sensorManager?.getDefaultSensor(Sensor.TYPE_GRAVITY) != null
+        Function("isGyroscopeAvailable") {
+            sensorManager?.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null
         }
 
         OnCreate {
@@ -47,26 +55,27 @@ class MyModule : Module() {
             val applicationContext = activity?.applicationContext
             if(applicationContext != null) {
             sensorManager = applicationContext.applicationContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
-            gravitySensor = sensorManager?.getDefaultSensor(Sensor.TYPE_GRAVITY)
+            gyroscope = sensorManager?.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
             }
+           
         }
 
         OnDestroy {
-            stopGravitySensor()
+            stopGyroscope()
         }
     }
 
-    private fun startGravitySensor() {
-        if (gravityListener != null) {
+    private fun startGyroscope() {
+        if (gyroscopeListener != null) {
             return
         }
 
-        gravityListener = object : SensorEventListener {
+        gyroscopeListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
-                sendEvent("onOrientationChange", mapOf(
-                    "x" to event.values[0],  // Gravity force along x-axis
-                    "y" to event.values[1],  // Gravity force along y-axis
-                    "z" to event.values[2],  // Gravity force along z-axis
+                sendEvent("onGyroscopeChange", mapOf(
+                    "x" to event.values[0],
+                    "y" to event.values[1],
+                    "z" to event.values[2],
                     "timestamp" to event.timestamp
                 ))
             }
@@ -77,16 +86,16 @@ class MyModule : Module() {
         }
 
         sensorManager?.registerListener(
-            gravityListener,
-            gravitySensor,
+            gyroscopeListener,
+            gyroscope,
             SensorManager.SENSOR_DELAY_UI
         )
     }
 
-    private fun stopGravitySensor() {
-        gravityListener?.let { listener ->
+    private fun stopGyroscope() {
+        gyroscopeListener?.let { listener ->
             sensorManager?.unregisterListener(listener)
-            gravityListener = null
+            gyroscopeListener = null
         }
     }
 }

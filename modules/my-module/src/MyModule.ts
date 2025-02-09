@@ -2,24 +2,23 @@ import { NativeModule, requireNativeModule } from 'expo';
 
 // import { MyModuleEvents } from './MyModule.types';
  type MyModuleEvents = {
-  onGyroscopeChange: (params: GyroscopeEvent) => void;
+  onOrientationChange: (params: SensorEvent) => void;
 };
-export type GyroscopeEvent  = {
+export type SensorEvent  = {
   x: number;
   y: number;
   z: number;
   timestamp: number;
 }
 declare class MyModule extends NativeModule<MyModuleEvents> {
-  PI: number;
-  SENSOR_DELAY_NORMAL:string;
-  SENSOR_DELAY_UI: string;
-  SENSOR_DELAY_GAME:string;
-  SENSOR_DELAY_FASTEST:string;
+  // SENSOR_DELAY_NORMAL:string;
+  // SENSOR_DELAY_UI: string;
+  // SENSOR_DELAY_GAME:string;
+  // SENSOR_DELAY_FASTEST:string;
   //hello(): string;
-  startGyroscope(): Promise<null>;
-  stopGyroscope(): Promise<null>;
-  isGyroscopeAvailable():boolean;
+  startGravitySensor(): Promise<null>;
+  stopGravitySensor(): Promise<null>;
+  isOrientationAvailable():boolean;
 }
 
 // This call loads the native module object from the JSI.
