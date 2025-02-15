@@ -9,6 +9,7 @@ import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.Promise
 
+import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import expo.modules.haptics.arguments.HapticsVibrationType
