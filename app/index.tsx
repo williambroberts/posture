@@ -5,7 +5,7 @@ import BackgroundService from 'react-native-background-actions';
 // import { NativeModules, DeviceEventEmitter } from 'react-native';
 // import MyModule from '../modules/my-module';
 import myModule from '../modules/my-module';
-import { GyroscopeEvent } from '@/modules/my-module/src/MyModule';
+import { SensorEvent } from '@/modules/my-module/src/MyModule';
 
 // // Access the GyroscopeModule
 // const { GyroscopeModule } = NativeModules;
@@ -13,14 +13,14 @@ import { GyroscopeEvent } from '@/modules/my-module/src/MyModule';
 // Start listening for gyroscope data
 
 export default function Index(){
-  const [data,setData] = useState<GyroscopeEvent | null>()
+  const [data,setData] = useState<SensorEvent | null>()
   //
   const [tog,setTog] = useState(false)
   useEffect(()=>{
     
     return () => {
-      myModule.removeAllListeners("onGyroscopeChange")
-      myModule.stopGyroscope();
+      myModule.removeAllListeners("onOrientationChange")
+      myModule.stopOrientation();
     }
     // console.log(myModule.hello(),myModule.PI)
   },[])
@@ -34,19 +34,14 @@ export default function Index(){
   //   }
   // },[])
 
-  useEffect(() => {
-    console.log(tog)
-    return () => {
-      console.log(tog,"return")
-    }
-  },[tog])
+  
   return (
   <View>
     <Text>{myModule.PI}</Text>
     <Button onPress={()=>{
-     if (myModule.isGyroscopeAvailable()){
-      myModule.startGyroscope(); 
-      myModule.addListener("onGyroscopeChange",(e)=>setData(e))
+     if (myModule.isOrientationAvailable()){
+      myModule.startOrientation(); 
+      myModule.addListener("onOrientationChange",(e)=>setData(e))
     }
     }}
       title='start'
@@ -54,7 +49,7 @@ export default function Index(){
     <Text>{JSON.stringify(data,null,2)}</Text>
 
       <Button onPress={()=>{
-        myModule.removeAllListeners("onGyroscopeChange")
+        myModule.removeAllListeners("onOrientationChange")
         myModule.stopGyroscope().catch(e => console.log(e)).finally(()=>console.log("stopped"))
         setData(null)
     }}

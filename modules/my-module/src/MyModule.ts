@@ -16,8 +16,8 @@ declare class MyModule extends NativeModule<MyModuleEvents> {
   // SENSOR_DELAY_GAME:string;
   // SENSOR_DELAY_FASTEST:string;
   //hello(): string;
-  startGravitySensor(): Promise<null>;
-  stopGravitySensor(): Promise<null>;
+  startOrientation(): Promise<null>;
+  stopOrientation(): Promise<null>;
   isOrientationAvailable():boolean;
 }
 
