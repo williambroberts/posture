@@ -34,7 +34,6 @@ export default function Index(){
   //   }
   // },[])
 
-  
   return (
   <View>
     <Text>{myModule.PI}</Text>
@@ -61,6 +60,8 @@ export default function Index(){
       <Button
       title='haptics'
       onPress={async ()=> {
+        //myModule.mediumHaptic()
+        myModule.selectionAsync()
        // console.log("hi",myModule.hasVibrator())
         // if (!(await myModule.hasVibrator())){
         //   console.log("oh dear")
@@ -69,10 +70,12 @@ export default function Index(){
         //   return;
         // }
         // console.warn("ok")
-         myModule.mediumHaptic().then(c => {
-          setTog("done")
-        }).catch(err => console.log(err))
-      }}
+        //  myModule.mediumHaptic().then(c => {
+        //   setTog("done")
+        // }).catch(err => console.log(err))
+        console.log("ok");
+
+        }}
       />
       <Button
       title='cancel vibration'

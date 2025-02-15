@@ -20,7 +20,7 @@ declare class MyModule extends NativeModule<MyModuleEvents> {
   stopOrientation(): Promise<null>;
   isOrientationAvailable():boolean;
 
-  mediumHaptic(): Promise<null>;
+  selectionAsync(): Promise<null>;
   //cancelVibration(): Promise<null>;
   //hasVibrator(): Promise<null>;
 }
