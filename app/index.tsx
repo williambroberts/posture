@@ -39,6 +39,7 @@ export default function Index(){
   <View>
     <Text>{myModule.PI}</Text>
     <Button onPress={()=>{
+      console.log(myModule.isOrientationAvailable())
      if (myModule.isOrientationAvailable()){
       myModule.startOrientation(); 
       myModule.addListener("onOrientationChange",(e)=>setData(e))
@@ -50,7 +51,7 @@ export default function Index(){
 
       <Button onPress={()=>{
         myModule.removeAllListeners("onOrientationChange")
-        myModule.stopGyroscope()
+        myModule.stopOrientation()
         // .catch(e => console.log(e))
         .finally(()=>console.log("stopped"))
         setData(null)
@@ -68,7 +69,7 @@ export default function Index(){
         //   return;
         // }
         // console.warn("ok")
-        await myModule.mediumHaptic().then(c => {
+         myModule.mediumHaptic().then(c => {
           setTog("done")
         }).catch(err => console.log(err))
       }}
@@ -76,11 +77,7 @@ export default function Index(){
       <Button
       title='cancel vibration'
       onPress={async ()=> {
-        if (!(await myModule.hasVibrator())){
-          console.log("oh dear")
-          return;
-        }
-        await myModule.cancelVibration()
+       console.log("ok")
       }}
       />
       <Button

@@ -106,13 +106,12 @@ class MyModule : Module() {
             gravitySensor = sensorManager?.getDefaultSensor(Sensor.TYPE_GRAVITY)
             //haptics
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                vibrator = (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+                vibrator = (applicationContext.applicationContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+                //vibrator = (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
             } else {
                 @Suppress("DEPRECATION")
-                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                vibrator = applicationContext.applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             }
-
-
             }
         }
 
