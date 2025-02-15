@@ -15,7 +15,7 @@ import { SensorEvent } from '@/modules/my-module/src/MyModule';
 export default function Index(){
   const [data,setData] = useState<SensorEvent | null>()
   //
-  const [tog,setTog] = useState(false)
+  const [tog,setTog] = useState("")
   useEffect(()=>{
     
     return () => {
@@ -50,15 +50,44 @@ export default function Index(){
 
       <Button onPress={()=>{
         myModule.removeAllListeners("onOrientationChange")
-        myModule.stopGyroscope().catch(e => console.log(e)).finally(()=>console.log("stopped"))
+        myModule.stopGyroscope()
+        // .catch(e => console.log(e))
+        .finally(()=>console.log("stopped"))
         setData(null)
     }}
       title='stop'
       />
-      {/* <Button
-      title='tog'
-      onPress={()=>setTog(p => !p)}
-      /> */}
+      <Button
+      title='haptics'
+      onPress={async ()=> {
+       // console.log("hi",myModule.hasVibrator())
+        // if (!(await myModule.hasVibrator())){
+        //   console.log("oh dear")
+        //   setTog("false")
+
+        //   return;
+        // }
+        // console.warn("ok")
+        await myModule.mediumHaptic().then(c => {
+          setTog("done")
+        }).catch(err => console.log(err))
+      }}
+      />
+      <Button
+      title='cancel vibration'
+      onPress={async ()=> {
+        if (!(await myModule.hasVibrator())){
+          console.log("oh dear")
+          return;
+        }
+        await myModule.cancelVibration()
+      }}
+      />
+      <Button
+      title='stop background'
+      onPress={()=>BackgroundService.stop()}
+      />
+      <Text>{tog}: vib</Text>
   </View>
   )
 }
@@ -70,6 +99,7 @@ const veryIntensiveTask = async () => {
         console.warn(i);
         await new Promise(r => setTimeout(r,1000));
     }
+    resolve("done")
 });
 }
 const options = {

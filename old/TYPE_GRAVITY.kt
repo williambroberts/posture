@@ -9,13 +9,69 @@ import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.Promise
 
+import android.os.VibrationEffect
+import android.os.Vibrator
+import expo.modules.haptics.arguments.HapticsVibrationType
+import expo.modules.haptics.arguments.HapticsSelectionType
+
 class MyModule : Module() {
     private var sensorManager: SensorManager? = null
     private var gravitySensor: Sensor? = null
     private var gravityListener: SensorEventListener? = null
+    private var vibrator: Vibrator? = null
 
     override fun definition() = ModuleDefinition {
         Name("MyModule")
+
+        // val vibrator = when {
+        //     Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        //         val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        //         vibratorManager.defaultVibrator
+        //     }
+        //     else -> {
+        //         @Suppress("DEPRECATION")
+        //         context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        //     }
+        // }
+        // Medium haptic feedback
+        AsyncFunction("mediumHaptic") { promise: Promise ->
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(VibrationEffect.createWaveform(HapticsSelectionType.timings, HapticsSelectionType.amplitudes, -1))
+                    //vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
+                } else {
+                    @Suppress("DEPRECATION")
+                    vibrator.vibrate(HapticsSelectionType.oldSDKPattern,-1)
+                }
+                promise.resolve(null)
+            } catch (e: Exception) {
+                promise.reject("HAPTIC_ERROR", "Failed to execute medium haptic", e)
+            }
+        }
+        // Check if device has vibrator
+        // AsyncFunction("hasVibrator") { promise: Promise ->
+        //     try {
+        //         val result = vibrator.hasVibrator()
+        //         promise.resolve(result)
+        //     } catch (e: Exception) {
+        //         promise.reject("HAPTIC_ERROR", "Failed to check vibrator availability", e)
+        //     }
+        // }
+
+        // Cancel ongoing vibration
+        // AsyncFunction("cancelVibration") { promise: Promise ->
+        //     try {
+        //         vibrator.cancel()
+        //         promise.resolve(null)
+        //     } catch (e: Exception) {
+        //         promise.reject("HAPTIC_ERROR", "Failed to cancel vibration", e)
+        //     }
+        // }
+
+
+
+
+
 
         Events("onOrientationChange")
 
@@ -48,6 +104,15 @@ class MyModule : Module() {
             if(applicationContext != null) {
             sensorManager = applicationContext.applicationContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
             gravitySensor = sensorManager?.getDefaultSensor(Sensor.TYPE_GRAVITY)
+            //haptics
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                vibrator = (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            }
+
+
             }
         }
 

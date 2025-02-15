@@ -19,6 +19,10 @@ declare class MyModule extends NativeModule<MyModuleEvents> {
   startOrientation(): Promise<null>;
   stopOrientation(): Promise<null>;
   isOrientationAvailable():boolean;
+
+  mediumHaptic(): Promise<null>;
+  //cancelVibration(): Promise<null>;
+  //hasVibrator(): Promise<null>;
 }
 
 // This call loads the native module object from the JSI.
