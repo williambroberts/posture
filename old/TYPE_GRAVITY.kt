@@ -13,9 +13,6 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-
-import expo.modules.haptics.arguments.HapticsVibrationType
-import expo.modules.haptics.arguments.HapticsSelectionType
 import expo.modules.kotlin.exception.Exceptions
 
 class MyModule : Module() {
@@ -36,15 +33,20 @@ class MyModule : Module() {
         Name("MyModule")
 
 
-        AsyncFunction<Unit>("selectionAsync") {
-            vibrate(HapticsSelectionType)
+         AsyncFunction("selectionAsync") { promise: Promise ->
+            try {
+                vibrate()
+                promise.resolve(null)
+            } catch (e: Exception) {
+                promise.reject("HAPTIC_ERROR", "Failed to execute selection haptic", e)
+            }
         }
-        private fun vibrate(type: HapticsVibrationType) {
+        private fun vibrate() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createWaveform(type.timings, type.amplitudes, -1))
+            vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 50), intArrayOf(0, 30), -1))
             } else {
             @Suppress("DEPRECATION")
-            vibrator.vibrate(type.oldSDKPattern, -1)
+            vibrator.vibrate(longArrayOf(0, 70), -1)
             }
         }
         // val vibrator = when {

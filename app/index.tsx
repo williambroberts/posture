@@ -25,14 +25,14 @@ export default function Index(){
     // console.log(myModule.hello(),myModule.PI)
   },[])
   
-  // useEffect(()=>{
-  //   (async()=>{
-  //     await BackgroundService.start(veryIntensiveTask, options);
-  //   })()
-  //   return () => {
-  //     BackgroundService.stop(); 
-  //   }
-  // },[])
+  useEffect(()=>{
+    (async()=>{
+      await BackgroundService.start(veryIntensiveTask, options);
+    })()
+    return () => {
+      BackgroundService.stop(); 
+    }
+  },[])
 
   return (
   <View>
@@ -87,17 +87,32 @@ export default function Index(){
       title='stop background'
       onPress={()=>BackgroundService.stop()}
       />
+       <Button
+      title='start background'
+      onPress={()=>BackgroundService.start(veryIntensiveTask, options)}
+      />
       <Text>{tog}: vib</Text>
   </View>
   )
 }
 // prebuild and re build try again (using 2 yr old unmaintained package)
 const veryIntensiveTask = async () => {
+  const ref: {current:null | SensorEvent} = {current:null}
   await new Promise( async (resolve) => {
+    myModule.removeAllListeners("onOrientationChange")
+    if (myModule.isOrientationAvailable()){
+      myModule.startOrientation(); 
+      myModule.addListener("onOrientationChange",(event) => {
+        ref.current = event
+      })
+    }
     for (let i = 0; BackgroundService.isRunning(); i++) {
-        console.log(i);
-        console.warn(i);
-        await new Promise(r => setTimeout(r,1000));
+
+        console.log(i,ref.current);
+        // console.warn(i);
+        
+        await new Promise(r => setTimeout(r,2000));
+
     }
     resolve("done")
 });
