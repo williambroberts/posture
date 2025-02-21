@@ -29,13 +29,61 @@ class MyModule : Module() {
     //   @Suppress("DEPRECATION")
     //   context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     // }
+    private fun startGravitySensor() {
+        if (gravityListener != null) {
+            return
+        }
+
+        gravityListener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                sendEvent("onOrientationChange", mapOf(
+                    "x" to event.values[0],  // Gravity force along x-axis
+                    "y" to event.values[1],  // Gravity force along y-axis
+                    "z" to event.values[2],  // Gravity force along z-axis
+                    "timestamp" to event.timestamp
+                ))
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+                // Handle accuracy changes if needed
+            }
+        }
+
+        sensorManager?.registerListener(
+            gravityListener,
+            gravitySensor,
+            SensorManager.SENSOR_DELAY_UI
+        )
+    }
+
+    private fun stopGravitySensor() {
+        gravityListener?.let { listener ->
+            sensorManager?.unregisterListener(listener)
+            gravityListener = null
+        }
+    }
+    private fun vibrate() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator?.vibrate(
+                VibrationEffect.createWaveform(
+                    longArrayOf(0, 50),
+                    intArrayOf(0, 30),
+                    -1
+                )
+            ) ?: throw Exception("Vibrator not initialized")
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator?.vibrate(longArrayOf(0, 70), -1) 
+                ?: throw Exception("Vibrator not initialized")
+        }
+    }
     override fun definition() = ModuleDefinition {
         Name("MyModule")
 
 
          AsyncFunction("selectionAsync") { promise: Promise ->
             try {
-                vibrate()
+                this@MyModule.vibrate()
                 promise.resolve(null)
             } catch (e: Exception) {
                 promise.reject("HAPTIC_ERROR", "Failed to execute selection haptic", e)
@@ -121,15 +169,15 @@ class MyModule : Module() {
             val activity = appContext.activityProvider?.currentActivity
             val applicationContext = activity?.applicationContext
             if(applicationContext != null) {
-            sensorManager = applicationContext.applicationContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+            sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
             gravitySensor = sensorManager?.getDefaultSensor(Sensor.TYPE_GRAVITY)
             // //haptics
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                vibrator = (applicationContext.applicationContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager).defaultVibrator
+                vibrator = (applicationContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager)?.defaultVibrator
                 //vibrator = (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
             } else {
                 @Suppress("DEPRECATION")
-                vibrator = applicationContext.applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
             }
             // }
         }
@@ -138,46 +186,7 @@ class MyModule : Module() {
             stopGravitySensor()
         }
     }
-    private fun vibrate() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 50), intArrayOf(0, 30), -1))
-            } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(longArrayOf(0, 70), -1)
-            }
-    }
-    private fun startGravitySensor() {
-        if (gravityListener != null) {
-            return
-        }
-
-        gravityListener = object : SensorEventListener {
-            override fun onSensorChanged(event: SensorEvent) {
-                sendEvent("onOrientationChange", mapOf(
-                    "x" to event.values[0],  // Gravity force along x-axis
-                    "y" to event.values[1],  // Gravity force along y-axis
-                    "z" to event.values[2],  // Gravity force along z-axis
-                    "timestamp" to event.timestamp
-                ))
-            }
-
-            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-                // Handle accuracy changes if needed
-            }
-        }
-
-        sensorManager?.registerListener(
-            gravityListener,
-            gravitySensor,
-            SensorManager.SENSOR_DELAY_UI
-        )
-    }
-
-    private fun stopGravitySensor() {
-        gravityListener?.let { listener ->
-            sensorManager?.unregisterListener(listener)
-            gravityListener = null
-        }
-    }
+    
+    
 }
 }
