@@ -61,7 +61,7 @@ export default function Index(){
       title='haptics'
       onPress={async ()=> {
         //myModule.mediumHaptic()
-        myModule.selectionAsync()
+        myModule.selectionAsync().catch(e => console.log(e)).finally(()=>console.log("oks"))
        // console.log("hi",myModule.hasVibrator())
         // if (!(await myModule.hasVibrator())){
         //   console.log("oh dear")

@@ -19,6 +19,7 @@ const config:ExpoConfig = {
       "supportsTablet": true
     },
     "android": {
+      "permissions":["VIBRATE"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

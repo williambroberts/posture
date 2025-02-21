@@ -20,15 +20,15 @@ class MyModule : Module() {
     private var gravitySensor: Sensor? = null
     private var gravityListener: SensorEventListener? = null
     
-    private val context: Context
-    get() = appContext.reactContext ?: throw Exceptions.ReactContextLost()
-    private val vibrator: Vibrator
-    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-      (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
-    } else {
-      @Suppress("DEPRECATION")
-      context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-    }
+    //private val context: Context
+    //get() = appContext.reactContext ?: throw Exceptions.ReactContextLost()
+    private var vibrator: Vibrator? = null
+    // get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    //   (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+    // } else {
+    //   @Suppress("DEPRECATION")
+    //   context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    // }
     override fun definition() = ModuleDefinition {
         Name("MyModule")
 
@@ -131,13 +131,13 @@ class MyModule : Module() {
             sensorManager = applicationContext.applicationContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
             gravitySensor = sensorManager?.getDefaultSensor(Sensor.TYPE_GRAVITY)
             // //haptics
-            // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            //     vibrator = (applicationContext.applicationContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager).defaultVibrator
-            //     //vibrator = (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
-            // } else {
-            //     @Suppress("DEPRECATION")
-            //     vibrator = applicationContext.applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-            // }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                vibrator = (applicationContext.applicationContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager).defaultVibrator
+                //vibrator = (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator = applicationContext.applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            }
             // }
         }
 

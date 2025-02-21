@@ -1,5 +1,5 @@
 package expo.modules.mymodule
-
+// working 
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -9,13 +9,88 @@ import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.Promise
 
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import expo.modules.kotlin.exception.Exceptions
+
 class MyModule : Module() {
     private var sensorManager: SensorManager? = null
     private var gravitySensor: Sensor? = null
     private var gravityListener: SensorEventListener? = null
-
+    
+    //private val context: Context
+    //get() = appContext.reactContext ?: throw Exceptions.ReactContextLost()
+    private var vibrator: Vibrator? = null
+    // get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    //   (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+    // } else {
+    //   @Suppress("DEPRECATION")
+    //   context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    // }
     override fun definition() = ModuleDefinition {
         Name("MyModule")
+
+
+         AsyncFunction("selectionAsync") { promise: Promise ->
+            try {
+                vibrate()
+                promise.resolve(null)
+            } catch (e: Exception) {
+                promise.reject("HAPTIC_ERROR", "Failed to execute selection haptic", e)
+            }
+        }
+        
+        // val vibrator = when {
+        //     Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        //         val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        //         vibratorManager.defaultVibrator
+        //     }
+        //     else -> {
+        //         @Suppress("DEPRECATION")
+        //         context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        //     }
+        // }
+        // Medium haptic feedback
+        // AsyncFunction("mediumHaptic") { promise: Promise ->
+        //     try {
+        //         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        //             vibrator.vibrate(VibrationEffect.createWaveform(HapticsSelectionType.timings, HapticsSelectionType.amplitudes, -1))
+        //             //vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
+        //         } else {
+        //             @Suppress("DEPRECATION")
+        //             vibrator.vibrate(HapticsSelectionType.oldSDKPattern,-1)
+        //         }
+        //         promise.resolve(null)
+        //     } catch (e: Exception) {
+        //         promise.reject("HAPTIC_ERROR", "Failed to execute medium haptic", e)
+        //     }
+        // }
+        // Check if device has vibrator
+        // AsyncFunction("hasVibrator") { promise: Promise ->
+        //     try {
+        //         val result = vibrator.hasVibrator()
+        //         promise.resolve(result)
+        //     } catch (e: Exception) {
+        //         promise.reject("HAPTIC_ERROR", "Failed to check vibrator availability", e)
+        //     }
+        // }
+
+        // Cancel ongoing vibration
+        // AsyncFunction("cancelVibration") { promise: Promise ->
+        //     try {
+        //         vibrator.cancel()
+        //         promise.resolve(null)
+        //     } catch (e: Exception) {
+        //         promise.reject("HAPTIC_ERROR", "Failed to cancel vibration", e)
+        //     }
+        // }
+
+
+
+
+
 
         Events("onOrientationChange")
 
@@ -48,14 +123,29 @@ class MyModule : Module() {
             if(applicationContext != null) {
             sensorManager = applicationContext.applicationContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
             gravitySensor = sensorManager?.getDefaultSensor(Sensor.TYPE_GRAVITY)
+            // //haptics
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                vibrator = (applicationContext.applicationContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager).defaultVibrator
+                //vibrator = (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator = applicationContext.applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
             }
+            // }
         }
 
         OnDestroy {
             stopGravitySensor()
         }
     }
-
+    private fun vibrate() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 50), intArrayOf(0, 30), -1))
+            } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(longArrayOf(0, 70), -1)
+            }
+    }
     private fun startGravitySensor() {
         if (gravityListener != null) {
             return
@@ -89,4 +179,5 @@ class MyModule : Module() {
             gravityListener = null
         }
     }
+}
 }
