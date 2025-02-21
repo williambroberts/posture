@@ -1,1 +1,0 @@
-C:\Users\thew1\RN\posture\modules\my-module\android\src\main\java\expo\modules\mymodule\MyModule.kt
