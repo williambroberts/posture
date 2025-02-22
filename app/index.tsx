@@ -110,8 +110,8 @@ const veryIntensiveTask = async () => {
 
         console.log(i,ref.current);
         // console.warn(i);
-        
-        await new Promise(r => setTimeout(r,2000));
+        myModule.selectionAsync()
+        await new Promise(r => setTimeout(r,3000));
 
     }
     resolve("done")
