@@ -157,6 +157,7 @@ const options = {
 
 //npm i -g @expo/ngrok
 //npx expo start --tunnel
+//npx eas build --platform android --profile production
 
 function calculateAngles(event:SensorEvent) {
   const {x,y,z} = event;
