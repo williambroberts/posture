@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Button, Text, View } from 'react-native'
 // import { gyroscope, SensorData } from "react-native-sensors";
 import BackgroundService from 'react-native-background-actions';
@@ -14,8 +14,9 @@ import { SensorEvent } from '@/modules/my-module/src/MyModule';
 
 export default function Index(){
   const [data,setData] = useState<SensorEvent | null>()
-  const [config,setConfig] = useState<BackgroundTaskParams>()
-  //
+  const [config,setConfig] = useState<BackgroundTaskParams>(defaultConfig)
+  const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
+  const myRef = useRef<number>(0)
   const [tog,setTog] = useState("")
   useEffect(()=>{
     return () => {
@@ -35,7 +36,12 @@ export default function Index(){
      if (myModule.isOrientationAvailable()){
 
       myModule.startOrientation(); 
-      myModule.addListener("onOrientationChange",(e)=>setData(e))
+      myModule.addListener("onOrientationChange",(e)=>{
+        myRef.current++;
+        if (myRef.current % 100 === 0){
+          setData(e)
+        }
+      })
     }
     }}
       title='start'
@@ -59,16 +65,19 @@ export default function Index(){
       />
       <Button
       title='stop background'
-      onPress={()=>BackgroundService.stop()}
+      disabled={!isBackgroundRunning}
+      onPress={()=>{
+        BackgroundService.stop().finally(() => setIsBackgroundRunning(false))
+      }}
       />
        <Button
+       disabled={isBackgroundRunning}
       title='start background'
-      disabled={BackgroundService.isRunning()}
       onPress={()=>{
         if (BackgroundService.isRunning()){
           return;
         }
-        BackgroundService.start(veryIntensiveTask, options)}}
+        BackgroundService.start(veryIntensiveTask, options).finally(()=>setIsBackgroundRunning(true))}}
       />
       <Text>{tog}: vib</Text>
   </View>
@@ -81,36 +90,43 @@ type BackgroundTaskParams = {
   strictness: number;
   //strictness: number; // max strikes at bad angle -> vibrate 
 }
-const configDefault = {
+const valuesMap = {
+  30:  {y:4.9,z:8.5},
+  45:  {y:6.94,z:6.94},
+  60:  {y:8.5,z:4.9},
+}
+const defaultConfig = {
   delay: 5000,
-  values: {y:6.94,z:6.94},
+  values: valuesMap["30"],
   strictness: 1
 } satisfies BackgroundTaskParams
 const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
-  const config = taskData ?? configDefault
+  const config = taskData ?? defaultConfig
   const {delay,values,strictness} = config;
   let count = 0;
-  const ref: {current: number} = {current:0}//todow generic
+  const countRef: {current: number} = {current:0}//todow generic
+  const eventRef:{current:SensorEvent| null} = {current:null} 
+  const isBadAngleRef: {current:boolean} = {current: false}
   await new Promise( async (resolve) => {
     if (!myModule.isOrientationAvailable()){
       //notify user?
       return resolve("done");
     }
+    console.log(values,delay,"values,delay")
     for (let i = 0; BackgroundService.isRunning(); i++) {
-      ref.current = 0;
+      countRef.current = 0;
       // delay
-      console.log(values,delay,"values,delay")
-      
       // listen for angle
       myModule.startOrientation(); 
       myModule.addListener("onOrientationChange",(event) => {
-        if (count % 100 === 0){
-          console.log(event)
-        }
+        eventRef.current = event;
         count++
-        const isBadAngle = shouldExecuteHaptics(event,config)
-        if (isBadAngle){
-          ref.current++
+        const badAngle = isBadAngle(event,config)
+        if (badAngle){
+          countRef.current++
+          isBadAngleRef.current = true;
+        } else {
+          isBadAngleRef.current = false;
         }
       })
       await new Promise(r => setTimeout(r,delay));
@@ -118,8 +134,8 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
       myModule.stopOrientation().finally(()=>console.log("ok"));
       myModule.removeAllListeners("onOrientationChange")
 
-      console.log(ref.current,"ref");
-      if (ref.current > strictness){
+      console.log(countRef.current,"ref",isBadAngleRef.current,eventRef.current);
+      if (countRef.current > strictness && isBadAngleRef.current){
         myModule.selectionAsync();
       }
     }
@@ -136,7 +152,7 @@ const options = {
   },
   color: '#ff00ff',
   linkingURI: 'posture://', // See Deep Linking for more info
-  parameters: configDefault satisfies BackgroundTaskParams,
+  parameters: defaultConfig satisfies BackgroundTaskParams,
 };
 
 //npm i -g @expo/ngrok
@@ -162,6 +178,6 @@ function fromRollToComponents(rollDegrees:number, gravity = 9.81) {
   const gy = gravity * Math.cos(rollRadians);
   return { gy:gy.toFixed(2), gz:gz.toFixed(gz) };
 }
-function shouldExecuteHaptics(event:SensorEvent,config: BackgroundTaskParams){
-  return config.values.y < event.y && config.values.z > event.z;
+function isBadAngle(event:SensorEvent,config: BackgroundTaskParams){
+  return event.y < config.values.y && event.z > config.values.z;
 }
