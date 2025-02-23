@@ -12,7 +12,7 @@ const config:ExpoConfig = {
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "postureKeep",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "ios": {
@@ -42,12 +42,6 @@ const config:ExpoConfig = {
           "backgroundColor": "#ffffff"
         }
       ],
-      // [
-      //   "expo-sensors",
-      //   {
-      //     "motionPermission": "Allow the app to access your device motion"
-      //   }
-      // ],
     ],
     "experiments": {
       "typedRoutes": true
@@ -61,13 +55,8 @@ const config:ExpoConfig = {
       }
     }
   }
-// export default withSensorsMainApplication(
-//   withSensorsSettingsGradle(
-//   withSensorsAppBuildGradle(
-//   withBackgroundActions(config)
-// )))
+
 export default (
   (
   withBackgroundActions(config)
 ))
-// module.exports = withBackgroundActions(config)

@@ -62,28 +62,64 @@ class MyModule : Module() {
             gravityListener = null
         }
     }
-    private fun vibrate() {
+    private fun vibrate(
+        timings: LongArray = longArrayOf(0, 50),
+        amplitudes: IntArray = intArrayOf(0, 30),
+        oldSDKPattern: LongArray = longArrayOf(0,70),
+    ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator?.vibrate(
                 VibrationEffect.createWaveform(
-                    longArrayOf(0, 50),
-                    intArrayOf(0, 30),
+                    timings,
+                    amplitudes,
                     -1
                 )
             ) ?: throw Exception("Vibrator not initialized")
         } else {
             @Suppress("DEPRECATION")
-            vibrator?.vibrate(longArrayOf(0, 70), -1) 
+            // For pre-O devices, amplitudes are not supported.
+            vibrator?.vibrate(oldSDKPattern, -1)
                 ?: throw Exception("Vibrator not initialized")
         }
     }
+    // private fun vibrate() {
+    //     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    //         vibrator?.vibrate(
+    //             VibrationEffect.createWaveform(
+    //                 longArrayOf(0, 50),
+    //                 intArrayOf(0, 30),
+    //                 -1
+    //             )
+    //         ) ?: throw Exception("Vibrator not initialized")
+    //     } else {
+    //         @Suppress("DEPRECATION")
+    //         vibrator?.vibrate(longArrayOf(0, 70), -1) 
+    //             ?: throw Exception("Vibrator not initialized")
+    //     }
+    // }
     override fun definition() = ModuleDefinition {
         Name("MyModule")
 
 
-         AsyncFunction("selectionAsync") { promise: Promise ->
+         AsyncFunction("warningAsync") { promise: Promise ->
             try {
-                this@MyModule.vibrate()
+                this@MyModule.vibrate(
+                    longArrayOf(0, 40, 120, 60),
+                    intArrayOf(0, 40, 0, 60),
+                    longArrayOf(0, 40, 120, 60)
+                )
+                promise.resolve(null)
+            } catch (e: Exception) {
+                promise.reject("HAPTIC_ERROR", "Failed to execute selection haptic", e)
+            }
+        }
+        AsyncFunction("errorAsync") { promise: Promise ->
+            try {
+                this@MyModule.vibrate(
+                    longArrayOf(0, 60, 100, 40, 80, 50),
+                    intArrayOf(0, 50, 0, 40, 0, 50),
+                    longArrayOf(0, 60, 100, 40, 80, 50)
+                )
                 promise.resolve(null)
             } catch (e: Exception) {
                 promise.reject("HAPTIC_ERROR", "Failed to execute selection haptic", e)

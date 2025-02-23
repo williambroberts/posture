@@ -90,20 +90,19 @@ type BackgroundTaskParams = {
   strictness: number;
   //strictness: number; // max strikes at bad angle -> vibrate 
 }
-const valuesMap = {
+const angleValuesMap = {
   30:  {y:4.9,z:8.5},
   45:  {y:6.94,z:6.94},
   60:  {y:8.5,z:4.9},
 }
 const defaultConfig = {
   delay: 5000,
-  values: valuesMap["30"],
+  values: angleValuesMap["30"],
   strictness: 1
 } satisfies BackgroundTaskParams
 const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
   const config = taskData ?? defaultConfig
   const {delay,values,strictness} = config;
-  let count = 0;
   const countRef: {current: number} = {current:0}//todow generic
   const eventRef:{current:SensorEvent| null} = {current:null} 
   const isBadAngleRef: {current:boolean} = {current: false}
@@ -120,7 +119,6 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
       myModule.startOrientation(); 
       myModule.addListener("onOrientationChange",(event) => {
         eventRef.current = event;
-        count++
         const badAngle = isBadAngle(event,config)
         if (badAngle){
           countRef.current++
