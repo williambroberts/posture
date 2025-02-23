@@ -28,7 +28,7 @@ export default function Index(){
   return (
   <View>
     <Text>{myModule.PI}</Text>
-    {/* <Button onPress={()=>{
+    <Button onPress={()=>{
       console.log(myModule.isOrientationAvailable())
       myModule.removeAllListeners("onOrientationChange")
       myModule.stopOrientation();
@@ -39,10 +39,10 @@ export default function Index(){
     }
     }}
       title='start'
-      /> */}
-    {/* <Text>{JSON.stringify(data,null,2)}</Text> */}
+      />
+    <Text>{JSON.stringify(data,null,2)}</Text>
 
-      {/* <Button onPress={()=>{
+      <Button onPress={()=>{
         myModule.removeAllListeners("onOrientationChange")
         myModule.stopOrientation()
         // .catch(e => console.log(e))
@@ -50,7 +50,7 @@ export default function Index(){
         setData(null)
     }}
       title='stop'
-      /> */}
+      />
       <Button
       title='haptics'
       onPress={async ()=> {
@@ -63,7 +63,12 @@ export default function Index(){
       />
        <Button
       title='start background'
-      onPress={()=>BackgroundService.start(veryIntensiveTask, options)}
+      disabled={BackgroundService.isRunning()}
+      onPress={()=>{
+        if (BackgroundService.isRunning()){
+          return;
+        }
+        BackgroundService.start(veryIntensiveTask, options)}}
       />
       <Text>{tog}: vib</Text>
   </View>
@@ -72,39 +77,49 @@ export default function Index(){
 //region background task
 type BackgroundTaskParams = {
   delay: number;// power saving var
-  values:[number,number];
+  values:{y:number,z:number};
+  strictness: number;
   //strictness: number; // max strikes at bad angle -> vibrate 
 }
 const configDefault = {
   delay: 5000,
-  values: [6.94,6.94]
+  values: {y:6.94,z:6.94},
+  strictness: 1
 } satisfies BackgroundTaskParams
 const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
   const config = taskData ?? configDefault
-  const {delay,values} = config;
-  const ref: {current:null | SensorEvent} = {current:null}
+  const {delay,values,strictness} = config;
+  let count = 0;
+  const ref: {current: number} = {current:0}//todow generic
   await new Promise( async (resolve) => {
-    
+    if (!myModule.isOrientationAvailable()){
+      //notify user?
+      return resolve("done");
+    }
     for (let i = 0; BackgroundService.isRunning(); i++) {
-      if (!myModule.isOrientationAvailable()){
-        return resolve("done");
-      }
+      ref.current = 0;
       // delay
       console.log(values,delay,"values,delay")
-      //clean up any previous background task
-      myModule.stopOrientation();
-      myModule.removeAllListeners("onOrientationChange")
+      
       // listen for angle
       myModule.startOrientation(); 
-      await new Promise(r => setTimeout(r,delay));
-
       myModule.addListener("onOrientationChange",(event) => {
-        ref.current = event
+        if (count % 100 === 0){
+          console.log(event)
+        }
+        count++
+        const isBadAngle = shouldExecuteHaptics(event,config)
+        if (isBadAngle){
+          ref.current++
+        }
       })
+      await new Promise(r => setTimeout(r,delay));
       
-      console.log(ref.current,"ref.current");
-      const executeHaptics = shouldExecuteHaptics(ref.current,config);
-      if (executeHaptics){
+      myModule.stopOrientation().finally(()=>console.log("ok"));
+      myModule.removeAllListeners("onOrientationChange")
+
+      console.log(ref.current,"ref");
+      if (ref.current > strictness){
         myModule.selectionAsync();
       }
     }
@@ -147,6 +162,6 @@ function fromRollToComponents(rollDegrees:number, gravity = 9.81) {
   const gy = gravity * Math.cos(rollRadians);
   return { gy:gy.toFixed(2), gz:gz.toFixed(gz) };
 }
-function shouldExecuteHaptics(event:SensorEvent | null,config: BackgroundTaskParams){
-  return true;
+function shouldExecuteHaptics(event:SensorEvent,config: BackgroundTaskParams){
+  return config.values.y < event.y && config.values.z > event.z;
 }
