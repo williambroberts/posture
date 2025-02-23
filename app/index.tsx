@@ -90,16 +90,18 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
         return resolve("done");
       }
       // delay
-      await new Promise(r => setTimeout(r,delay));
       console.log(values,delay,"values,delay")
       //clean up any previous background task
       myModule.stopOrientation();
       myModule.removeAllListeners("onOrientationChange")
       // listen for angle
       myModule.startOrientation(); 
+      await new Promise(r => setTimeout(r,delay));
+
       myModule.addListener("onOrientationChange",(event) => {
         ref.current = event
       })
+      
       console.log(ref.current,"ref.current");
       const executeHaptics = shouldExecuteHaptics(ref.current,config);
       if (executeHaptics){
