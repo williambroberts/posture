@@ -100,12 +100,16 @@ const defaultConfig = {
   values: angleValuesMap["30"],
   strictness: 1
 } satisfies BackgroundTaskParams
+type RefType<T> = {current:T};
 const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
   const config = taskData ?? defaultConfig
   const {delay,values,strictness} = config;
   const countRef: {current: number} = {current:0}//todow generic
   const eventRef:{current:SensorEvent| null} = {current:null} 
   const isBadAngleRef: {current:boolean} = {current: false}
+  const streakRef: RefType<number> = {current:0}
+  const maxStreak = 10; // if 10 streak then stop playing
+  const goToErrorOn = 3; // after streak =3 play error haptic
   await new Promise( async (resolve) => {
     if (!myModule.isOrientationAvailable()){
       //notify user?
@@ -125,6 +129,7 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
           isBadAngleRef.current = true;
         } else {
           isBadAngleRef.current = false;
+          streakRef.current = 0;
         }
       })
       await new Promise(r => setTimeout(r,delay));
@@ -134,7 +139,16 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
 
       console.log(countRef.current,"ref",isBadAngleRef.current,eventRef.current);
       if (countRef.current > strictness && isBadAngleRef.current){
-        myModule.warningAsync();
+        streakRef.current++;
+        if (streakRef.current > 3){// can put into var
+          myModule.errorAsync();
+        }else {
+          myModule.warningAsync();
+        }
+        if (streakRef.current > 10){
+          //end the background task
+          resolve("done");
+        }
       }
     }
     resolve("done")

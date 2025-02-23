@@ -27,7 +27,7 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="myapp"/>
+        <data android:scheme="postureKeep"/>
         <data android:scheme="com.thew1lego.posture"/>
         <data android:scheme="exp+posture"/>
       </intent-filter>
