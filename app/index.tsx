@@ -60,7 +60,7 @@ export default function Index(){
       <Button
       title='haptics'
       onPress={async ()=> {
-        myModule.selectionAsync().catch(e => console.log(e)).finally(()=>console.log("oks haptics"))
+        myModule.warningAsync().catch(e => console.log(e)).finally(()=>console.log("oks haptics"))
         }}
       />
       <Button
@@ -134,7 +134,7 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
 
       console.log(countRef.current,"ref",isBadAngleRef.current,eventRef.current);
       if (countRef.current > strictness && isBadAngleRef.current){
-        myModule.selectionAsync();
+        myModule.warningAsync();
       }
     }
     resolve("done")
