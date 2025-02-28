@@ -1,13 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { AppState, Button, Text, View } from 'react-native'
 // import { gyroscope, SensorData } from "react-native-sensors";
-import BackgroundService from 'react-native-background-actions';
+import BackgroundService, { BackgroundTaskOptions } from 'react-native-background-actions';
 // import { NativeModules, DeviceEventEmitter } from 'react-native';
 // import MyModule from '../modules/my-module';
 import myModule from '../modules/my-module';
 import { SensorEvent } from '@/modules/my-module/src/MyModule';
-import { Linking } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 
 // // Access the GyroscopeModule
 // const { GyroscopeModule } = NativeModules;
@@ -16,7 +14,7 @@ import { NavigationContainer } from '@react-navigation/native';
 //region component
 export const Application = () => {
   const [data,setData] = useState<SensorEvent | null>()
-  const [config,setConfig] = useState<BackgroundTaskParams>(defaultConfig)
+  const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
   const myRef = useRef<number>(0)
   const [tog,setTog] = useState("")
@@ -37,7 +35,7 @@ export const Application = () => {
     // <NavigationContainer linking={linking}>
   <View>
     <Text>{myModule.PI}</Text>
-    <Button onPress={()=>{
+    {/* <Button onPress={()=>{
       console.log(myModule.isOrientationAvailable())
       myModule.removeAllListeners("onOrientationChange")
       myModule.stopOrientation();
@@ -53,9 +51,9 @@ export const Application = () => {
     }
     }}
       title='start'
-      />
-    <Text>{JSON.stringify(data,null,2)}</Text>
-
+      /> */}
+    {/* <Text>{JSON.stringify(data,null,2)}</Text> */}
+{/* 
       <Button onPress={()=>{
         myModule.removeAllListeners("onOrientationChange")
         myModule.stopOrientation()
@@ -64,12 +62,24 @@ export const Application = () => {
         setData(null)
     }}
       title='stop'
-      />
+      /> */}
       <Button
       title='haptics'
       onPress={async ()=> {
         myModule.warningAsync().catch(e => console.log(e)).finally(()=>console.log("oks haptics"))
         }}
+      />
+      <Button
+      title='30 deg'
+      onPress={()=> setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["30"]}})}
+      />
+      <Button
+      title='45 deg'
+      onPress={()=> setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["45"]}})}
+      />
+      <Button
+      title='60 deg'
+      onPress={()=> setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["60"]}})}
       />
       <Button
       title='stop background'
@@ -80,7 +90,7 @@ export const Application = () => {
       />
        <Button
        disabled={isBackgroundRunning}
-      title='start background'
+      title={`start background ${options.parameters.values.angle}`}
       onPress={()=>{
         if (BackgroundService.isRunning()){
           return;
@@ -98,14 +108,14 @@ export const Application = () => {
 //region background task
 type BackgroundTaskParams = {
   delay: number;// power saving var
-  values:{y:number,z:number};
+  values:{y:number,z:number,angle:number};
   strictness: number;
   //strictness: number; // max strikes at bad angle -> vibrate 
 }
 const angleValuesMap = {
-  30:  {y:4.9,z:8.5},
-  45:  {y:6.94,z:6.94},
-  60:  {y:8.5,z:4.9},
+  30:  {y:4.9,z:8.5,angle:30},
+  45:  {y:6.94,z:6.94,angle:45},
+  60:  {y:8.5,z:4.9,angle:60},
 }
 const defaultConfig = {
   delay: 5000,
@@ -166,7 +176,7 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
     resolve("done")
 });
 }
-const options = {
+const defaultOptions = {
   taskName: 'Example',
   taskTitle: 'ExampleTask title',
   taskDesc: 'ExampleTask description',
@@ -177,8 +187,10 @@ const options = {
   color: '#ff00ff',
   linkingURI: 'postureKeep://', // See Deep Linking for more info
   parameters: defaultConfig satisfies BackgroundTaskParams,
-};
 
+} satisfies ExtendedOptions;
+
+type ExtendedOptions = BackgroundTaskOptions & {parameters:BackgroundTaskParams}
 //npm i -g @expo/ngrok
 //npx expo start --tunnel
 //npx eas build --platform android --profile production
