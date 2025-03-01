@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { AppState, Button, StyleSheet, Text, View } from 'react-native'
+import { AppState, StyleSheet, View } from 'react-native'
 // import { gyroscope, SensorData } from "react-native-sensors";
 import BackgroundService, { BackgroundTaskOptions } from 'react-native-background-actions';
 // import { NativeModules, DeviceEventEmitter } from 'react-native';
 // import MyModule from '../modules/my-module';
 import myModule from '../modules/my-module';
 import { SensorEvent } from '@/modules/my-module/src/MyModule';
-import { Icon, IconButton, MD3Colors, MD3Theme, Tooltip, TouchableRipple } from 'react-native-paper';
+import {  IconButton,  MD3Theme, Text, Tooltip, } from 'react-native-paper';
 import { CustomButton } from './CustomButton';
 import { useThemedStyles } from '@/utilities/theme';
+import { AnimatedSwapHandler, AnimatedSwapHandlerRef } from './AnimatedSwapHandler';
 
 // // Access the GyroscopeModule
 // const { GyroscopeModule } = NativeModules;
@@ -19,6 +20,7 @@ export const Application = () => {
   const [data,setData] = useState<SensorEvent | null>()
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
+  const controlRef = useRef<AnimatedSwapHandlerRef>(null)
   // const myRef = useRef<number>(0)
   // const [tog,setTog] = useState("")
   
@@ -87,21 +89,38 @@ export const Application = () => {
       
       <CustomButton
       disabled={isBackgroundRunning}
-      text='30 deg'
       onPress={()=> {
-        myModule.warningAsync();
+        controlRef.current?.show()
+        myModule.selectionAsync();
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["30"]}})
       }}
-      />
+      >
+        <AnimatedSwapHandler
+        controlRef={controlRef}
+        componentA={<Text variant="titleSmall">{angleValuesMap[30].name}</Text>}
+        componentB={<Text variant="headlineSmall">{angleValuesMap[30].name}</Text>}
+        />
+      </CustomButton>
       <CustomButton
       disabled={isBackgroundRunning}
-      text='45 deg'
       onPress={()=> {
-        myModule.warningAsync();
+        controlRef.current?.hide()
+        myModule.selectionAsync();
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["45"]}})
       }}
-      />
-      <CustomButton
+      ><Text>
+        <>
+        {/* {angleValuesMap[45].name} */}
+           <AnimatedSwapHandler
+        controlRef={controlRef}
+        componentA={<Text variant="titleSmall">{angleValuesMap[45].name}</Text>}
+        componentB={<Text variant="headlineSmall">{angleValuesMap[45].name}</Text>}
+        />
+        </>
+      </Text>
+        
+      </CustomButton>
+      {/* <CustomButton
       
      
       disabled={isBackgroundRunning}
@@ -111,16 +130,16 @@ export const Application = () => {
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["60"]}})
       }}
       />
-      </View>
-      <CustomButton
+      </View> */}
+      {/* <CustomButton
       text='stop background'
       disabled={!isBackgroundRunning}
       onPress={()=>{
         myModule.warningAsync();
         BackgroundService.stop().finally(() => setIsBackgroundRunning(false))
       }}
-      />
-       <CustomButton
+      /> */}
+       {/* <CustomButton
        disabled={isBackgroundRunning}
       text={`start background ${options.parameters.values.angle}`}
       onPress={()=>{
@@ -129,13 +148,12 @@ export const Application = () => {
         }
         myModule.warningAsync();
         BackgroundService.start(veryIntensiveTask, options).finally(()=>setIsBackgroundRunning(true))}}
-      />
+      /> */}
       <Text>${options.parameters.values.name}</Text>
   </View>
-
- 
-  // </NavigationContainer>
+  </View>
   )
+
 }
 //region styles
 const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
