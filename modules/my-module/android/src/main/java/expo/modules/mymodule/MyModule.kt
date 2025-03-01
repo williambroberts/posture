@@ -99,7 +99,18 @@ class MyModule : Module() {
     // }
     override fun definition() = ModuleDefinition {
         Name("MyModule")
-
+             AsyncFunction("selectionAsync") { promise: Promise ->
+            try {
+                this@MyModule.vibrate(
+                    longArrayOf(0, 50),
+                    intArrayOf(0, 30),
+                    longArrayOf(0, 70)
+                )
+                promise.resolve(null)
+            } catch (e: Exception) {
+                promise.reject("HAPTIC_ERROR", "Failed to execute selection haptic", e)
+            }
+        }
 
          AsyncFunction("warningAsync") { promise: Promise ->
             try {

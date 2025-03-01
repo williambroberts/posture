@@ -6,7 +6,7 @@ import BackgroundService, { BackgroundTaskOptions } from 'react-native-backgroun
 // import MyModule from '../modules/my-module';
 import myModule from '../modules/my-module';
 import { SensorEvent } from '@/modules/my-module/src/MyModule';
-import { Icon, IconButton, MD3Colors, Tooltip, TouchableRipple } from 'react-native-paper';
+import { Icon, IconButton, MD3Colors, MD3Theme, Tooltip, TouchableRipple } from 'react-native-paper';
 import { CustomButton } from './CustomButton';
 import { useThemedStyles } from '@/utilities/theme';
 
@@ -34,7 +34,7 @@ export const Application = () => {
       sub.remove();
     }
   },[])
-  
+  const selected = options.parameters.values.name
   return (
     // <NavigationContainer linking={linking}>
   <View>
@@ -102,6 +102,8 @@ export const Application = () => {
       }}
       />
       <CustomButton
+      
+     
       disabled={isBackgroundRunning}
       text='60 deg'
       onPress={()=> {
@@ -136,21 +138,31 @@ export const Application = () => {
   )
 }
 //region styles
-const stylesCallback = () => StyleSheet.create({
-  controls:{flexDirection:"row",alignItems:"center",gap:4,justifyContent:"space-evenly"}
+const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
+  controls:{
+    flexDirection:"row",
+    alignItems:"center",
+    gap:4,
+    justifyContent:"space-evenly",
+    margin: 4,
+    padding:4,
+    borderRadius: 8,
+    backgroundColor: theme.colors.surface
+  },
 })
 //region background task
 type BackgroundTaskParams = {
   delay: number;// power saving var
-  values:{y:number,z:number,angle:number,name:string};
+  values: (typeof angleValuesMap)[keyof typeof angleValuesMap];
   strictness: number;
   //strictness: number; // max strikes at bad angle -> vibrate 
 }
 const angleValuesMap = {
-  30:  {y:4.9,z:8.5,angle:30,name:"Light"},
-  45:  {y:6.94,z:6.94,angle:45,name:"normal"},
-  60:  {y:8.5,z:4.9,angle:60,name:"Intense"},
-} satisfies {[key:number]:BackgroundTaskParams["values"]}
+  30:  {y:4.9,z:8.5,angle:30,name:"Light" as const},
+  45:  {y:6.94,z:6.94,angle:45,name:"Normal" as const},
+  60:  {y:8.5,z:4.9,angle:60,name:"Strict" as const},
+      
+} satisfies {[key:number]:{y:number,z:number,angle:number,name:string}}
 const defaultConfig = {
   delay: 5000,
   values: angleValuesMap["30"],

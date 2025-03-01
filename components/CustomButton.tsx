@@ -1,7 +1,7 @@
 import { useThemedStyles } from '@/utilities/theme';
 import React, { useMemo } from 'react'
 import { StyleProp, StyleSheet, TextStyle, ViewStyle } from 'react-native';
-import { MD3Theme, Text, TouchableRipple, useTheme } from 'react-native-paper'
+import { MD3Theme, MD3TypescaleKey, Text, TouchableRipple, useTheme } from 'react-native-paper'
 
 type Props = {
   text:string;
@@ -9,7 +9,9 @@ type Props = {
   disabled:boolean;
   containerStyle?:StyleProp<ViewStyle>
   textStyle?:StyleProp<TextStyle>
+
 }
+
 export const CustomButton = ({
   text,
   onPress,
