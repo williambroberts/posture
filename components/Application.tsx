@@ -6,6 +6,7 @@ import BackgroundService, { BackgroundTaskOptions } from 'react-native-backgroun
 // import MyModule from '../modules/my-module';
 import myModule from '../modules/my-module';
 import { SensorEvent } from '@/modules/my-module/src/MyModule';
+import { Icon, MD3Colors, Tooltip, TouchableRipple } from 'react-native-paper';
 
 // // Access the GyroscopeModule
 // const { GyroscopeModule } = NativeModules;
@@ -16,8 +17,8 @@ export const Application = () => {
   const [data,setData] = useState<SensorEvent | null>()
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
-  const myRef = useRef<number>(0)
-  const [tog,setTog] = useState("")
+  // const myRef = useRef<number>(0)
+  // const [tog,setTog] = useState("")
   
   useEffect(()=>{
     const sub = AppState.addEventListener("change",event => {
@@ -35,6 +36,14 @@ export const Application = () => {
     // <NavigationContainer linking={linking}>
   <View>
     <Text>{myModule.PI}</Text>
+    <Tooltip title="Selected Camera">
+    <Icon
+    source="camera"
+    color={MD3Colors.error50}
+    size={20}
+  />
+  </Tooltip>
+   
     {/* <Button onPress={()=>{
       console.log(myModule.isOrientationAvailable())
       myModule.removeAllListeners("onOrientationChange")
@@ -134,7 +143,7 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
   const goToErrorOn = 3; // after streak =3 play error haptic
   await new Promise( async (resolve) => {
     if (!myModule.isOrientationAvailable()){
-      //notify user?
+      //todow notify user?
       return resolve("done");
     }
     console.log(values,delay,"values,delay")
@@ -163,12 +172,13 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
       console.log(countRef.current,"ref",isBadAngleRef.current,eventRef.current);
       if (countRef.current > strictness && isBadAngleRef.current){
         streakRef.current++;
-        if (streakRef.current > 3){// can put into var
+        if (streakRef.current > goToErrorOn){// can put into var
           myModule.errorAsync();
         }else {
           myModule.warningAsync();
         }
-        if (streakRef.current > 10){
+        if (streakRef.current > maxStreak){
+          //todow warning etc notify user
           //end the background task
           resolve("done");
         }
