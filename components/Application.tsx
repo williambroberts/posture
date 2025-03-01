@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { AppState, Button, Text, View } from 'react-native'
+import { AppState, Button, StyleSheet, Text, View } from 'react-native'
 // import { gyroscope, SensorData } from "react-native-sensors";
 import BackgroundService, { BackgroundTaskOptions } from 'react-native-background-actions';
 // import { NativeModules, DeviceEventEmitter } from 'react-native';
 // import MyModule from '../modules/my-module';
 import myModule from '../modules/my-module';
 import { SensorEvent } from '@/modules/my-module/src/MyModule';
-import { Icon, MD3Colors, Tooltip, TouchableRipple } from 'react-native-paper';
+import { Icon, IconButton, MD3Colors, Tooltip, TouchableRipple } from 'react-native-paper';
+import { CustomButton } from './CustomButton';
+import { useThemedStyles } from '@/utilities/theme';
 
 // // Access the GyroscopeModule
 // const { GyroscopeModule } = NativeModules;
@@ -20,6 +22,7 @@ export const Application = () => {
   // const myRef = useRef<number>(0)
   // const [tog,setTog] = useState("")
   
+  const styles = useThemedStyles(stylesCallback)
   useEffect(()=>{
     const sub = AppState.addEventListener("change",event => {
       if (event === "active"){
@@ -35,11 +38,11 @@ export const Application = () => {
   return (
     // <NavigationContainer linking={linking}>
   <View>
-    <Text>{myModule.PI}</Text>
     <Tooltip title="Selected Camera">
-    <Icon
-    source="camera"
-    color={MD3Colors.error50}
+    <IconButton
+    icon={"camera"}
+    onPress={()=>{}}
+    // color={MD3Colors.error50}
     size={20}
   />
   </Tooltip>
@@ -72,38 +75,57 @@ export const Application = () => {
     }}
       title='stop'
       /> */}
-      <Button
+      {/* <Button
       title='haptics'
       onPress={async ()=> {
         myModule.warningAsync().catch(e => console.log(e)).finally(()=>console.log("oks haptics"))
         }}
+      /> */}
+      
+      <View style={styles.controls}>
+
+      
+      <CustomButton
+      disabled={isBackgroundRunning}
+      text='30 deg'
+      onPress={()=> {
+        myModule.warningAsync();
+        setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["30"]}})
+      }}
       />
-      <Button
-      title='30 deg'
-      onPress={()=> setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["30"]}})}
+      <CustomButton
+      disabled={isBackgroundRunning}
+      text='45 deg'
+      onPress={()=> {
+        myModule.warningAsync();
+        setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["45"]}})
+      }}
       />
-      <Button
-      title='45 deg'
-      onPress={()=> setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["45"]}})}
+      <CustomButton
+      disabled={isBackgroundRunning}
+      text='60 deg'
+      onPress={()=> {
+        myModule.warningAsync();
+        setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["60"]}})
+      }}
       />
-      <Button
-      title='60 deg'
-      onPress={()=> setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["60"]}})}
-      />
-      <Button
-      title='stop background'
+      </View>
+      <CustomButton
+      text='stop background'
       disabled={!isBackgroundRunning}
       onPress={()=>{
+        myModule.warningAsync();
         BackgroundService.stop().finally(() => setIsBackgroundRunning(false))
       }}
       />
-       <Button
+       <CustomButton
        disabled={isBackgroundRunning}
-      title={`start background ${options.parameters.values.angle}`}
+      text={`start background ${options.parameters.values.angle}`}
       onPress={()=>{
         if (BackgroundService.isRunning()){
           return;
         }
+        myModule.warningAsync();
         BackgroundService.start(veryIntensiveTask, options).finally(()=>setIsBackgroundRunning(true))}}
       />
       <Text>${options.parameters.values.name}</Text>
@@ -113,7 +135,10 @@ export const Application = () => {
   // </NavigationContainer>
   )
 }
-
+//region styles
+const stylesCallback = () => StyleSheet.create({
+  controls:{flexDirection:"row",alignItems:"center",gap:4,justifyContent:"space-evenly"}
+})
 //region background task
 type BackgroundTaskParams = {
   delay: number;// power saving var
