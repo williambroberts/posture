@@ -97,7 +97,7 @@ export const Application = () => {
         }
         BackgroundService.start(veryIntensiveTask, options).finally(()=>setIsBackgroundRunning(true))}}
       />
-      <Text>{tog}: vib</Text>
+      <Text>${options.parameters.values.name}</Text>
   </View>
 
  
@@ -108,15 +108,15 @@ export const Application = () => {
 //region background task
 type BackgroundTaskParams = {
   delay: number;// power saving var
-  values:{y:number,z:number,angle:number};
+  values:{y:number,z:number,angle:number,name:string};
   strictness: number;
   //strictness: number; // max strikes at bad angle -> vibrate 
 }
 const angleValuesMap = {
-  30:  {y:4.9,z:8.5,angle:30},
-  45:  {y:6.94,z:6.94,angle:45},
-  60:  {y:8.5,z:4.9,angle:60},
-}
+  30:  {y:4.9,z:8.5,angle:30,name:"Light"},
+  45:  {y:6.94,z:6.94,angle:45,name:"normal"},
+  60:  {y:8.5,z:4.9,angle:60,name:"Intense"},
+} satisfies {[key:number]:BackgroundTaskParams["values"]}
 const defaultConfig = {
   delay: 5000,
   values: angleValuesMap["30"],
@@ -154,6 +154,7 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
           streakRef.current = 0;
         }
       })
+      // ON for delay length of time
       await new Promise(r => setTimeout(r,delay));
       
       myModule.stopOrientation().finally(()=>console.log("ok"));
@@ -172,6 +173,8 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
           resolve("done");
         }
       }
+      // OFF for delay length of time
+      await new Promise(r => setTimeout(r,delay));
     }
     resolve("done")
 });
