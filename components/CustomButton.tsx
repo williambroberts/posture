@@ -1,17 +1,21 @@
 import { useThemedStyles } from '@/utilities/theme';
 import React, { useMemo } from 'react'
-import { StyleSheet } from 'react-native';
+import { StyleProp, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 import { MD3Theme, Text, TouchableRipple, useTheme } from 'react-native-paper'
 
 type Props = {
   text:string;
   onPress: ()=>void;
   disabled:boolean;
+  containerStyle?:StyleProp<ViewStyle>
+  textStyle?:StyleProp<TextStyle>
 }
 export const CustomButton = ({
   text,
   onPress,
   disabled,
+  containerStyle,
+  textStyle,
 }:Props) => {
   //theme
   const styles = useThemedStyles(stylesCallback)
@@ -23,13 +27,16 @@ export const CustomButton = ({
   style={[styles.container,
     disabled 
     ? styles.containerDisabled 
-    : undefined]}
+    : undefined,
+    containerStyle,
+  ]}
   >
     <Text variant='titleSmall'
      style={[styles.text,
       disabled 
       ? styles.textDisabled
-      : undefined
+      : undefined,
+      textStyle,
      ]}
      >{text}</Text>
   </TouchableRipple>
