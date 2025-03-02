@@ -9,7 +9,8 @@ import { SensorEvent } from '@/modules/my-module/src/MyModule';
 import {  IconButton,  MD3Theme, Text, Tooltip, } from 'react-native-paper';
 import { CustomButton } from './CustomButton';
 import { useThemedStyles } from '@/utilities/theme';
-import { AnimatedSwapHandler, AnimatedSwapHandlerRef } from './AnimatedSwapHandler';
+import {PlayButton} from './PlayButton';
+import { Settings } from './FloatingButtons';
 
 // // Access the GyroscopeModule
 // const { GyroscopeModule } = NativeModules;
@@ -20,7 +21,6 @@ export const Application = () => {
   const [data,setData] = useState<SensorEvent | null>()
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
-  const controlRef = useRef<AnimatedSwapHandlerRef>(null)
   // const myRef = useRef<number>(0)
   // const [tog,setTog] = useState("")
   
@@ -40,14 +40,6 @@ export const Application = () => {
   return (
     // <NavigationContainer linking={linking}>
   <View>
-    <Tooltip title="Selected Camera">
-    <IconButton
-    icon={"camera"}
-    onPress={()=>{}}
-    // color={MD3Colors.error50}
-    size={20}
-  />
-  </Tooltip>
    
     {/* <Button onPress={()=>{
       console.log(myModule.isOrientationAvailable())
@@ -83,42 +75,30 @@ export const Application = () => {
         myModule.warningAsync().catch(e => console.log(e)).finally(()=>console.log("oks haptics"))
         }}
       /> */}
-      
+
+        <Settings/>
+        <PlayButton/>
+
       <View style={styles.controls}>
 
       
       <CustomButton
       disabled={isBackgroundRunning}
       onPress={()=> {
-        controlRef.current?.show()
         myModule.selectionAsync();
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["30"]}})
       }}
       >
-        <AnimatedSwapHandler
-        controlRef={controlRef}
-        componentA={<Text variant="titleSmall">{angleValuesMap[30].name}</Text>}
-        componentB={<Text variant="headlineSmall">{angleValuesMap[30].name}</Text>}
-        />
+      <Text variant="titleSmall">{angleValuesMap[30].name}</Text>
       </CustomButton>
       <CustomButton
       disabled={isBackgroundRunning}
       onPress={()=> {
-        controlRef.current?.hide()
         myModule.selectionAsync();
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["45"]}})
       }}
-      ><Text>
-        <>
-        {/* {angleValuesMap[45].name} */}
-           <AnimatedSwapHandler
-        controlRef={controlRef}
-        componentA={<Text variant="titleSmall">{angleValuesMap[45].name}</Text>}
-        componentB={<Text variant="headlineSmall">{angleValuesMap[45].name}</Text>}
-        />
-        </>
-      </Text>
-        
+      >
+        <Text variant="titleSmall">{angleValuesMap[45].name}</Text>
       </CustomButton>
       {/* <CustomButton
       
@@ -150,7 +130,9 @@ export const Application = () => {
         BackgroundService.start(veryIntensiveTask, options).finally(()=>setIsBackgroundRunning(true))}}
       /> */}
       <Text>${options.parameters.values.name}</Text>
-  </View>
+    </View>
+
+
   </View>
   )
 
@@ -165,7 +147,8 @@ const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
     margin: 4,
     padding:4,
     borderRadius: 8,
-    backgroundColor: theme.colors.surface
+    backgroundColor: theme.colors.surface,
+    display:"none"
   },
 })
 //region background task

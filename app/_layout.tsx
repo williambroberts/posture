@@ -18,5 +18,11 @@ export default function RootLayout() {
       }
       // console.log(myModule.hello(),myModule.PI)
     },[])
-  return <Stack/>;
+  return (
+      <Stack
+        screenOptions={{
+          headerShown:false
+        }}
+      />
+    );
 }
