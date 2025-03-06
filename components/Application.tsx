@@ -77,7 +77,7 @@ export const Application = () => {
       /> */}
 
         <Settings/>
-        <PlayButton/>
+        {/* <PlayButton/> */}
 
       <View style={styles.controls}>
 

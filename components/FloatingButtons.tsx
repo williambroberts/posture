@@ -1,6 +1,7 @@
 import myModule from '@/modules/my-module';
 import React from 'react';
 import { StyleSheet, SafeAreaView, View, Pressable, Text } from 'react-native';
+import { IconButton } from 'react-native-paper';
 import Animated, {
   withDelay,
   interpolate,
@@ -85,13 +86,18 @@ export const Settings = () => {
   return (
       <View style={styles.mainContainer}>
         <View style={styles.buttonContainer}>
-          <AnimatedPressable
+          <IconButton
+          icon={"settings"}
+          onPress={handlePress}
+          style={[styles.shadow, mainButtonStyles.button]}
+          />
+          {/* <AnimatedPressable
             onPress={handlePress}
             style={[styles.shadow, mainButtonStyles.button]}>
             <Animated.Text style={[plusIconStyle, mainButtonStyles.content]}>
               +
             </Animated.Text>
-          </AnimatedPressable>
+          </AnimatedPressable> */}
           <FloatingActionButton
           onPress={()=> myModule.selectionAsync()}
             isExpanded={isExpanded}
