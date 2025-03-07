@@ -18,10 +18,12 @@ import { Settings } from './FloatingButtons';
 // Start listening for gyroscope data
 //region component
 export const Application = () => {
-  const [data,setData] = useState<MovementEvent | null>()
+  const [data,setData] = useState<{x:number,y:number,z:number} | null>()
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
   const myRef = useRef<number>(0)
+  const velocityRef = useRef<{x:number,y:number,z:number}>({ x: 0, y: 0, z: 0 })
+  const distanceRef = useRef<{x:number,y:number,z:number}>({ x: 0, y: 0, z: 0 })
   // const [tog,setTog] = useState<>()
   
   const styles = useThemedStyles(stylesCallback)
@@ -49,11 +51,39 @@ export const Application = () => {
       }
       myModule.startMovementDetection();
       myModule.addListener("onMovementDetected",e => {
-        myRef.current++;
-        if (myRef.current % 100 === 0){
-          console.log(e)
-          setData(e)
+        // if (myRef.current = 0){
+        //   myRef.current = e.timestamp / 1_000_000
+        // }
+        // myRef.current = e.timestamp / 1_000_000
+        let time = e.timestamp / 1_000_000_000
+        // console.log(time - myRef.current,)
+        if (time - myRef.current > 1){
+        let dt = time - myRef.current;
+        myRef.current = time;
+          console.log(e,"tur",dt)
+          let gravity = { x: 0, y: 0, z: 0 };
+          gravity.x = ALPHA * gravity.x + (1 - ALPHA) * e.distanceX;
+          gravity.y = ALPHA * gravity.y + (1 - ALPHA) * e.distanceY;
+          gravity.z = ALPHA * gravity.z + (1 - ALPHA) * e.distanceZ;
+          
+          const accel = {
+            x: e.distanceX - gravity.x,
+            y: e.distanceY - gravity.y,
+            z: e.distanceZ - gravity.z,
+          };
+          velocityRef.current = {
+            x: velocityRef.current.x + accel.x * dt,
+            y: velocityRef.current.y + accel.y * dt,
+            z: velocityRef.current.z + accel.z * dt,
+          }
+          distanceRef.current = {
+            x: distanceRef.current.x + velocityRef.current.x * dt,
+            y: distanceRef.current.y + velocityRef.current.y * dt,
+            z: distanceRef.current.z + velocityRef.current.z * dt,
+          }
+          setData(distanceRef.current)
         }
+          // console.log(distanceRef.current.y)
       })
     }}
     >
@@ -64,6 +94,8 @@ export const Application = () => {
     onPress={()=>{
       myModule.removeAllListeners("onMovementDetected");
       myModule.stopMovementDetection();
+      setData(null)
+      myRef.current = 0;
     }}
     >
       stop accelerometer
@@ -162,11 +194,12 @@ export const Application = () => {
       <Text style={styles.text}>${options.parameters.values.name}</Text>
     {/* </View> */}
 
-        <Text style={styles.text}>{JSON.stringify(data)}</Text>
+        <Text style={styles.text}>{data?.y}</Text>
   </View>
   )
 
 }
+const ALPHA = 0.8
 //region styles
 const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
   controls:{
