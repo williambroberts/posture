@@ -5,8 +5,8 @@ import BackgroundService, { BackgroundTaskOptions } from 'react-native-backgroun
 // import { NativeModules, DeviceEventEmitter } from 'react-native';
 // import MyModule from '../modules/my-module';
 import myModule from '../modules/my-module';
-import { SensorEvent } from '@/modules/my-module/src/MyModule';
-import {  IconButton,  MD3Theme, Text, Tooltip, } from 'react-native-paper';
+import { MovementEvent, SensorEvent } from '@/modules/my-module/src/MyModule';
+import {  Button, IconButton,  MD3Theme, Text, Tooltip, } from 'react-native-paper';
 import { CustomButton } from './CustomButton';
 import { useThemedStyles } from '@/utilities/theme';
 import {PlayButton} from './PlayButton';
@@ -18,11 +18,11 @@ import { Settings } from './FloatingButtons';
 // Start listening for gyroscope data
 //region component
 export const Application = () => {
-  const [data,setData] = useState<SensorEvent | null>()
+  const [data,setData] = useState<MovementEvent | null>()
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
-  // const myRef = useRef<number>(0)
-  // const [tog,setTog] = useState("")
+  const myRef = useRef<number>(0)
+  // const [tog,setTog] = useState<>()
   
   const styles = useThemedStyles(stylesCallback)
   useEffect(()=>{
@@ -40,7 +40,34 @@ export const Application = () => {
   return (
     // <NavigationContainer linking={linking}>
   <View>
-   
+    <Button
+    mode='contained'
+    onPress={()=>{
+      console.log(myModule.isMovementDetectionAvailable())
+      if (!myModule.isMovementDetectionAvailable()){
+        return;
+      }
+      myModule.startMovementDetection();
+      myModule.addListener("onMovementDetected",e => {
+        myRef.current++;
+        if (myRef.current % 100 === 0){
+          console.log(e)
+          setData(e)
+        }
+      })
+    }}
+    >
+      start accelerometer
+    </Button>
+    <Button
+    mode='contained-tonal'
+    onPress={()=>{
+      myModule.removeAllListeners("onMovementDetected");
+      myModule.stopMovementDetection();
+    }}
+    >
+      stop accelerometer
+    </Button>
     {/* <Button onPress={()=>{
       console.log(myModule.isOrientationAvailable())
       myModule.removeAllListeners("onOrientationChange")
@@ -76,10 +103,10 @@ export const Application = () => {
         }}
       /> */}
 
-        <Settings/>
+        {/* <Settings/> */}
         {/* <PlayButton/> */}
 
-      <View style={styles.controls}>
+      {/* <View style={styles.controls}> */}
 
       
       <CustomButton
@@ -89,7 +116,7 @@ export const Application = () => {
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["30"]}})
       }}
       >
-      <Text variant="titleSmall">{angleValuesMap[30].name}</Text>
+      <Text variant="titleSmall" style={styles.text}>{angleValuesMap[30].name}</Text>
       </CustomButton>
       <CustomButton
       disabled={isBackgroundRunning}
@@ -98,7 +125,7 @@ export const Application = () => {
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["45"]}})
       }}
       >
-        <Text variant="titleSmall">{angleValuesMap[45].name}</Text>
+        <Text variant="titleSmall" style={styles.text}>{angleValuesMap[45].name}</Text>
       </CustomButton>
       {/* <CustomButton
       
@@ -111,28 +138,31 @@ export const Application = () => {
       }}
       />
       </View> */}
-      {/* <CustomButton
-      text='stop background'
+      <CustomButton
       disabled={!isBackgroundRunning}
       onPress={()=>{
         myModule.warningAsync();
         BackgroundService.stop().finally(() => setIsBackgroundRunning(false))
       }}
-      /> */}
-       {/* <CustomButton
+      >
+         <Text variant="titleSmall" style={styles.text}>stop background</Text>
+      </CustomButton>
+       <CustomButton
        disabled={isBackgroundRunning}
-      text={`start background ${options.parameters.values.angle}`}
       onPress={()=>{
         if (BackgroundService.isRunning()){
           return;
         }
         myModule.warningAsync();
         BackgroundService.start(veryIntensiveTask, options).finally(()=>setIsBackgroundRunning(true))}}
-      /> */}
-      <Text>${options.parameters.values.name}</Text>
-    </View>
+      > 
+      <Text variant="titleSmall"style={styles.text}>{`start background ${options.parameters.values.angle}`}</Text>
+      </CustomButton>
 
+      <Text style={styles.text}>${options.parameters.values.name}</Text>
+    {/* </View> */}
 
+        <Text style={styles.text}>{JSON.stringify(data)}</Text>
   </View>
   )
 
@@ -148,8 +178,11 @@ const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
     padding:4,
     borderRadius: 8,
     backgroundColor: theme.colors.surface,
-    display:"none"
+    // display:"none"
   },
+  text:{
+    color: theme.colors.onTertiary,
+  }
 })
 //region background task
 type BackgroundTaskParams = {
@@ -162,7 +195,7 @@ const angleValuesMap = {
   30:  {y:4.9,z:8.5,angle:30,name:"Light" as const},
   45:  {y:6.94,z:6.94,angle:45,name:"Normal" as const},
   60:  {y:8.5,z:4.9,angle:60,name:"Strict" as const},
-      
+  
 } satisfies {[key:number]:{y:number,z:number,angle:number,name:string}}
 const defaultConfig = {
   delay: 5000,
@@ -174,7 +207,7 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
   const config = taskData ?? defaultConfig
   const {delay,values,strictness} = config;
   const countRef: {current: number} = {current:0}//todow generic
-  const eventRef:{current:SensorEvent| null} = {current:null} 
+  const sensorEventRef:{current:SensorEvent| null} = {current:null} 
   const isBadAngleRef: {current:boolean} = {current: false}
   const streakRef: RefType<number> = {current:0}
   const maxStreak = 10; // if 10 streak then stop playing
@@ -191,7 +224,7 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
       // listen for angle
       myModule.startOrientation(); 
       myModule.addListener("onOrientationChange",(event) => {
-        eventRef.current = event;
+        sensorEventRef.current = event;
         const badAngle = isBadAngle(event,config)
         if (badAngle){
           countRef.current++
@@ -207,7 +240,7 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
       myModule.stopOrientation().finally(()=>console.log("ok"));
       myModule.removeAllListeners("onOrientationChange")
 
-      console.log(countRef.current,"ref",isBadAngleRef.current,eventRef.current);
+      console.log(countRef.current,"ref",isBadAngleRef.current,sensorEventRef.current);
       if (countRef.current > strictness && isBadAngleRef.current){
         streakRef.current++;
         if (streakRef.current > goToErrorOn){// can put into var

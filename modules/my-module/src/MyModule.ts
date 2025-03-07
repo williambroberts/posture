@@ -9,7 +9,7 @@ export type MovementEvent = {
   distanceX :number;
   distanceY :number;
   distanceZ :number;
-  totalDistance :number;
+  timestamp :number;
 }
 export type SensorEvent  = {
   x: number;

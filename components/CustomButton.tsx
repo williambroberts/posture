@@ -46,7 +46,7 @@ export const CustomButton = ({
 }
 const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
   container:{
-    backgroundColor:theme.colors.primary,
+    backgroundColor:theme.colors.tertiary,
     padding: 8,
     margin: 4,
     borderRadius: 8,
@@ -55,7 +55,7 @@ const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
     backgroundColor: theme.colors.surfaceDisabled,
   },
   text:{
-    color:theme.colors.onPrimary,
+    color:theme.colors.error,
     flexShrink:1,
   },
   textDisabled:{

@@ -15,6 +15,8 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import expo.modules.kotlin.exception.Exceptions
 
+import kotlin.math.abs
+
 class MyModule : Module() {
     private var sensorManager: SensorManager? = null
     private var gravitySensor: Sensor? = null
@@ -94,69 +96,75 @@ class MyModule : Module() {
     
         movementListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
-                if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-                    val currentTime = System.currentTimeMillis()
-                    
-                    // Apply low-pass filter to isolate gravity
-                    gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
-                    gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]
-                    gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
-                    
-                    // Remove gravity effect from accelerometer values to get linear acceleration
-                    val x = event.values[0] - gravity[0]
-                    val y = event.values[1] - gravity[1]
-                    val z = event.values[2] - gravity[2]
-                    
-                    // First reading
-                    if (lastTimestamp == 0L) {
-                        lastTimestamp = currentTime
-                        lastX = x
-                        lastY = y
-                        lastZ = z
-                        return
-                    }
-                    
-                    val timeElapsed = (currentTime - lastTimestamp) / 1000f // Convert to seconds
-                    lastTimestamp = currentTime
-                    
-                    // Update velocity (integration of acceleration)
-                    velocityX += (x + lastX) / 2 * timeElapsed
-                    velocityY += (y + lastY) / 2 * timeElapsed
-                    velocityZ += (z + lastZ) / 2 * timeElapsed
-                    
-                    // Calculate distance moved (integration of velocity)
-                    val distanceX = velocityX * timeElapsed
-                    val distanceY = velocityY * timeElapsed
-                    val distanceZ = velocityZ * timeElapsed
-                    
-                    // Check if movement exceeds threshold
-                    if (abs(distanceX) > movementThreshold || 
-                        abs(distanceY) > movementThreshold || 
-                        abs(distanceZ) > movementThreshold) {
-                            
-                        // Send event to JS
                         sendEvent("onMovementDetected", mapOf(
-                            "distanceX" to distanceX,
-                            "distanceY" to distanceY,
-                            "distanceZ" to distanceZ,
-                            "totalDistance" to Math.sqrt(
-                                (distanceX * distanceX + 
-                                distanceY * distanceY + 
-                                distanceZ * distanceZ).toDouble()
-                            )
+                            "distanceX" to event.values[0],
+                            "distanceY" to event.values[1],
+                            "distanceZ" to event.values[2],
+                            "timestamp" to event.timestamp
                         ))
-                        
-                        // Reset velocities after reporting movement
-                        velocityX = 0f
-                        velocityY = 0f
-                        velocityZ = 0f
-                    }
+                // if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                //     val currentTime = System.currentTimeMillis()
                     
-                    // Update last values
-                    lastX = x
-                    lastY = y
-                    lastZ = z
-                }
+                //     // Apply low-pass filter to isolate gravity
+                //     gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
+                //     gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]
+                //     gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
+                    
+                //     // Remove gravity effect from accelerometer values to get linear acceleration
+                //     val x = event.values[0] - gravity[0]
+                //     val y = event.values[1] - gravity[1]
+                //     val z = event.values[2] - gravity[2]
+                    
+                //     // First reading
+                //     if (lastTimestamp == 0L) {
+                //         lastTimestamp = currentTime
+                //         lastX = x
+                //         lastY = y
+                //         lastZ = z
+                //         return
+                //     }
+                    
+                //     val timeElapsed = (currentTime - lastTimestamp) / 1000f // Convert to seconds
+                //     lastTimestamp = currentTime
+                    
+                //     // Update velocity (integration of acceleration)
+                //     velocityX += (x + lastX) / 2 * timeElapsed
+                //     velocityY += (y + lastY) / 2 * timeElapsed
+                //     velocityZ += (z + lastZ) / 2 * timeElapsed
+                    
+                //     // Calculate distance moved (integration of velocity)
+                //     val distanceX = velocityX * timeElapsed
+                //     val distanceY = velocityY * timeElapsed
+                //     val distanceZ = velocityZ * timeElapsed
+                    
+                //     // Check if movement exceeds threshold
+                //     if (abs(distanceX) > movementThreshold || 
+                //         abs(distanceY) > movementThreshold || 
+                //         abs(distanceZ) > movementThreshold) {
+                            
+                //         // Send event to JS
+                //         sendEvent("onMovementDetected", mapOf(
+                //             "distanceX" to distanceX,
+                //             "distanceY" to distanceY,
+                //             "distanceZ" to distanceZ,
+                //             "totalDistance" to Math.sqrt(
+                //                 (distanceX * distanceX + 
+                //                 distanceY * distanceY + 
+                //                 distanceZ * distanceZ).toDouble()
+                //             )
+                //         ))
+                        
+                //         // Reset velocities after reporting movement
+                //         velocityX = 0f
+                //         velocityY = 0f
+                //         velocityZ = 0f
+                //     }
+                    
+                //     // Update last values
+                //     lastX = x
+                //     lastY = y
+                //     lastZ = z
+                // }
             }
             
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -165,7 +173,7 @@ class MyModule : Module() {
         }
         sensorManager?.registerListener(
             movementListener,
-            accelerometerSensor,
+            accelerationSensor,
             SensorManager.SENSOR_DELAY_GAME // Higher sampling rate for more sensitivity
         )
     }
@@ -289,7 +297,6 @@ class MyModule : Module() {
         //         promise.reject("HAPTIC_ERROR", "Failed to cancel vibration", e)
         //     }
         // }
-        Events("onMovementDetected")
 
         AsyncFunction("startMovementDetection") { promise: Promise ->
             try {
@@ -316,7 +323,7 @@ class MyModule : Module() {
 
 
 
-        Events("onOrientationChange")
+        Events("onOrientationChange","onMovementDetected")
     
         AsyncFunction("startOrientation") { promise: Promise ->
             try {
