@@ -110,11 +110,6 @@ class MyModule : Module() {
             movementListener = null
         }
         
-        // Reset state
-        lastTimestamp = 0L
-        velocityX = 0f
-        velocityY = 0f
-        velocityZ = 0f
     }
 
     private fun startStepDetection(){
