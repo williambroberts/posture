@@ -33,14 +33,6 @@ export const CustomButton = ({
   ]}
   >
     {children}
-    {/* <Text variant='titleSmall'
-     style={[styles.text,
-      disabled 
-      ? styles.textDisabled
-      : undefined,
-      textStyle,
-     ]}
-     >{text}</Text> */}
   </TouchableRipple>
   )
 }
@@ -53,13 +45,6 @@ const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
   },
   containerDisabled:{
     backgroundColor: theme.colors.surfaceDisabled,
-  },
-  text:{
-    color:theme.colors.error,
-    flexShrink:1,
-  },
-  textDisabled:{
-    color: theme.colors.onSurfaceDisabled
   },
 })
 

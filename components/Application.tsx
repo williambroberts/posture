@@ -9,8 +9,7 @@ import { MovementEvent, SensorEvent } from '@/modules/my-module/src/MyModule';
 import {  Button, IconButton,  MD3Theme, Text, Tooltip, } from 'react-native-paper';
 import { CustomButton } from './CustomButton';
 import { useThemedStyles } from '@/utilities/theme';
-import {PlayButton} from './PlayButton';
-import { Settings } from './FloatingButtons';
+
 
 // // Access the GyroscopeModule
 // const { GyroscopeModule } = NativeModules;
@@ -18,12 +17,15 @@ import { Settings } from './FloatingButtons';
 // Start listening for gyroscope data
 //region component
 export const Application = () => {
-  const [data,setData] = useState<{x:number,y:number,z:number} | null>()
+  // const [data,setData] = useState<{x:number,y:number,z:number} | null>()
+  const [data,setData] = useState<MovementEvent | null>()
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
-  const myRef = useRef<number>(0)
+  const myRef = useRef<number | null>(null)
   const velocityRef = useRef<{x:number,y:number,z:number}>({ x: 0, y: 0, z: 0 })
   const distanceRef = useRef<{x:number,y:number,z:number}>({ x: 0, y: 0, z: 0 })
+  const gravityRef = useRef<{x:number,y:number,z:number}>({ x: 0, y: 0, z: 0 })
+  const countRef  = useRef<number>(0)
   // const [tog,setTog] = useState<>()
   
   const styles = useThemedStyles(stylesCallback)
@@ -54,35 +56,44 @@ export const Application = () => {
         // if (myRef.current = 0){
         //   myRef.current = e.timestamp / 1_000_000
         // }
+        if (!myRef.current){
+          myRef.current = e.timestamp / 1_000_000
+          return;
+        }
         // myRef.current = e.timestamp / 1_000_000
-        let time = e.timestamp / 1_000_000_000
+        let time = e.timestamp / 1_000_000
         // console.log(time - myRef.current,)
-        if (time - myRef.current > 1){
         let dt = time - myRef.current;
         myRef.current = time;
-          console.log(e,"tur",dt)
-          let gravity = { x: 0, y: 0, z: 0 };
-          gravity.x = ALPHA * gravity.x + (1 - ALPHA) * e.distanceX;
-          gravity.y = ALPHA * gravity.y + (1 - ALPHA) * e.distanceY;
-          gravity.z = ALPHA * gravity.z + (1 - ALPHA) * e.distanceZ;
+        gravityRef.current.x = ALPHA * gravityRef.current.x + (1 - ALPHA) * e.distanceX;
+        gravityRef.current.y = ALPHA * gravityRef.current.y + (1 - ALPHA) * e.distanceY;
+        gravityRef.current.z = ALPHA * gravityRef.current.z + (1 - ALPHA) * e.distanceZ;
           
           const accel = {
-            x: e.distanceX - gravity.x,
-            y: e.distanceY - gravity.y,
-            z: e.distanceZ - gravity.z,
+            x: e.distanceX - gravityRef.current.x,
+            y: e.distanceY - gravityRef.current.y,
+            z: e.distanceZ - gravityRef.current.z,
           };
           velocityRef.current = {
-            x: velocityRef.current.x + accel.x * dt,
-            y: velocityRef.current.y + accel.y * dt,
-            z: velocityRef.current.z + accel.z * dt,
+            x: velocityRef.current.x * DECAY + accel.x * dt,
+            y: velocityRef.current.y * DECAY + accel.y * dt,
+            z: velocityRef.current.z * DECAY + accel.z * dt,
           }
           distanceRef.current = {
             x: distanceRef.current.x + velocityRef.current.x * dt,
             y: distanceRef.current.y + velocityRef.current.y * dt,
             z: distanceRef.current.z + velocityRef.current.z * dt,
           }
-          setData(distanceRef.current)
-        }
+          countRef.current++
+          if (countRef.current % 10 === 0){
+            // if (e.distanceZ > e.distanceY){
+            //   myModule.warningAsync();
+            // }
+            console.log(distanceRef.current,e.timestamp)
+            setData(e)
+          }
+          
+        
           // console.log(distanceRef.current.y)
       })
     }}
@@ -95,7 +106,8 @@ export const Application = () => {
       myModule.removeAllListeners("onMovementDetected");
       myModule.stopMovementDetection();
       setData(null)
-      myRef.current = 0;
+      myRef.current = null;
+      countRef.current = 0;
     }}
     >
       stop accelerometer
@@ -194,12 +206,14 @@ export const Application = () => {
       <Text style={styles.text}>${options.parameters.values.name}</Text>
     {/* </View> */}
 
-        <Text style={styles.text}>{data?.y}</Text>
+        <Text style={styles.text}>{JSON.stringify(data)}</Text>
   </View>
   )
 
 }
-const ALPHA = 0.8
+//region constants
+const ALPHA = 0.8; // Gravity filter constant
+const DECAY = 0.98; // Helps reduce drift
 //region styles
 const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
   controls:{

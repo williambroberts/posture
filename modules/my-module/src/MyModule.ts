@@ -35,6 +35,11 @@ declare class MyModule extends NativeModule<MyModuleEvents> {
   startMovementDetection(): Promise<void>;
   stopMovementDetection(): Promise<void>;
   isMovementDetectionAvailable(): boolean;
+
+  startStepDetection(): Promise<void>;
+  stopStepDetection(): Promise<void>;
+  isStepDetectionAvailable(): boolean;
+  requestStepPermissions():void;
 }
 
 // This call loads the native module object from the JSI.

@@ -15,7 +15,12 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import expo.modules.kotlin.exception.Exceptions
 
-import kotlin.math.abs
+import androidx.core.content.ContextCompat
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+
+const val kRequestCode = 1
 
 class MyModule : Module() {
     private var sensorManager: SensorManager? = null
@@ -24,17 +29,11 @@ class MyModule : Module() {
     
     private var accelerationSensor: Sensor? = null
     private var movementListener: SensorEventListener? = null
-    // Movement detection variables
-    private var lastX: Float = 0f
-    private var lastY: Float = 0f
-    private var lastZ: Float = 0f
-    private var lastTimestamp: Long = 0
 
-    // Values to calculate distance
-    private var velocityX: Float = 0f
-    private var velocityY: Float = 0f
-    private var velocityZ: Float = 0f
-    private var movementThreshold: Float = 0.01f // 1cm in meters
+    private var stepSensor: Sensor? = null
+    private var stepListener: SensorEventListener? = null
+
+    
     //private val context: Context
     //get() = appContext.reactContext ?: throw Exceptions.ReactContextLost()
     private var vibrator: Vibrator? = null
@@ -84,16 +83,6 @@ class MyModule : Module() {
             return
         }
     
-        //movementThreshold = threshold
-        lastTimestamp = 0L
-        velocityX = 0f
-        velocityY = 0f
-        velocityZ = 0f
-    
-        // Will store gravity values to remove from accelerometer readings
-        val gravity = FloatArray(3)
-        val alpha = 0.8f // Smoothing factor for gravity low-pass filter
-    
         movementListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
                         sendEvent("onMovementDetected", mapOf(
@@ -102,69 +91,6 @@ class MyModule : Module() {
                             "distanceZ" to event.values[2],
                             "timestamp" to event.timestamp
                         ))
-                // if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-                //     val currentTime = System.currentTimeMillis()
-                    
-                //     // Apply low-pass filter to isolate gravity
-                //     gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
-                //     gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]
-                //     gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
-                    
-                //     // Remove gravity effect from accelerometer values to get linear acceleration
-                //     val x = event.values[0] - gravity[0]
-                //     val y = event.values[1] - gravity[1]
-                //     val z = event.values[2] - gravity[2]
-                    
-                //     // First reading
-                //     if (lastTimestamp == 0L) {
-                //         lastTimestamp = currentTime
-                //         lastX = x
-                //         lastY = y
-                //         lastZ = z
-                //         return
-                //     }
-                    
-                //     val timeElapsed = (currentTime - lastTimestamp) / 1000f // Convert to seconds
-                //     lastTimestamp = currentTime
-                    
-                //     // Update velocity (integration of acceleration)
-                //     velocityX += (x + lastX) / 2 * timeElapsed
-                //     velocityY += (y + lastY) / 2 * timeElapsed
-                //     velocityZ += (z + lastZ) / 2 * timeElapsed
-                    
-                //     // Calculate distance moved (integration of velocity)
-                //     val distanceX = velocityX * timeElapsed
-                //     val distanceY = velocityY * timeElapsed
-                //     val distanceZ = velocityZ * timeElapsed
-                    
-                //     // Check if movement exceeds threshold
-                //     if (abs(distanceX) > movementThreshold || 
-                //         abs(distanceY) > movementThreshold || 
-                //         abs(distanceZ) > movementThreshold) {
-                            
-                //         // Send event to JS
-                //         sendEvent("onMovementDetected", mapOf(
-                //             "distanceX" to distanceX,
-                //             "distanceY" to distanceY,
-                //             "distanceZ" to distanceZ,
-                //             "totalDistance" to Math.sqrt(
-                //                 (distanceX * distanceX + 
-                //                 distanceY * distanceY + 
-                //                 distanceZ * distanceZ).toDouble()
-                //             )
-                //         ))
-                        
-                //         // Reset velocities after reporting movement
-                //         velocityX = 0f
-                //         velocityY = 0f
-                //         velocityZ = 0f
-                //     }
-                    
-                //     // Update last values
-                //     lastX = x
-                //     lastY = y
-                //     lastZ = z
-                // }
             }
             
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -191,6 +117,36 @@ class MyModule : Module() {
         velocityZ = 0f
     }
 
+    private fun startStepDetection(){
+        if (stepListener != null) {
+            return
+            }
+        stepListener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                 sendEvent("onStepCountChange", mapOf(
+                    "steps" to event.values[0],  // Total steps since the last reboot
+                    "timestamp" to event.timestamp
+                ))
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+                // Handle accuracy changes if needed
+            }
+        }
+
+        sensorManager?.registerListener(
+            stepListener,
+            stepSensor,
+            SensorManager.SENSOR_DELAY_UI
+        )
+    }
+
+    private fun stopStepDetection() {
+        stepListener?.let { listener ->
+            sensorManager?.unregisterListener(listener)
+            stepListener = null;
+        }
+    }
 
     private fun vibrate(
         timings: LongArray = longArrayOf(0, 50),
@@ -215,7 +171,7 @@ class MyModule : Module() {
    
     override fun definition() = ModuleDefinition {
         Name("MyModule")
-             AsyncFunction("selectionAsync") { promise: Promise ->
+        AsyncFunction("selectionAsync") { promise: Promise ->
             try {
                 this@MyModule.vibrate(
                     longArrayOf(0, 50),
@@ -297,6 +253,26 @@ class MyModule : Module() {
         //         promise.reject("HAPTIC_ERROR", "Failed to cancel vibration", e)
         //     }
         // }
+        AsyncFunction("startStepDetection") { promise: Promise ->
+            try {
+                startStepDetection()
+                promise.resolve(null)
+            } catch (e: Exception) {
+                promise.reject("SENSOR_ERROR", e.message, e)
+            }
+        }
+        AsyncFunction("stopStepDetection") { promise: Promise ->
+            try {
+                stopStepDetection()
+                promise.resolve(null)
+            } catch (e: Exception) {
+                promise.reject("SENSOR_ERROR", e.message, e)
+            }
+        }
+        Function("isStepDetectionAvailable") {
+            sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR) != null
+        }
+
 
         AsyncFunction("startMovementDetection") { promise: Promise ->
             try {
@@ -320,10 +296,7 @@ class MyModule : Module() {
             sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null
         }
 
-
-
-
-        Events("onOrientationChange","onMovementDetected")
+        Events("onOrientationChange","onMovementDetected","onStepCounted")
     
         AsyncFunction("startOrientation") { promise: Promise ->
             try {
@@ -347,6 +320,25 @@ class MyModule : Module() {
             sensorManager?.getDefaultSensor(Sensor.TYPE_GRAVITY) != null
         }
 
+        Function("requestStepPermissions") {
+            val activity = appContext.activityProvider?.currentActivity
+            val applicationContext = activity?.applicationContext
+            if(applicationContext != null) {
+            val permissionCheck = ContextCompat.checkSelfPermission(
+            applicationContext,
+            Manifest.permission.ACTIVITY_RECOGNITION
+            )
+            if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
+                kRequestCode
+            )
+            }
+      }
+        }
+        
+
         OnCreate {
             // Initialize sensor manager using appContext
             val activity = appContext.activityProvider?.currentActivity
@@ -355,6 +347,8 @@ class MyModule : Module() {
             // TYPE_GRAVITY for orientation calculation
             sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
             gravitySensor = sensorManager?.getDefaultSensor(Sensor.TYPE_GRAVITY)
+            
+            stepSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
 
             accelerationSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
             // //haptics
@@ -371,9 +365,8 @@ class MyModule : Module() {
         OnDestroy {
             stopGravitySensor()
             stopMovementDetection()
+            stopStepDetection()
         }
     }
-    
-    
 }
 }
