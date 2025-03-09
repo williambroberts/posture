@@ -38,6 +38,7 @@ export const Application = () => {
       sub.remove();
     }
   },[])
+
   const selected = options.parameters.values.name
   return (
     // <NavigationContainer linking={linking}>
@@ -47,42 +48,68 @@ export const Application = () => {
     mode='contained'
     onPress={()=>{
       console.log(myModule.isOrientationAvailable())
+      console.log(myModule.isLinearMovementDetectionAvailable())
+
       if (!myModule.isOrientationAvailable()){
+        return;
+      }
+      if (!myModule.isLinearMovementDetectionAvailable){
         return;
       }
       myModule.startOrientation();
       myModule.addListener("onOrientationChange",e => {
-        if (!orientationRef.current){
+        myRef.current = (myRef.current ?? 0) +1;      
+        // if (myRef.current % 100 ===0){
+        //   console.log(e)
+        // }
+        //must have a good angle to begin with or wont do anything
+        //Gyroscope
+        // -	Phone vertical  ~9.81
+        // -	Phone flat ~ 0
+        if (!orientationRef.current && e.y > 9){//todow make configurable to "user's selected good reading angle e.g 45,60,75"
           orientationRef.current ={y: e.y,count:1};
           return;
         }
-        if (e.y < orientationRef.current.y){
-          console.log(e.y,orientationRef.current)
-        orientationRef.current.count++
+        // if not yet good angle, do nothing
+        if (!orientationRef.current){
+          return;
         }
+        // angle getting worse
+        if (e.y < orientationRef.current.y){
+        orientationRef.current = {y: e.y,count:orientationRef.current.count++}
+        // angle getting better
+        } else if (e.y > orientationRef.current.y){
+          orientationRef.current = {y: e.y,count:orientationRef.current.count--}
+        }
+        // reset so that if the angle is bad N times will result in a haptic
+        if (orientationRef.current.count < 0){
+          orientationRef.current.count = 0;
+        } 
       })
-      console.log(myModule.isLinearMovementDetectionAvailable())
-      if (!myModule.isLinearMovementDetectionAvailable){
-        return;
-      }
       myModule.startLinearMovementDetection();
       myModule.addListener("onLinearMovementDetected",e => {
+        const NconsecutiveAcceleration = 10
+        const NconsecutiveAngleGotWorse = 10;
         // myRef.current = (myRef.current ?? 0) +1
         // if (myRef.current > 10){
         //   console.log(e)
         //   myRef.current = 0
         // }
+
+        // dont do anything until phone set to a good angle
+        if (!orientationRef.current){
+          return;
+        }
+        //-	Z direction for tilting bad/good reading angle
         if (Math.abs(e.z) > 2){
           myRef.current = (myRef.current ?? 0) +1
           // console.log(e.z,"ok")
         }
-        if (myRef.current && myRef.current > 20){
-          myRef.current = 0;
-        }
-        if (!myRef.current || !orientationRef.current){
+        if (!myRef.current){
           return;
         }
-        if (myRef.current > 10 && orientationRef.current?.count > 10){
+        if (myRef.current > NconsecutiveAcceleration 
+          && orientationRef.current?.count > NconsecutiveAngleGotWorse){
           myRef.current = null
           orientationRef.current = null
           myModule.warningAsync();
@@ -93,14 +120,19 @@ export const Application = () => {
       start both
     </Button>
     <Button
-    onPress={()=>{
-      myModule.removeAllListeners("onOrientationChange");
-      myModule.stopOrientation().finally(()=>console.log("stop gyroscope"));
+    onPress={async ()=>{
+      await Promise.all([
+        myModule.removeAllListeners("onOrientationChange"),
+        myModule.removeAllListeners("onLinearMovementDetected")
+      ])
+      await Promise.all([
+        myModule.stopOrientation(),
+        myModule.stopLinearMovementDetection()
+      ])
       orientationRef.current = null;
-      myModule.removeAllListeners("onLinearMovementDetected")
-      myModule.stopLinearMovementDetection();
-      console.log("stoped both")
       myRef.current = null
+      console.log("stoped both")
+      
     }}
        style={{margin:6}}
     mode='contained-tonal'
@@ -117,15 +149,29 @@ export const Application = () => {
       }
       myModule.startOrientation();
       myModule.addListener("onOrientationChange",e => {
+        myRef.current = (myRef.current ?? 0) +1;      
+        // if (myRef.current % 100 ===0){
+        //   console.log(e)
+        // }
+        //must have a good angle to begin with or wont do anything
         if (!orientationRef.current && e.y > 9){
           orientationRef.current ={y: e.y,count:1};
           return;
         }
+        // if not yet good angle, do nothing
         if (!orientationRef.current){
           return;
         }
+        // angle getting worse
         if (e.y < orientationRef.current.y){
         orientationRef.current = {y: e.y,count:orientationRef.current.count++}
+        // angle getting better
+        } else if (e.y > orientationRef.current.y){
+          orientationRef.current = {y: e.y,count:orientationRef.current.count--}
+        }
+        // reset so that if the angle is bad N times will result in a haptic
+        if (orientationRef.current.count <0){
+          orientationRef.current.count = 0;
         }
         if (orientationRef.current.count > 100){
           console.log(orientationRef.current)
@@ -147,7 +193,7 @@ export const Application = () => {
     >
       stop gyrosopce
     </Button>
-    {/* <Button
+   <Button
      style={{margin:6}}
     mode='contained'
     onPress={()=>{
@@ -176,7 +222,7 @@ export const Application = () => {
     }}
     >
       stop accelerometer
-    </Button> */}
+    </Button> 
     <Button
     mode='outlined'
     style={{margin:6}}
