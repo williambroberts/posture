@@ -58,6 +58,7 @@ export const Application = () => {
       }
       myModule.startOrientation();
       myModule.addListener("onOrientationChange",e => {
+        const DIFF = 0.25
         myRef.current = (myRef.current ?? 0) +1;      
         // if (myRef.current % 100 ===0){
         //   console.log(e)
@@ -66,8 +67,9 @@ export const Application = () => {
         //Gyroscope
         // -	Phone vertical  ~9.81
         // -	Phone flat ~ 0
-        if (!orientationRef.current && e.y > 9){//todow make configurable to "user's selected good reading angle e.g 45,60,75"
+        if (!orientationRef.current && e.y > 7){//todow make configurable to "user's selected good reading angle e.g 45,60,75"
           orientationRef.current ={y: e.y,count:1};
+          console.log(orientationRef.current)
           return;
         }
         // if not yet good angle, do nothing
@@ -75,16 +77,26 @@ export const Application = () => {
           return;
         }
         // angle getting worse
-        if (e.y < orientationRef.current.y){
-        orientationRef.current = {y: e.y,count:orientationRef.current.count++}
+        if (e.y < orientationRef.current.y-DIFF){
+        orientationRef.current = {y: e.y,count:++orientationRef.current.count}
+        console.log("getting worse",orientationRef.current)
+        
+        } 
         // angle getting better
-        } else if (e.y > orientationRef.current.y){
-          orientationRef.current = {y: e.y,count:orientationRef.current.count--}
+         if (e.y > orientationRef.current.y+DIFF){
+          orientationRef.current = {y: e.y,count:--orientationRef.current.count}
+          // console.log(orientationRef.current)
         }
         // reset so that if the angle is bad N times will result in a haptic
         if (orientationRef.current.count < 0){
           orientationRef.current.count = 0;
         } 
+        // if (orientationRef.current.count > 10){
+        //   console.log(orientationRef.current)
+        //   // myModule.warningAsync();
+        //   orientationRef.current = null;
+        // }
+        
       })
       myModule.startLinearMovementDetection();
       myModule.addListener("onLinearMovementDetected",e => {
@@ -100,7 +112,7 @@ export const Application = () => {
         if (!orientationRef.current){
           return;
         }
-        //-	Z direction for tilting bad/good reading angle
+        //-	Z direction is for linear acceleration tilting bad/good reading angle (good->bad posture)
         if (Math.abs(e.z) > 2){
           myRef.current = (myRef.current ?? 0) +1
           // console.log(e.z,"ok")
@@ -112,7 +124,7 @@ export const Application = () => {
           && orientationRef.current?.count > NconsecutiveAngleGotWorse){
           myRef.current = null
           orientationRef.current = null
-          myModule.warningAsync();
+          myModule.errorAsync();
         }
       })
     }}
