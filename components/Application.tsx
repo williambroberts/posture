@@ -22,10 +22,8 @@ export const Application = () => {
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
   const myRef = useRef<number | null>(null)
-  const velocityRef = useRef<{x:number,y:number,z:number}>({ x: 0, y: 0, z: 0 })
-  const distanceRef = useRef<{x:number,y:number,z:number}>({ x: 0, y: 0, z: 0 })
-  const gravityRef = useRef<{x:number,y:number,z:number}>({ x: 0, y: 0, z: 0 })
-  const countRef  = useRef<number>(0)
+  const linearAccelerationRef  = useRef<number>(0)
+  const orientationRef = useRef<{y:number,count:number}| null>(null)
   // const [tog,setTog] = useState<>()
   
   const styles = useThemedStyles(stylesCallback)
@@ -45,6 +43,112 @@ export const Application = () => {
     // <NavigationContainer linking={linking}>
   <View>
     <Button
+       style={{margin:6}}
+    mode='contained'
+    onPress={()=>{
+      console.log(myModule.isOrientationAvailable())
+      if (!myModule.isOrientationAvailable()){
+        return;
+      }
+      myModule.startOrientation();
+      myModule.addListener("onOrientationChange",e => {
+        if (!orientationRef.current){
+          orientationRef.current ={y: e.y,count:1};
+          return;
+        }
+        if (e.y < orientationRef.current.y){
+          console.log(e.y,orientationRef.current)
+        orientationRef.current.count++
+        }
+      })
+      console.log(myModule.isLinearMovementDetectionAvailable())
+      if (!myModule.isLinearMovementDetectionAvailable){
+        return;
+      }
+      myModule.startLinearMovementDetection();
+      myModule.addListener("onLinearMovementDetected",e => {
+        // myRef.current = (myRef.current ?? 0) +1
+        // if (myRef.current > 10){
+        //   console.log(e)
+        //   myRef.current = 0
+        // }
+        if (Math.abs(e.z) > 2){
+          myRef.current = (myRef.current ?? 0) +1
+          // console.log(e.z,"ok")
+        }
+        if (myRef.current && myRef.current > 20){
+          myRef.current = 0;
+        }
+        if (!myRef.current || !orientationRef.current){
+          return;
+        }
+        if (myRef.current > 10 && orientationRef.current?.count > 10){
+          myRef.current = null
+          orientationRef.current = null
+          myModule.warningAsync();
+        }
+      })
+    }}
+    >
+      start both
+    </Button>
+    <Button
+    onPress={()=>{
+      myModule.removeAllListeners("onOrientationChange");
+      myModule.stopOrientation().finally(()=>console.log("stop gyroscope"));
+      orientationRef.current = null;
+      myModule.removeAllListeners("onLinearMovementDetected")
+      myModule.stopLinearMovementDetection();
+      console.log("stoped both")
+      myRef.current = null
+    }}
+       style={{margin:6}}
+    mode='contained-tonal'
+    >
+      stop both
+    </Button>
+     <Button
+     style={{margin:6}}
+    mode='contained'
+    onPress={()=>{
+      console.log(myModule.isOrientationAvailable())
+      if (!myModule.isOrientationAvailable()){
+        return;
+      }
+      myModule.startOrientation();
+      myModule.addListener("onOrientationChange",e => {
+        if (!orientationRef.current && e.y > 9){
+          orientationRef.current ={y: e.y,count:1};
+          return;
+        }
+        if (!orientationRef.current){
+          return;
+        }
+        if (e.y < orientationRef.current.y){
+        orientationRef.current = {y: e.y,count:orientationRef.current.count++}
+        }
+        if (orientationRef.current.count > 100){
+          console.log(orientationRef.current)
+          orientationRef.current = null
+        }
+      })
+    }}
+    >
+      start gyroscope
+    </Button>
+    <Button
+     style={{margin:6}}
+    mode='contained-tonal'
+    onPress={()=>{
+      myModule.removeAllListeners("onOrientationChange");
+      myModule.stopOrientation().finally(()=>console.log("stop gyroscope"));
+      orientationRef.current = null;
+    }}
+    >
+      stop gyrosopce
+    </Button>
+    {/* <Button
+     style={{margin:6}}
     mode='contained'
     onPress={()=>{
       console.log(myModule.isMovementDetectionAvailable())
@@ -53,64 +157,105 @@ export const Application = () => {
       }
       myModule.startMovementDetection();
       myModule.addListener("onMovementDetected",e => {
-        // if (myRef.current = 0){
-        //   myRef.current = e.timestamp / 1_000_000
-        // }
-        if (!myRef.current){
-          myRef.current = e.timestamp / 1_000_000
-          return;
+        myRef.current = (myRef.current ?? 0) +1;      
+        if (myRef.current % 100 ===0){
+          console.log(e)
         }
-        // myRef.current = e.timestamp / 1_000_000
-        let time = e.timestamp / 1_000_000
-        // console.log(time - myRef.current,)
-        let dt = time - myRef.current;
-        myRef.current = time;
-        gravityRef.current.x = ALPHA * gravityRef.current.x + (1 - ALPHA) * e.distanceX;
-        gravityRef.current.y = ALPHA * gravityRef.current.y + (1 - ALPHA) * e.distanceY;
-        gravityRef.current.z = ALPHA * gravityRef.current.z + (1 - ALPHA) * e.distanceZ;
-          
-          const accel = {
-            x: e.distanceX - gravityRef.current.x,
-            y: e.distanceY - gravityRef.current.y,
-            z: e.distanceZ - gravityRef.current.z,
-          };
-          velocityRef.current = {
-            x: velocityRef.current.x * DECAY + accel.x * dt,
-            y: velocityRef.current.y * DECAY + accel.y * dt,
-            z: velocityRef.current.z * DECAY + accel.z * dt,
-          }
-          distanceRef.current = {
-            x: distanceRef.current.x + velocityRef.current.x * dt,
-            y: distanceRef.current.y + velocityRef.current.y * dt,
-            z: distanceRef.current.z + velocityRef.current.z * dt,
-          }
-          countRef.current++
-          if (countRef.current % 10 === 0){
-            // if (e.distanceZ > e.distanceY){
-            //   myModule.warningAsync();
-            // }
-            console.log(distanceRef.current,e.timestamp)
-            setData(e)
-          }
-          
-        
-          // console.log(distanceRef.current.y)
       })
     }}
     >
       start accelerometer
     </Button>
     <Button
+     style={{margin:6}}
     mode='contained-tonal'
     onPress={()=>{
       myModule.removeAllListeners("onMovementDetected");
-      myModule.stopMovementDetection();
-      setData(null)
-      myRef.current = null;
-      countRef.current = 0;
+      myModule.stopMovementDetection().finally(()=>console.log("stop accelerometer"));
+      myRef.current = 0;
     }}
     >
       stop accelerometer
+    </Button> */}
+    <Button
+    mode='outlined'
+    style={{margin:6}}
+    onPress={()=>{
+      myModule.removeAllListeners("onStepCountChange");
+      myModule.stopStepDetection().finally(()=>console.log("stopped"));
+      
+    }}
+    >
+      stop step count
+    </Button>
+    <Button
+    mode='elevated'
+    onPress={()=>{
+      console.log(myModule.isStepDetectionAvailable())
+      if (!myModule.isStepDetectionAvailable()){
+        return;
+      }
+      myModule.startStepDetection().finally(()=>console.log("starting..."));
+      myModule.addListener("onStepCountChange",e => console.log(e))
+      
+    }}
+    >
+      start step count
+    </Button>
+    <Button 
+    mode='contained'
+    onPress={()=>{
+      myModule.requestStepPermissions()
+    }}
+    >
+      permissiosn
+    </Button>
+    <Button
+    mode='contained'
+    style={{margin:6}}
+    onPress={() => {
+      console.log(myModule.isLinearMovementDetectionAvailable())
+      if (!myModule.isLinearMovementDetectionAvailable){
+        return;
+      }
+      myModule.startLinearMovementDetection();
+      myModule.addListener("onLinearMovementDetected",e => {
+        // myRef.current = (myRef.current ?? 0) +1
+        // if (myRef.current > 10){
+        //   console.log(e)
+        //   myRef.current = 0
+        // }
+        if (Math.abs(e.z) > 2){
+          myRef.current = (myRef.current ?? 0) +1
+          console.log(e.z,"ok")
+        }
+        if (myRef.current && myRef.current > 20){
+          myRef.current = 0;
+        }
+        if (!myRef.current || !orientationRef.current){
+          return;
+        }
+        if (myRef.current > 10 && orientationRef.current?.count > 10){
+          myRef.current = null
+          orientationRef.current = null
+          myModule.warningAsync();
+        }
+      })
+    }}
+    >
+      start linear
+    </Button>
+    <Button
+    style={{margin:6}}
+    mode='contained'
+    onPress={()=>{
+      myModule.removeAllListeners("onLinearMovementDetected")
+      myModule.stopLinearMovementDetection();
+      console.log("stoped")
+      myRef.current = null
+    }}
+    >
+      stop linear
     </Button>
     {/* <Button onPress={()=>{
       console.log(myModule.isOrientationAvailable())

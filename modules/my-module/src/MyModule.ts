@@ -4,6 +4,8 @@ import { NativeModule, requireNativeModule } from 'expo';
  type MyModuleEvents = {
   onOrientationChange: (params: SensorEvent) => void;
   onMovementDetected: (params: MovementEvent) => void;
+  onStepCountChange: (params: StepEvent) => void;
+  onLinearMovementDetected: (params: SensorEvent) => void;
 };
 export type MovementEvent = {
   distanceX :number;
@@ -15,6 +17,10 @@ export type SensorEvent  = {
   x: number;
   y: number;
   z: number;
+  timestamp: number;
+}
+export type StepEvent = {
+  steps:number;
   timestamp: number;
 }
 declare class MyModule extends NativeModule<MyModuleEvents> {
@@ -40,6 +46,10 @@ declare class MyModule extends NativeModule<MyModuleEvents> {
   stopStepDetection(): Promise<void>;
   isStepDetectionAvailable(): boolean;
   requestStepPermissions():void;
+
+  startLinearMovementDetection(): Promise<void>;
+  stopLinearMovementDetection(): Promise<void>;
+  isLinearMovementDetectionAvailable(): boolean;
 }
 
 // This call loads the native module object from the JSI.

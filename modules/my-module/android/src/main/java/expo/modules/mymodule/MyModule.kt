@@ -33,7 +33,8 @@ class MyModule : Module() {
     private var stepSensor: Sensor? = null
     private var stepListener: SensorEventListener? = null
 
-    
+    private var linearAccelerationSensor: Sensor? = null 
+    private var linearMovementListener: SensorEventListener? = null   
     //private val context: Context
     //get() = appContext.reactContext ?: throw Exceptions.ReactContextLost()
     private var vibrator: Vibrator? = null
@@ -112,6 +113,37 @@ class MyModule : Module() {
         
     }
 
+    private fun startLinearMovementDetection() {
+        if (linearMovementListener != null) {
+            return
+        }
+    
+        linearMovementListener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                        sendEvent("onLinearMovementDetected", mapOf(
+                            "x" to event.values[0],
+                            "y" to event.values[1],
+                            "z" to event.values[2],
+                            "timestamp" to event.timestamp
+                        ))
+            }
+            
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+                // Not needed for this implementation
+            }
+        }
+        sensorManager?.registerListener(
+            linearMovementListener,
+            linearAccelerationSensor,
+            SensorManager.SENSOR_DELAY_GAME // Higher sampling rate for more sensitivity
+        )
+    }
+    private fun stopLinearMovementDetection() {
+        linearMovementListener?.let { listener ->
+            sensorManager?.unregisterListener(listener)
+            linearMovementListener = null
+        }
+    }
     private fun startStepDetection(){
         if (stepListener != null) {
             return
@@ -269,6 +301,29 @@ class MyModule : Module() {
         }
 
 
+        AsyncFunction("startLinearMovementDetection") { promise: Promise ->
+            try {
+                startLinearMovementDetection()
+                promise.resolve(null)
+            } catch (e: Exception) {
+                promise.reject("SENSOR_ERROR", e.message, e)
+            }
+        }
+
+        AsyncFunction("stopLinearMovementDetection") { promise: Promise ->
+            try {
+                stopLinearMovementDetection()
+                promise.resolve(null)
+            } catch (e: Exception) {
+                promise.reject("SENSOR_ERROR", e.message, e)
+            }
+        }
+
+        Function("isLinearMovementDetectionAvailable") {
+            sensorManager?.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION) != null
+        }
+
+
         AsyncFunction("startMovementDetection") { promise: Promise ->
             try {
                 startMovementDetection()
@@ -291,7 +346,7 @@ class MyModule : Module() {
             sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null
         }
 
-        Events("onOrientationChange","onMovementDetected","onStepCounted")
+        Events("onOrientationChange","onMovementDetected","onStepCountChange","onLinearMovementDetected")
     
         AsyncFunction("startOrientation") { promise: Promise ->
             try {
@@ -345,6 +400,8 @@ class MyModule : Module() {
             
             stepSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
 
+            linearAccelerationSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+
             accelerationSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
             // //haptics
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -361,6 +418,7 @@ class MyModule : Module() {
             stopGravitySensor()
             stopMovementDetection()
             stopStepDetection()
+            stopLinearMovementDetection()
         }
     }
 }
