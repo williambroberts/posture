@@ -437,7 +437,7 @@ export const Application = () => {
           return;
         }
         myModule.warningAsync();
-        BackgroundService.start(veryIntensiveTask, options).finally(()=>setIsBackgroundRunning(true))}}
+        BackgroundService.start(veryIntensiveTask2, options).finally(()=>setIsBackgroundRunning(true))}}
       > 
       <Text variant="titleSmall"style={styles.text}>{`start background ${options.parameters.values.angle}`}</Text>
       </CustomButton>
@@ -484,11 +484,104 @@ const angleValuesMap = {
   
 } satisfies {[key:number]:{y:number,z:number,angle:number,name:string}}
 const defaultConfig = {
-  delay: 5000,
+  delay: 1000,
   values: angleValuesMap["30"],
   strictness: 1
 } satisfies BackgroundTaskParams
 type RefType<T> = {current:T};
+type OrientationRef = RefType<{y:number,count:number}>
+type BadAngleRef = RefType<{isBadAngle:boolean,count:number}>
+const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
+  const config = taskData ?? defaultConfig
+  const {delay,values,strictness} = config;
+  const badAngleRef:BadAngleRef = {current:{isBadAngle:false,count:0}}
+  const orientationRef:OrientationRef = {current:{count:0,y:0}}
+  const runLockRef:RefType<RunLock> = {current:{}}
+  // BAD ANGLE, ARCH DOWN, MOVE DOWN,
+  await new Promise( async (resolve) => {
+    if (!myModule.isOrientationAvailable() || !myModule.isLinearMovementDetectionAvailable()){
+      //todow notify user?
+      return resolve("done");
+    }
+    myModule.startLinearMovementDetection();
+    myModule.startOrientation();
+    myModule.addListener("onLinearMovementDetected",e =>{
+
+    })
+    myModule.addListener("onOrientationChange",e => {
+      onOrientationChangeArch(orientationRef,e)
+      onOrientationChangeBadAngle(
+        badAngleRef,
+        e,
+        config,
+      )
+    })
+    for (let i = 0; BackgroundService.isRunning(); i++) {
+      await new Promise(r => setTimeout(r,delay));
+      if (badAngleRef.current.isBadAngle === true){
+        badAngleRef.current.count++
+      } else {
+        badAngleRef.current.count = 0;
+      }
+      if (badAngleRef.current.count > strictness){
+        runWithLock({
+          cb: myModule.warningAsync,
+          key: "a-key",
+          lockTime: 1000,
+          runLock: runLockRef.current
+        })
+      }
+    }
+  })
+}
+type RunLock = {[key:`${string}-key`]:boolean}
+type RunWithLock = {
+    cb: () => void;
+    key:`${string}-key`;
+    runLock: RunLock;
+    lockTime: number
+}
+const runWithLock = (args:RunWithLock) => {
+  const {cb,key,runLock,lockTime} = args
+  if (runLock[key] === true){
+    return;
+  }
+  runLock[key] = true;
+  cb();
+  setTimeout(()=>{runLock[key] = false},lockTime)
+}
+const onOrientationChangeBadAngle = (badAngleRef:BadAngleRef,e:SensorEvent,config:BackgroundTaskParams) => {
+  const badAngle = isBadAngle(e,config);
+  if (badAngle){
+    badAngleRef.current.isBadAngle = true;
+  } else {
+    badAngleRef.current.isBadAngle = false;
+  }
+}
+const onOrientationChangeArch = (orientationRef:OrientationRef,e:SensorEvent) => {
+  const DIFF = 0.25;
+  if (!orientationRef.current && e.y > 7){//todow make configurable to "user's selected good reading angle e.g 45,60,75"
+    orientationRef.current ={y: e.y,count:1};
+    return;
+  }
+  // if not yet good angle, do nothing
+  if (!orientationRef.current){
+    return;
+  }
+  // angle getting worse
+  if (e.y < orientationRef.current.y-DIFF){
+  orientationRef.current = {y: e.y,count:++orientationRef.current.count}
+  
+  } 
+  // angle getting better
+   if (e.y > orientationRef.current.y+DIFF){
+    orientationRef.current = {y: e.y,count:--orientationRef.current.count}
+  }
+  // reset so that if the angle is bad N times will result in a haptic
+  if (orientationRef.current.count < 0){
+    orientationRef.current.count = 0;
+  } 
+}
 const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
   const config = taskData ?? defaultConfig
   const {delay,values,strictness} = config;
@@ -546,6 +639,8 @@ const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
     resolve("done")
 });
 }
+
+
 const defaultOptions = {
   taskName: 'Example',
   taskTitle: 'ExampleTask title',
