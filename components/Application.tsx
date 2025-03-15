@@ -315,23 +315,46 @@ export const Application = () => {
         if (!myRef.current){
           myRef.current = 0;
         }
-        let VAR = 0.5
-        if (Math.abs(e.x) > VAR || Math.abs(e.y) > VAR || Math.abs(e.z) > VAR){
-          ++myRef.current
+        let VAR = 1
+        let absX = Math.abs(e.x), absY = Math.abs(e.y), absZ = Math.abs(e.z)
+        // if (Math.abs(e.x) > VAR || Math.abs(e.y) > VAR || Math.abs(e.z) > VAR){
+        //   ++myRef.current
+        //   if (myRef.current > 10){
+        //     myRef.current = 0;
+        //     if (Math.max(absX,absY,absZ) === absX){
+        //     console.log("X",e)
+        //     } else if (Math.max(absX,absY,absZ) === absY){
+        //       console.log("Y",e)
+        //     } else if (Math.max(absX,absY,absZ) === absZ){
+        //       console.log("Z",e)
+        //     }
+        //   }      
+        // }
+        if (absY > VAR){
+          ++myRef.current;
+          if (myRef.current > 10){
+            if (Math.max(absX,absY,absZ) === absX){
+            console.log("X",e)
+            } else if (Math.max(absX,absY,absZ) === absY){
+              console.log("Y",e)
+            } else if (Math.max(absX,absY,absZ) === absZ){
+              console.log("Z",e)
+            }
+          }
         }
-        if(Math.abs(e.x) > VAR){
-          setColor("green")
-        } else if(Math.abs(e.y) > VAR){
-          setColor("red")
-        } else if(Math.abs(e.z) > VAR){
-          setColor("yellow")
-        } else {
-          setColor("white")
-        }
-        if (myRef.current > 20){
-          myRef.current = 0;
-          console.log(e)
-        }
+        // if(Math.abs(e.x) > VAR){
+        //   setColor("green")
+        // } else if(Math.abs(e.y) > VAR){
+        //   setColor("red")
+        // } else if(Math.abs(e.z) > VAR){
+        //   setColor("yellow")
+        // } else {
+        //   setColor("white")
+        // }
+        // if (myRef.current > 20){
+        //   myRef.current = 0;
+        //   console.log(e)
+        // }
       })
     }}
     >
