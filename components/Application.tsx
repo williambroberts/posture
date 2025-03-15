@@ -22,6 +22,8 @@ export const Application = () => {
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
   const myRef = useRef<number | null>(null)
+  const dataRef = useRef<{count:number,z:number}|null>(null)
+  const [color,setColor] = useState<"red"|"green"|"yellow"|"white">("white")
   const linearAccelerationRef  = useRef<number>(0)
   const orientationRef = useRef<{y:number,count:number}| null>(null)
   // const [tog,setTog] = useState<>()
@@ -42,7 +44,7 @@ export const Application = () => {
   const selected = options.parameters.values.name
   return (
     // <NavigationContainer linking={linking}>
-  <View>
+  <View style={{backgroundColor:color}}>
     <Button
        style={{margin:6}}
     mode='contained'
@@ -61,7 +63,6 @@ export const Application = () => {
         const DIFF = 0.25
         myRef.current = (myRef.current ?? 0) +1;      
         // if (myRef.current % 100 ===0){
-        //   console.log(e)
         // }
         //must have a good angle to begin with or wont do anything
         //Gyroscope
@@ -69,7 +70,6 @@ export const Application = () => {
         // -	Phone flat ~ 0
         if (!orientationRef.current && e.y > 7){//todow make configurable to "user's selected good reading angle e.g 45,60,75"
           orientationRef.current ={y: e.y,count:1};
-          console.log(orientationRef.current)
           return;
         }
         // if not yet good angle, do nothing
@@ -79,20 +79,17 @@ export const Application = () => {
         // angle getting worse
         if (e.y < orientationRef.current.y-DIFF){
         orientationRef.current = {y: e.y,count:++orientationRef.current.count}
-        console.log("getting worse",orientationRef.current)
         
         } 
         // angle getting better
          if (e.y > orientationRef.current.y+DIFF){
           orientationRef.current = {y: e.y,count:--orientationRef.current.count}
-          // console.log(orientationRef.current)
         }
         // reset so that if the angle is bad N times will result in a haptic
         if (orientationRef.current.count < 0){
           orientationRef.current.count = 0;
         } 
         // if (orientationRef.current.count > 10){
-        //   console.log(orientationRef.current)
         //   // myModule.warningAsync();
         //   orientationRef.current = null;
         // }
@@ -104,10 +101,11 @@ export const Application = () => {
         const NconsecutiveAngleGotWorse = 10;
         // myRef.current = (myRef.current ?? 0) +1
         // if (myRef.current > 10){
-        //   console.log(e)
         //   myRef.current = 0
         // }
-
+        if (!dataRef.current){
+          dataRef.current = {count:0,z:0}
+        }
         // dont do anything until phone set to a good angle
         if (!orientationRef.current){
           return;
@@ -115,7 +113,6 @@ export const Application = () => {
         //-	Z direction is for linear acceleration tilting bad/good reading angle (good->bad posture)
         if (Math.abs(e.z) > 2){
           myRef.current = (myRef.current ?? 0) +1
-          // console.log(e.z,"ok")
         }
         if (!myRef.current){
           return;
@@ -126,6 +123,41 @@ export const Application = () => {
           orientationRef.current = null
           myModule.errorAsync();
         }
+
+        if (orientationRef.current && orientationRef.current.y > 9 
+          && e.y < -2 
+        ){
+          // console.log("x,y,z",e.x,e.y,e.z)
+          dataRef.current.count = dataRef.current.count +1;
+          if (dataRef.current.count > 7){
+            dataRef.current = null;
+            // console.log("EEK")
+            myModule.warningAsync();
+          }
+        }
+        
+          // let VAR = 1;
+          // if (Math.abs(e.x) > VAR || Math.abs(e.y) > VAR || Math.abs(e.z) > VAR){
+          //   dataRef.current.count++
+          //   if (Math.max(Math.abs(e.x),Math.abs(e.y),Math.abs(e.z)) === Math.abs(e.x)){
+          //       console.log("X")
+          //   }
+          //   if (Math.max(Math.abs(e.x),Math.abs(e.y),Math.abs(e.z)) === Math.abs(e.y)){
+          //     console.log("Y")
+          // }
+          // if (Math.max(Math.abs(e.x),Math.abs(e.y),Math.abs(e.z)) === Math.abs(e.z)){
+          //   console.log("Z")
+          // }
+            // if (color !== "red" && dataRef.current.count > NconsecutiveAcceleration){
+            // setColor("red")
+            // }
+            
+            // if (color !== "green" && dataRef.current.count <=0){
+            //   dataRef.current.count = 0;
+            //   setColor("green")
+            // }
+          
+        
       })
     }}
     >
@@ -141,9 +173,11 @@ export const Application = () => {
         myModule.stopOrientation(),
         myModule.stopLinearMovementDetection()
       ])
+      console.log("stoped both",dataRef.current)
+
       orientationRef.current = null;
       myRef.current = null
-      console.log("stoped both")
+      dataRef.current = null
       
     }}
        style={{margin:6}}
@@ -278,25 +312,25 @@ export const Application = () => {
       }
       myModule.startLinearMovementDetection();
       myModule.addListener("onLinearMovementDetected",e => {
-        // myRef.current = (myRef.current ?? 0) +1
-        // if (myRef.current > 10){
-        //   console.log(e)
-        //   myRef.current = 0
-        // }
-        if (Math.abs(e.z) > 2){
-          myRef.current = (myRef.current ?? 0) +1
-          console.log(e.z,"ok")
-        }
-        if (myRef.current && myRef.current > 20){
+        if (!myRef.current){
           myRef.current = 0;
         }
-        if (!myRef.current || !orientationRef.current){
-          return;
+        let VAR = 0.5
+        if (Math.abs(e.x) > VAR || Math.abs(e.y) > VAR || Math.abs(e.z) > VAR){
+          ++myRef.current
         }
-        if (myRef.current > 10 && orientationRef.current?.count > 10){
-          myRef.current = null
-          orientationRef.current = null
-          myModule.warningAsync();
+        if(Math.abs(e.x) > VAR){
+          setColor("green")
+        } else if(Math.abs(e.y) > VAR){
+          setColor("red")
+        } else if(Math.abs(e.z) > VAR){
+          setColor("yellow")
+        } else {
+          setColor("white")
+        }
+        if (myRef.current > 20){
+          myRef.current = 0;
+          console.log(e)
         }
       })
     }}
@@ -310,6 +344,8 @@ export const Application = () => {
       myModule.removeAllListeners("onLinearMovementDetected")
       myModule.stopLinearMovementDetection();
       console.log("stoped")
+      console.log(dataRef.current)
+      dataRef.current = null;
       myRef.current = null
     }}
     >
