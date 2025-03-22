@@ -22,6 +22,7 @@ export const Application = () => {
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
   const myRef = useRef<number | null>(null)
+  const arrayRef = useRef<any[]>([])
   const dataRef = useRef<{count:number,z:number}|null>(null)
   const [color,setColor] = useState<"red"|"green"|"yellow"|"white">("white")
   const linearAccelerationRef  = useRef<number>(0)
@@ -315,46 +316,24 @@ export const Application = () => {
         if (!myRef.current){
           myRef.current = 0;
         }
-        let VAR = 1
+        let VAR = 1.5
         let absX = Math.abs(e.x), absY = Math.abs(e.y), absZ = Math.abs(e.z)
-        // if (Math.abs(e.x) > VAR || Math.abs(e.y) > VAR || Math.abs(e.z) > VAR){
-        //   ++myRef.current
-        //   if (myRef.current > 10){
-        //     myRef.current = 0;
-        //     if (Math.max(absX,absY,absZ) === absX){
-        //     console.log("X",e)
-        //     } else if (Math.max(absX,absY,absZ) === absY){
-        //       console.log("Y",e)
-        //     } else if (Math.max(absX,absY,absZ) === absZ){
-        //       console.log("Z",e)
-        //     }
-        //   }      
+        // if (e.y > 2){
+        //   myRef.current = e.y
         // }
-        if (absY > VAR){
-          ++myRef.current;
-          if (myRef.current > 10){
-            if (Math.max(absX,absY,absZ) === absX){
-            console.log("X",e)
-            } else if (Math.max(absX,absY,absZ) === absY){
-              console.log("Y",e)
-            } else if (Math.max(absX,absY,absZ) === absZ){
-              console.log("Z",e)
-            }
-          }
+        // if (e.y < -2 && myRef.current > 2){
+
+        //   console.log(myRef.current,e.y)
+        //   myRef.current = null;
+        // }        
+        if (e.y < -VAR){
+          myRef.current = e.y
         }
-        // if(Math.abs(e.x) > VAR){
-        //   setColor("green")
-        // } else if(Math.abs(e.y) > VAR){
-        //   setColor("red")
-        // } else if(Math.abs(e.z) > VAR){
-        //   setColor("yellow")
-        // } else {
-        //   setColor("white")
-        // }
-        // if (myRef.current > 20){
-        //   myRef.current = 0;
-        //   console.log(e)
-        // }
+        if (e.y > VAR && myRef.current < -VAR){
+          console.log(myRef.current,e.y)
+          myModule.warningAsync();
+          myRef.current = null;
+        }
       })
     }}
     >
@@ -367,7 +346,8 @@ export const Application = () => {
       myModule.removeAllListeners("onLinearMovementDetected")
       myModule.stopLinearMovementDetection();
       console.log("stoped")
-      console.log(dataRef.current)
+      console.log(arrayRef.current,dataRef.current)
+      arrayRef.current =[]
       dataRef.current = null;
       myRef.current = null
     }}
