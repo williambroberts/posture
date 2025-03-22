@@ -33,8 +33,18 @@ export const Application = () => {
   useEffect(()=>{
     const sub = AppState.addEventListener("change",event => {
       if (event === "active"){
-        BackgroundService.stop();
-        setIsBackgroundRunning(false);
+        console.log("stopping");
+        (async ()=>{
+          await BackgroundService.stop();
+          myModule.removeAllListeners("onLinearMovementDetected")
+          myModule.removeAllListeners("onOrientationChange")
+          await Promise.all([
+            myModule.stopLinearMovementDetection(),
+            myModule.stopOrientation()
+          ])
+        })().finally(()=>{
+          setIsBackgroundRunning(false)
+        })
       }
     })
     return () => {
@@ -125,17 +135,17 @@ export const Application = () => {
           myModule.errorAsync();
         }
 
-        if (orientationRef.current && orientationRef.current.y > 9 
-          && e.y < -2 
-        ){
-          // console.log("x,y,z",e.x,e.y,e.z)
-          dataRef.current.count = dataRef.current.count +1;
-          if (dataRef.current.count > 7){
-            dataRef.current = null;
-            // console.log("EEK")
-            myModule.warningAsync();
-          }
-        }
+        // if (orientationRef.current && orientationRef.current.y > 9 
+        //   && e.y < -2 
+        // ){
+        //   // console.log("x,y,z",e.x,e.y,e.z)
+        //   dataRef.current.count = dataRef.current.count +1;
+        //   if (dataRef.current.count > 7){
+        //     dataRef.current = null;
+        //     // console.log("EEK")
+        //     myModule.warningAsync();
+        //   }
+        // }
         
           // let VAR = 1;
           // if (Math.abs(e.x) > VAR || Math.abs(e.y) > VAR || Math.abs(e.z) > VAR){
@@ -428,7 +438,15 @@ export const Application = () => {
       disabled={!isBackgroundRunning}
       onPress={()=>{
         myModule.warningAsync();
-        BackgroundService.stop().finally(() => setIsBackgroundRunning(false))
+        BackgroundService.stop().finally(async () => {
+          myModule.removeAllListeners("onLinearMovementDetected")
+          myModule.removeAllListeners("onOrientationChange")
+          await Promise.all([
+            myModule.stopLinearMovementDetection(),
+            myModule.stopOrientation()
+          ])
+          setIsBackgroundRunning(false)
+        })
       }}
       >
          <Text variant="titleSmall" style={styles.text}>stop background</Text>
@@ -487,12 +505,13 @@ const angleValuesMap = {
   
 } satisfies {[key:number]:{y:number,z:number,angle:number,name:string}}
 const defaultConfig = {
-  delay: 1000,
+  delay: 10000 as const,
   values: angleValuesMap["30"],
   strictness: 1
 } satisfies BackgroundTaskParams
 type RefType<T> = {current:T};
-type OrientationRef = RefType<{y:number,count:number}>
+type OrientationRef = RefType<{y:number,count:number}|null>
+type NullableNumberRef = RefType<number|null>
 type BadAngleRef = RefType<{isBadAngle:boolean,count:number}>
 const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
   const config = taskData ?? defaultConfig
@@ -500,41 +519,71 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
   const badAngleRef:BadAngleRef = {current:{isBadAngle:false,count:0}}
   const orientationRef:OrientationRef = {current:{count:0,y:0}}
   const runLockRef:RefType<RunLock> = {current:{}}
+  const linearAccelerationRef: NullableNumberRef = {current:null}
+  const VAR = 1.5;
+  const key = "a-key" as const;
   // BAD ANGLE, ARCH DOWN, MOVE DOWN,
-  await new Promise( async (resolve) => {
-    if (!myModule.isOrientationAvailable() || !myModule.isLinearMovementDetectionAvailable()){
-      //todow notify user?
-      return resolve("done");
-    }
-    myModule.startLinearMovementDetection();
-    myModule.startOrientation();
-    myModule.addListener("onLinearMovementDetected",e =>{
 
-    })
-    myModule.addListener("onOrientationChange",e => {
-      onOrientationChangeArch(orientationRef,e)
-      onOrientationChangeBadAngle(
-        badAngleRef,
-        e,
-        config,
-      )
-    })
+  const runTheLock = () => runWithLock({
+    cb: myModule.errorAsync,
+    key,
+    lockTime: 1000,
+    runLock: runLockRef.current
+  })
+  await new Promise( async (resolve) => {
+    
     for (let i = 0; BackgroundService.isRunning(); i++) {
-      await new Promise(r => setTimeout(r,delay));
-      if (badAngleRef.current.isBadAngle === true){
-        badAngleRef.current.count++
-      } else {
-        badAngleRef.current.count = 0;
+      if (!myModule.isOrientationAvailable() || !myModule.isLinearMovementDetectionAvailable()){
+        //todow notify user?
+        return resolve("done");
       }
-      if (badAngleRef.current.count > strictness){
-        runWithLock({
-          cb: myModule.warningAsync,
-          key: "a-key",
-          lockTime: 1000,
-          runLock: runLockRef.current
+      myModule.startLinearMovementDetection();
+      myModule.startOrientation();
+      myModule.addListener("onLinearMovementDetected",e =>{
+        onLinearMovementDetectedAngle({
+          cb: myModule.errorAsync,
+          e,
+          linearRef: linearAccelerationRef,
+          orientationRef,
         })
-      }
+        onLinearMovementDetectedVertical({
+          cb: myModule.errorAsync,
+          e,
+          linearRef: linearAccelerationRef,
+          var:VAR
+        })
+      })
+      myModule.addListener("onOrientationChange",e => {
+        onOrientationChangeArch(orientationRef,e)
+        // onOrientationChangeBadAngle(
+        //   badAngleRef,
+        //   e,
+        //   config,
+        // )
+      })
+      await new Promise(r => setTimeout(r,delay));
+      myModule.removeAllListeners("onLinearMovementDetected")
+      myModule.removeAllListeners("onOrientationChange")
+      await Promise.all([
+        myModule.stopOrientation(),
+        myModule.stopLinearMovementDetection()
+      ])
+      await new Promise(r => setTimeout(r,200));
+      // if (badAngleRef.current.isBadAngle === true){
+      //   badAngleRef.current.count++
+      // } else {
+      //   badAngleRef.current.count = 0;
+      // }
+      // if (badAngleRef.current.count > strictness){
+      //   runWithLock({
+      //     cb: myModule.warningAsync,
+      //     key,
+      //     lockTime: 1000,
+      //     runLock: runLockRef.current
+      //   })
+      // }
     }
+    resolve("done")
   })
 }
 type RunLock = {[key:`${string}-key`]:boolean}
@@ -552,6 +601,56 @@ const runWithLock = (args:RunWithLock) => {
   runLock[key] = true;
   cb();
   setTimeout(()=>{runLock[key] = false},lockTime)
+}
+type OnLinearMovementDetectedVertical = {
+  e: SensorEvent;
+  cb: () => void;
+  var: number;
+  linearRef:NullableNumberRef
+}
+const onLinearMovementDetectedVertical = (args:OnLinearMovementDetectedVertical) => {
+  const {cb,e, linearRef: linearAccelerationRef,var:VAR} = args
+  if (e.y < -VAR){
+    linearAccelerationRef.current = e.y
+  }
+  if (!linearAccelerationRef.current){
+    return;
+  }
+  if (e.y > VAR && linearAccelerationRef.current < -VAR){
+    console.log(linearAccelerationRef.current,e.y,"background,onLinearMovementDetectedVertical")
+    void cb();
+    linearAccelerationRef.current = null;
+  }
+}
+type OnLinearMovementDetectedAngle = {
+  e:SensorEvent;
+  orientationRef:OrientationRef;
+  linearRef: NullableNumberRef;
+  cb: () => void
+}
+const onLinearMovementDetectedAngle = (args:OnLinearMovementDetectedAngle) => {
+  const NconsecutiveAcceleration = 10
+        const NconsecutiveAngleGotWorse = 10;
+        const {e,linearRef,orientationRef} = args
+       
+        // dont do anything until phone set to a good angle
+        if (!orientationRef.current){
+          return;
+        }
+        //-	Z direction is for linear acceleration tilting bad/good reading angle (good->bad posture)
+        if (Math.abs(e.z) > 2){
+          linearRef.current = (linearRef.current ?? 0) +1
+        }
+        if (!linearRef.current){
+          return;
+        }
+        if (linearRef.current > NconsecutiveAcceleration 
+          && orientationRef.current?.count > NconsecutiveAngleGotWorse){
+          linearRef.current = null
+          orientationRef.current = null
+          console.log("running bg !")
+          void args.cb()
+        }
 }
 const onOrientationChangeBadAngle = (badAngleRef:BadAngleRef,e:SensorEvent,config:BackgroundTaskParams) => {
   const badAngle = isBadAngle(e,config);
