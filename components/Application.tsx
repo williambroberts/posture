@@ -541,27 +541,44 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
       myModule.startLinearMovementDetection();
       myModule.startOrientation();
       myModule.addListener("onLinearMovementDetected",e =>{
-        onLinearMovementDetectedAngle({
-          cb: myModule.errorAsync,
-          e,
-          linearRef: linearAccelerationRef,
-          orientationRef,
-        })
-        onLinearMovementDetectedVertical({
-          cb: myModule.errorAsync,
-          e,
-          linearRef: linearAccelerationRef,
-          var:VAR
-        })
+        // onLinearMovementDetectedAngle({
+        //   cb: myModule.errorAsync,
+        //   e,
+        //   linearRef: linearAccelerationRef,
+        //   orientationRef,
+        // })
+        // onLinearMovementDetectedVertical({
+        //   cb: myModule.errorAsync,
+        //   e,
+        //   linearRef: linearAccelerationRef,
+        //   var:VAR
+        // })
+
+        //------ UP / DOWN ---------------//
+        if (!linearAccelerationRef.current){
+          linearAccelerationRef.current = 0;
+        }
+        if (e.y < -VAR){
+          linearAccelerationRef.current = e.y
+          console.log("hmm")
+        }
+        if (e.y > VAR && linearAccelerationRef.current < -VAR){
+          console.log(linearAccelerationRef.current,e.y,"background,onLinearMovementDetectedVertical")
+          myModule.errorAsync();
+          linearAccelerationRef.current = null;
+        }
+
       })
       myModule.addListener("onOrientationChange",e => {
-        onOrientationChangeArch(orientationRef,e)
+        //onOrientationChangeArch(orientationRef,e)
         // onOrientationChangeBadAngle(
         //   badAngleRef,
         //   e,
         //   config,
         // )
       })
+      console.log(delay)
+      myModule.warningAsync();
       await new Promise(r => setTimeout(r,delay));
       
       await Promise.all([
@@ -614,13 +631,14 @@ const onLinearMovementDetectedVertical = (args:OnLinearMovementDetectedVertical)
   const {cb,e, linearRef: linearAccelerationRef,var:VAR} = args
   if (e.y < -VAR){
     linearAccelerationRef.current = e.y
+    console.log("hmm")
   }
   if (!linearAccelerationRef.current){
     return;
   }
   if (e.y > VAR && linearAccelerationRef.current < -VAR){
     console.log(linearAccelerationRef.current,e.y,"background,onLinearMovementDetectedVertical")
-    void cb();
+    myModule.errorAsync();
     linearAccelerationRef.current = null;
   }
 }
