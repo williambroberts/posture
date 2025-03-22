@@ -535,6 +535,7 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
     for (let i = 0; BackgroundService.isRunning(); i++) {
       if (!myModule.isOrientationAvailable() || !myModule.isLinearMovementDetectionAvailable()){
         //todow notify user?
+        console.log("not avaivlable, bg")
         return resolve("done");
       }
       myModule.startLinearMovementDetection();
@@ -562,12 +563,13 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
         // )
       })
       await new Promise(r => setTimeout(r,delay));
-      myModule.removeAllListeners("onLinearMovementDetected")
-      myModule.removeAllListeners("onOrientationChange")
+      
       await Promise.all([
         myModule.stopOrientation(),
         myModule.stopLinearMovementDetection()
-      ])
+      ]);
+      myModule.removeAllListeners("onLinearMovementDetected")
+      myModule.removeAllListeners("onOrientationChange")
       await new Promise(r => setTimeout(r,200));
       // if (badAngleRef.current.isBadAngle === true){
       //   badAngleRef.current.count++
