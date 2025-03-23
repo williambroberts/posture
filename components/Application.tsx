@@ -505,18 +505,18 @@ const angleValuesMap = {
   
 } satisfies {[key:number]:{y:number,z:number,angle:number,name:string}}
 const defaultConfig = {
-  delay: 10000 as const,
-  values: angleValuesMap["30"],
+  delay: 5000 as const,
+  values: angleValuesMap["60"],
   strictness: 1
 } satisfies BackgroundTaskParams
 type RefType<T> = {current:T};
 type OrientationRef = RefType<{y:number,count:number}|null>
 type NullableNumberRef = RefType<number|null>
-type BadAngleRef = RefType<{isBadAngle:boolean,count:number}>
+type BadAngleRef = RefType<{isBadAngle:boolean,count:number,eventCount:number}>
 const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
   const config = taskData ?? defaultConfig
   const {delay,values,strictness} = config;
-  const badAngleRef:BadAngleRef = {current:{isBadAngle:false,count:0}}
+  const badAngleRef:BadAngleRef = {current:{isBadAngle:false,count:0,eventCount:0}}
   const orientationRef:OrientationRef = {current:{count:0,y:0}}
   const runLockRef:RefType<RunLock> = {current:{}}
   const linearAccelerationRef: NullableNumberRef = {current:null}
@@ -562,7 +562,13 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
           linearAccelerationRef2.current = null
           orientationRef.current = null
           console.log("running bg !")
-          myModule.errorAsync();
+          // myModule.errorAsync();
+          runWithLock({
+            cb: myModule.errorAsync,
+            key,
+            lockTime: 500,
+            runLock: runLockRef.current
+          })
         }
 
         //------ UP / DOWN ---------------//
@@ -571,11 +577,17 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
         }
         if (e.y < -VAR){
           linearAccelerationRef.current = e.y
-          console.log("hmm")
+          // console.log("hmm")
         }
         if (e.y > VAR && linearAccelerationRef.current < -VAR){
           console.log(linearAccelerationRef.current,e.y,"background,onLinearMovementDetectedVertical")
-          myModule.errorAsync();
+          // myModule.errorAsync();
+          runWithLock({
+            cb: myModule.errorAsync,
+            key,
+            lockTime: 500,
+            runLock: runLockRef.current
+          })
           linearAccelerationRef.current = null;
         }
 
@@ -620,20 +632,16 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
       myModule.removeAllListeners("onLinearMovementDetected")
       myModule.removeAllListeners("onOrientationChange")
       await new Promise(r => setTimeout(r,200));
-      if (badAngleRef.current.isBadAngle === true){
-        badAngleRef.current.count++
-      } else {
-        badAngleRef.current.count = 0;
+      if (badAngleRef.current.isBadAngle){//todow configure from user settings
+        console.log("bad angle")
+        runWithLock({
+          cb: myModule.warningAsync,
+          key,
+          lockTime: 1000,
+          runLock: runLockRef.current
+        })
       }
-      if (badAngleRef.current.count > strictness){
-        //myModule.errorAsync();
-        // runWithLock({
-        //   cb: myModule.warningAsync,
-        //   key,
-        //   lockTime: 1000,
-        //   runLock: runLockRef.current
-        // })
-      }
+      
     }
     resolve("done")
   })
