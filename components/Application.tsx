@@ -520,6 +520,7 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
   const orientationRef:OrientationRef = {current:{count:0,y:0}}
   const runLockRef:RefType<RunLock> = {current:{}}
   const linearAccelerationRef: NullableNumberRef = {current:null}
+  const linearAccelerationRef2: NullableNumberRef = {current:null}
   const VAR = 1.5;
   const key = "a-key" as const;
   // BAD ANGLE, ARCH DOWN, MOVE DOWN,
@@ -541,18 +542,28 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
       myModule.startLinearMovementDetection();
       myModule.startOrientation();
       myModule.addListener("onLinearMovementDetected",e =>{
-        // onLinearMovementDetectedAngle({
-        //   cb: myModule.errorAsync,
-        //   e,
-        //   linearRef: linearAccelerationRef,
-        //   orientationRef,
-        // })
-        // onLinearMovementDetectedVertical({
-        //   cb: myModule.errorAsync,
-        //   e,
-        //   linearRef: linearAccelerationRef,
-        //   var:VAR
-        // })
+        // ------ ARCH -------------------//
+        const NconsecutiveAcceleration = 10
+        const NconsecutiveAngleGotWorse = 10;
+       
+        // dont do anything until phone set to a good angle
+        if (!orientationRef.current){
+          return;
+        }
+        //-	Z direction is for linear acceleration tilting bad/good reading angle (good->bad posture)
+        if (Math.abs(e.z) > 2){
+          linearAccelerationRef2.current = (linearAccelerationRef2.current ?? 0) +1
+        }
+        if (!linearAccelerationRef2.current){
+          return;
+        }
+        if (linearAccelerationRef2.current > NconsecutiveAcceleration 
+          && orientationRef.current?.count > NconsecutiveAngleGotWorse){
+          linearAccelerationRef2.current = null
+          orientationRef.current = null
+          console.log("running bg !")
+          myModule.errorAsync();
+        }
 
         //------ UP / DOWN ---------------//
         if (!linearAccelerationRef.current){
@@ -570,17 +581,38 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
 
       })
       myModule.addListener("onOrientationChange",e => {
-        //onOrientationChangeArch(orientationRef,e)
-        // onOrientationChangeBadAngle(
-        //   badAngleRef,
-        //   e,
-        //   config,
-        // )
+        const DIFF = 0.25;
+        if (!orientationRef.current && e.y > 7){//todow make configurable to "user's selected good reading angle e.g 45,60,75"
+          orientationRef.current ={y: e.y,count:1};
+          return;
+        }
+        // if not yet good angle, do nothing
+        if (!orientationRef.current){
+          return;
+        }
+        // angle getting worse
+        if (e.y < orientationRef.current.y-DIFF){
+        orientationRef.current = {y: e.y,count:++orientationRef.current.count}
+        
+        } 
+        // angle getting better
+        if (e.y > orientationRef.current.y+DIFF){
+          orientationRef.current = {y: e.y,count:--orientationRef.current.count}
+        }
+        // reset so that if the angle is bad N times will result in a haptic
+        if (orientationRef.current.count < 0){
+          orientationRef.current.count = 0;
+        } 
+        // --------- BAD ANGLE GENERALLY ---------// 
+        const badAngle = isBadAngle(e,config);
+        if (badAngle){
+          badAngleRef.current.isBadAngle = true;
+        } else {
+          badAngleRef.current.isBadAngle = false;
+        }
+        
       })
-      console.log(delay)
-      myModule.warningAsync();
       await new Promise(r => setTimeout(r,delay));
-      
       await Promise.all([
         myModule.stopOrientation(),
         myModule.stopLinearMovementDetection()
@@ -588,19 +620,20 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
       myModule.removeAllListeners("onLinearMovementDetected")
       myModule.removeAllListeners("onOrientationChange")
       await new Promise(r => setTimeout(r,200));
-      // if (badAngleRef.current.isBadAngle === true){
-      //   badAngleRef.current.count++
-      // } else {
-      //   badAngleRef.current.count = 0;
-      // }
-      // if (badAngleRef.current.count > strictness){
-      //   runWithLock({
-      //     cb: myModule.warningAsync,
-      //     key,
-      //     lockTime: 1000,
-      //     runLock: runLockRef.current
-      //   })
-      // }
+      if (badAngleRef.current.isBadAngle === true){
+        badAngleRef.current.count++
+      } else {
+        badAngleRef.current.count = 0;
+      }
+      if (badAngleRef.current.count > strictness){
+        //myModule.errorAsync();
+        // runWithLock({
+        //   cb: myModule.warningAsync,
+        //   key,
+        //   lockTime: 1000,
+        //   runLock: runLockRef.current
+        // })
+      }
     }
     resolve("done")
   })
