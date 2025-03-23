@@ -45,6 +45,8 @@ export const Application = () => {
         })().finally(()=>{
           setIsBackgroundRunning(false)
         })
+      } else if (event === "background"){
+        //todow launch background task from here
       }
     })
     return () => {
