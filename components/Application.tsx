@@ -17,16 +17,11 @@ import { useThemedStyles } from '@/utilities/theme';
 // Start listening for gyroscope data
 //region component
 export const Application = () => {
-  // const [data,setData] = useState<{x:number,y:number,z:number} | null>()
-  const [data,setData] = useState<MovementEvent | null>()
+
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
-  const myRef = useRef<number | null>(null)
-  const arrayRef = useRef<any[]>([])
-  const dataRef = useRef<{count:number,z:number}|null>(null)
+  const [isBackgroundReady,setIsBackgroundReady] = useState<boolean>(false)
   const [color,setColor] = useState<"red"|"green"|"yellow"|"white">("white")
-  const linearAccelerationRef  = useRef<number>(0)
-  const orientationRef = useRef<{y:number,count:number}| null>(null)
   // const [tog,setTog] = useState<>()
   
   const styles = useThemedStyles(stylesCallback)
@@ -43,10 +38,19 @@ export const Application = () => {
             myModule.stopOrientation()
           ])
         })().finally(()=>{
-          setIsBackgroundRunning(false)
+          setIsBackgroundReady(false)
+          setIsBackgroundRunning(false)//todow remove this state
         })
       } else if (event === "background"){
-        //todow launch background task from here
+        if (!isBackgroundReady || isBackgroundRunning){
+          return;
+        }
+        // launch background task from here
+        console.log("Starting...")
+        BackgroundService
+        .start(veryIntensiveTask2, options)
+        .finally(()=>setIsBackgroundRunning(true))
+        //todow nice animation e.g success
       }
     })
     return () => {
@@ -58,355 +62,6 @@ export const Application = () => {
   return (
     // <NavigationContainer linking={linking}>
   <View style={{backgroundColor:color}}>
-    <Button
-       style={{margin:6}}
-    mode='contained'
-    onPress={()=>{
-      console.log(myModule.isOrientationAvailable())
-      console.log(myModule.isLinearMovementDetectionAvailable())
-
-      if (!myModule.isOrientationAvailable()){
-        return;
-      }
-      if (!myModule.isLinearMovementDetectionAvailable){
-        return;
-      }
-      myModule.startOrientation();
-      myModule.addListener("onOrientationChange",e => {
-        const DIFF = 0.25
-        myRef.current = (myRef.current ?? 0) +1;      
-        // if (myRef.current % 100 ===0){
-        // }
-        //must have a good angle to begin with or wont do anything
-        //Gyroscope
-        // -	Phone vertical  ~9.81
-        // -	Phone flat ~ 0
-        if (!orientationRef.current && e.y > 7){//todow make configurable to "user's selected good reading angle e.g 45,60,75"
-          orientationRef.current ={y: e.y,count:1};
-          return;
-        }
-        // if not yet good angle, do nothing
-        if (!orientationRef.current){
-          return;
-        }
-        // angle getting worse
-        if (e.y < orientationRef.current.y-DIFF){
-        orientationRef.current = {y: e.y,count:++orientationRef.current.count}
-        
-        } 
-        // angle getting better
-         if (e.y > orientationRef.current.y+DIFF){
-          orientationRef.current = {y: e.y,count:--orientationRef.current.count}
-        }
-        // reset so that if the angle is bad N times will result in a haptic
-        if (orientationRef.current.count < 0){
-          orientationRef.current.count = 0;
-        } 
-        // if (orientationRef.current.count > 10){
-        //   // myModule.warningAsync();
-        //   orientationRef.current = null;
-        // }
-        
-      })
-      myModule.startLinearMovementDetection();
-      myModule.addListener("onLinearMovementDetected",e => {
-        const NconsecutiveAcceleration = 10
-        const NconsecutiveAngleGotWorse = 10;
-        // myRef.current = (myRef.current ?? 0) +1
-        // if (myRef.current > 10){
-        //   myRef.current = 0
-        // }
-        if (!dataRef.current){
-          dataRef.current = {count:0,z:0}
-        }
-        // dont do anything until phone set to a good angle
-        if (!orientationRef.current){
-          return;
-        }
-        //-	Z direction is for linear acceleration tilting bad/good reading angle (good->bad posture)
-        if (Math.abs(e.z) > 2){
-          myRef.current = (myRef.current ?? 0) +1
-        }
-        if (!myRef.current){
-          return;
-        }
-        if (myRef.current > NconsecutiveAcceleration 
-          && orientationRef.current?.count > NconsecutiveAngleGotWorse){
-          myRef.current = null
-          orientationRef.current = null
-          myModule.errorAsync();
-        }
-
-        // if (orientationRef.current && orientationRef.current.y > 9 
-        //   && e.y < -2 
-        // ){
-        //   // console.log("x,y,z",e.x,e.y,e.z)
-        //   dataRef.current.count = dataRef.current.count +1;
-        //   if (dataRef.current.count > 7){
-        //     dataRef.current = null;
-        //     // console.log("EEK")
-        //     myModule.warningAsync();
-        //   }
-        // }
-        
-          // let VAR = 1;
-          // if (Math.abs(e.x) > VAR || Math.abs(e.y) > VAR || Math.abs(e.z) > VAR){
-          //   dataRef.current.count++
-          //   if (Math.max(Math.abs(e.x),Math.abs(e.y),Math.abs(e.z)) === Math.abs(e.x)){
-          //       console.log("X")
-          //   }
-          //   if (Math.max(Math.abs(e.x),Math.abs(e.y),Math.abs(e.z)) === Math.abs(e.y)){
-          //     console.log("Y")
-          // }
-          // if (Math.max(Math.abs(e.x),Math.abs(e.y),Math.abs(e.z)) === Math.abs(e.z)){
-          //   console.log("Z")
-          // }
-            // if (color !== "red" && dataRef.current.count > NconsecutiveAcceleration){
-            // setColor("red")
-            // }
-            
-            // if (color !== "green" && dataRef.current.count <=0){
-            //   dataRef.current.count = 0;
-            //   setColor("green")
-            // }
-          
-        
-      })
-    }}
-    >
-      start both
-    </Button>
-    <Button
-    onPress={async ()=>{
-      await Promise.all([
-        myModule.removeAllListeners("onOrientationChange"),
-        myModule.removeAllListeners("onLinearMovementDetected")
-      ])
-      await Promise.all([
-        myModule.stopOrientation(),
-        myModule.stopLinearMovementDetection()
-      ])
-      console.log("stoped both",dataRef.current)
-
-      orientationRef.current = null;
-      myRef.current = null
-      dataRef.current = null
-      
-    }}
-       style={{margin:6}}
-    mode='contained-tonal'
-    >
-      stop both
-    </Button>
-     <Button
-     style={{margin:6}}
-    mode='contained'
-    onPress={()=>{
-      console.log(myModule.isOrientationAvailable())
-      if (!myModule.isOrientationAvailable()){
-        return;
-      }
-      myModule.startOrientation();
-      myModule.addListener("onOrientationChange",e => {
-        myRef.current = (myRef.current ?? 0) +1;      
-        // if (myRef.current % 100 ===0){
-        //   console.log(e)
-        // }
-        //must have a good angle to begin with or wont do anything
-        if (!orientationRef.current && e.y > 9){
-          orientationRef.current ={y: e.y,count:1};
-          return;
-        }
-        // if not yet good angle, do nothing
-        if (!orientationRef.current){
-          return;
-        }
-        // angle getting worse
-        if (e.y < orientationRef.current.y){
-        orientationRef.current = {y: e.y,count:orientationRef.current.count++}
-        // angle getting better
-        } else if (e.y > orientationRef.current.y){
-          orientationRef.current = {y: e.y,count:orientationRef.current.count--}
-        }
-        // reset so that if the angle is bad N times will result in a haptic
-        if (orientationRef.current.count <0){
-          orientationRef.current.count = 0;
-        }
-        if (orientationRef.current.count > 100){
-          console.log(orientationRef.current)
-          orientationRef.current = null
-        }
-      })
-    }}
-    >
-      start gyroscope
-    </Button>
-    <Button
-     style={{margin:6}}
-    mode='contained-tonal'
-    onPress={()=>{
-      myModule.removeAllListeners("onOrientationChange");
-      myModule.stopOrientation().finally(()=>console.log("stop gyroscope"));
-      orientationRef.current = null;
-    }}
-    >
-      stop gyrosopce
-    </Button>
-   <Button
-     style={{margin:6}}
-    mode='contained'
-    onPress={()=>{
-      console.log(myModule.isMovementDetectionAvailable())
-      if (!myModule.isMovementDetectionAvailable()){
-        return;
-      }
-      myModule.startMovementDetection();
-      myModule.addListener("onMovementDetected",e => {
-        myRef.current = (myRef.current ?? 0) +1;      
-        if (myRef.current % 100 ===0){
-          console.log(e)
-        }
-      })
-    }}
-    >
-      start accelerometer
-    </Button>
-    <Button
-     style={{margin:6}}
-    mode='contained-tonal'
-    onPress={()=>{
-      myModule.removeAllListeners("onMovementDetected");
-      myModule.stopMovementDetection().finally(()=>console.log("stop accelerometer"));
-      myRef.current = 0;
-    }}
-    >
-      stop accelerometer
-    </Button> 
-    <Button
-    mode='outlined'
-    style={{margin:6}}
-    onPress={()=>{
-      myModule.removeAllListeners("onStepCountChange");
-      myModule.stopStepDetection().finally(()=>console.log("stopped"));
-      
-    }}
-    >
-      stop step count
-    </Button>
-    <Button
-    mode='elevated'
-    onPress={()=>{
-      console.log(myModule.isStepDetectionAvailable())
-      if (!myModule.isStepDetectionAvailable()){
-        return;
-      }
-      myModule.startStepDetection().finally(()=>console.log("starting..."));
-      myModule.addListener("onStepCountChange",e => console.log(e))
-      
-    }}
-    >
-      start step count
-    </Button>
-    <Button 
-    mode='contained'
-    onPress={()=>{
-      myModule.requestStepPermissions()
-    }}
-    >
-      permissiosn
-    </Button>
-    <Button
-    mode='contained'
-    style={{margin:6}}
-    onPress={() => {
-      console.log(myModule.isLinearMovementDetectionAvailable())
-      if (!myModule.isLinearMovementDetectionAvailable){
-        return;
-      }
-      myModule.startLinearMovementDetection();
-      myModule.addListener("onLinearMovementDetected",e => {
-        if (!myRef.current){
-          myRef.current = 0;
-        }
-        let VAR = 1.5
-        let absX = Math.abs(e.x), absY = Math.abs(e.y), absZ = Math.abs(e.z)
-        // if (e.y > 2){
-        //   myRef.current = e.y
-        // }
-        // if (e.y < -2 && myRef.current > 2){
-
-        //   console.log(myRef.current,e.y)
-        //   myRef.current = null;
-        // }        
-        if (e.y < -VAR){
-          myRef.current = e.y
-        }
-        if (e.y > VAR && myRef.current < -VAR){
-          console.log(myRef.current,e.y)
-          myModule.warningAsync();
-          myRef.current = null;
-        }
-      })
-    }}
-    >
-      start linear
-    </Button>
-    <Button
-    style={{margin:6}}
-    mode='contained'
-    onPress={()=>{
-      myModule.removeAllListeners("onLinearMovementDetected")
-      myModule.stopLinearMovementDetection();
-      console.log("stoped")
-      console.log(arrayRef.current,dataRef.current)
-      arrayRef.current =[]
-      dataRef.current = null;
-      myRef.current = null
-    }}
-    >
-      stop linear
-    </Button>
-    {/* <Button onPress={()=>{
-      console.log(myModule.isOrientationAvailable())
-      myModule.removeAllListeners("onOrientationChange")
-      myModule.stopOrientation();
-     if (myModule.isOrientationAvailable()){
-
-      myModule.startOrientation(); 
-      myModule.addListener("onOrientationChange",(e)=>{
-        myRef.current++;
-        if (myRef.current % 100 === 0){
-          setData(e)
-        }
-      })
-    }
-    }}
-      title='start'
-      /> */}
-    {/* <Text>{JSON.stringify(data,null,2)}</Text> */}
-{/* 
-      <Button onPress={()=>{
-        myModule.removeAllListeners("onOrientationChange")
-        myModule.stopOrientation()
-        // .catch(e => console.log(e))
-        .finally(()=>console.log("stopped"))
-        setData(null)
-    }}
-      title='stop'
-      /> */}
-      {/* <Button
-      title='haptics'
-      onPress={async ()=> {
-        myModule.warningAsync().catch(e => console.log(e)).finally(()=>console.log("oks haptics"))
-        }}
-      /> */}
-
-        {/* <Settings/> */}
-        {/* <PlayButton/> */}
-
-      {/* <View style={styles.controls}> */}
-
-      
       <CustomButton
       disabled={isBackgroundRunning}
       onPress={()=> {
@@ -414,7 +69,7 @@ export const Application = () => {
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["30"]}})
       }}
       >
-      <Text variant="titleSmall" style={styles.text}>{angleValuesMap[30].name}</Text>
+      <Text variant="bodySmall" style={styles.text}>{angleValuesMap[30].name}</Text>
       </CustomButton>
       <CustomButton
       disabled={isBackgroundRunning}
@@ -423,19 +78,18 @@ export const Application = () => {
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["45"]}})
       }}
       >
-        <Text variant="titleSmall" style={styles.text}>{angleValuesMap[45].name}</Text>
+        <Text variant="bodySmall" style={styles.text}>{angleValuesMap[45].name}</Text>
       </CustomButton>
-      {/* <CustomButton
-      
-     
+      <CustomButton
       disabled={isBackgroundRunning}
-      text='60 deg'
+    
       onPress={()=> {
         myModule.warningAsync();
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["60"]}})
       }}
-      />
-      </View> */}
+      >
+        <Text variant="bodySmall" style={styles.text}>{angleValuesMap[60].name}</Text>
+      </CustomButton>
       <CustomButton
       disabled={!isBackgroundRunning}
       onPress={()=>{
@@ -451,7 +105,7 @@ export const Application = () => {
         })
       }}
       >
-         <Text variant="titleSmall" style={styles.text}>stop background</Text>
+         <Text variant="bodySmall" style={styles.text}>stop background</Text>
       </CustomButton>
        <CustomButton
        disabled={isBackgroundRunning}
@@ -460,15 +114,14 @@ export const Application = () => {
           return;
         }
         myModule.warningAsync();
-        BackgroundService.start(veryIntensiveTask2, options).finally(()=>setIsBackgroundRunning(true))}}
+        setIsBackgroundReady(true);
+      }}
       > 
       <Text variant="titleSmall"style={styles.text}>{`start background ${options.parameters.values.angle}`}</Text>
       </CustomButton>
 
       <Text style={styles.text}>${options.parameters.values.name}</Text>
-    {/* </View> */}
-
-        <Text style={styles.text}>{JSON.stringify(data)}</Text>
+      {isBackgroundReady && <Text variant='bodySmall'>Now switch to a different task and we will track your phone posture</Text>}
   </View>
   )
 
