@@ -5,25 +5,16 @@ import BackgroundService, { BackgroundTaskOptions } from 'react-native-backgroun
 // import { NativeModules, DeviceEventEmitter } from 'react-native';
 // import MyModule from '../modules/my-module';
 import myModule from '../modules/my-module';
-import { MovementEvent, SensorEvent } from '@/modules/my-module/src/MyModule';
-import {  Button, IconButton,  MD3Theme, Text, Tooltip, } from 'react-native-paper';
+import { SensorEvent } from '@/modules/my-module/src/MyModule';
+import { MD3Theme, Text, } from 'react-native-paper';
 import { CustomButton } from './CustomButton';
 import { useThemedStyles } from '@/utilities/theme';
-
-
-// // Access the GyroscopeModule
-// const { GyroscopeModule } = NativeModules;
-
-// Start listening for gyroscope data
 //region component
 export const Application = () => {
 
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
-  const [isBackgroundReady,setIsBackgroundReady] = useState<boolean>(false)
-  const [color,setColor] = useState<"red"|"green"|"yellow"|"white">("white")
-  // const [tog,setTog] = useState<>()
-  
+  const isBackgroundRunningRef = useRef<boolean>(false);
   const styles = useThemedStyles(stylesCallback)
   useEffect(()=>{
     const sub = AppState.addEventListener("change",event => {
@@ -38,18 +29,21 @@ export const Application = () => {
             myModule.stopOrientation()
           ])
         })().finally(()=>{
-          setIsBackgroundReady(false)
           setIsBackgroundRunning(false)//todow remove this state
         })
       } else if (event === "background"){
-        if (!isBackgroundReady || isBackgroundRunning){
+      
+        if (!isBackgroundRunningRef.current){
           return;
         }
         // launch background task from here
-        console.log("Starting...")
-        BackgroundService
-        .start(veryIntensiveTask2, options)
-        .finally(()=>setIsBackgroundRunning(true))
+        console.log("Starting...",isBackgroundRunningRef.current);
+        
+        (async () => {
+          await BackgroundService
+          .start(veryIntensiveTask2, options)
+        })()
+        
         //todow nice animation e.g success
       }
     })
@@ -58,10 +52,8 @@ export const Application = () => {
     }
   },[])
 
-  const selected = options.parameters.values.name
   return (
-    // <NavigationContainer linking={linking}>
-  <View style={{backgroundColor:color}}>
+  <View >
       <CustomButton
       disabled={isBackgroundRunning}
       onPress={()=> {
@@ -114,14 +106,18 @@ export const Application = () => {
           return;
         }
         myModule.warningAsync();
-        setIsBackgroundReady(true);
+        setIsBackgroundRunning(true);
+        isBackgroundRunningRef.current = true;
       }}
       > 
       <Text variant="titleSmall"style={styles.text}>{`start background ${options.parameters.values.angle}`}</Text>
       </CustomButton>
 
       <Text style={styles.text}>${options.parameters.values.name}</Text>
-      {isBackgroundReady && <Text variant='bodySmall'>Now switch to a different task and we will track your phone posture</Text>}
+      {isBackgroundRunning && 
+      <Text variant='bodySmall' style={styles.text}>
+        Now switch to a different task and we will track your phone posture
+        </Text>}
   </View>
   )
 
@@ -481,4 +477,12 @@ type ExtendedOptions = BackgroundTaskOptions & {parameters:BackgroundTaskParams}
 //region functions
 function isBadAngle(event:SensorEvent,config: BackgroundTaskParams){
   return event.y < config.values.y && event.z > config.values.z;
+}
+const useStateImediate = <T,>(initialData:T) => {
+  const [state,setState] = useState<T>(initialData);
+  const stateRef = useRef<T>(initialData);
+
+  const handleUpdate = () => {
+    
+  }
 }
