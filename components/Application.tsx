@@ -6,7 +6,7 @@ import BackgroundService, { BackgroundTaskOptions } from 'react-native-backgroun
 // import MyModule from '../modules/my-module';
 import myModule from '../modules/my-module';
 import { SensorEvent } from '@/modules/my-module/src/MyModule';
-import { MD3Theme, Text, } from 'react-native-paper';
+import { Icon, MD3Theme, Text, } from 'react-native-paper';
 import { CustomButton } from './CustomButton';
 import { useThemedStyles } from '@/utilities/theme';
 //region component
@@ -68,14 +68,24 @@ export const Application = () => {
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["30"]}})
       }}
       >
-      <Text variant="bodySmall" 
+        <View style={styles.buttonChildContainer}>
+        <Text variant="bodySmall" 
       style={[styles.text,
         options.parameters.values.name === angleValuesMap[30].name
         ? styles.selectedButtonText 
         : {}
       ]}
-      
-      >{angleValuesMap[30].name}</Text>
+      >{angleValuesMap[30].name}
+      </Text>
+      {options.parameters.values.name === angleValuesMap[30].name && (
+        <Icon
+        size={ICON_SIZE}
+        color={styles.selectedButtonText.color}
+        source={"check"}
+        />
+        )}
+        </View>
+     
       </CustomButton>
       <CustomButton
       containerStyle={[
@@ -89,12 +99,21 @@ export const Application = () => {
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["45"]}})
       }}
       >
+        <View style={styles.buttonChildContainer}>
         <Text variant="bodySmall" style={[
           styles.text,
            options.parameters.values.name === angleValuesMap[45].name
            ? styles.selectedButtonText 
            : {}
         ]}>{angleValuesMap[45].name}</Text>
+        {options.parameters.values.name === angleValuesMap[45].name && (
+        <Icon
+        size={ICON_SIZE}
+        color={styles.selectedButtonText.color}
+        source={"check"}
+        />
+        )}
+        </View>
       </CustomButton>
       <CustomButton
       containerStyle={[
@@ -109,6 +128,7 @@ export const Application = () => {
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["60"]}})
       }}
       >
+        <View style={styles.buttonChildContainer}>
         <Text variant="bodySmall" 
         style={[
           styles.text,
@@ -116,6 +136,14 @@ export const Application = () => {
           ? styles.selectedButtonText 
           : {}
         ]}>{angleValuesMap[60].name}</Text>
+        {options.parameters.values.name === angleValuesMap[60].name && (
+        <Icon
+        size={ICON_SIZE}
+        color={styles.selectedButtonText.color}
+        source={"check"}
+        />
+        )}
+        </View>
       </CustomButton>
       <CustomButton
       disabled={!isBackgroundRunning}
@@ -138,7 +166,9 @@ export const Application = () => {
           ? styles.textDisabled 
           : styles.text
           ]}
-         >stop background</Text>
+         >stop background
+         
+         </Text>
       </CustomButton>
        <CustomButton
        disabled={isBackgroundRunning}
@@ -166,23 +196,26 @@ export const Application = () => {
       {/* <Text style={}>${options.parameters.values.name}</Text> */}
       {isBackgroundRunning && 
       <>
-      <Text variant='bodySmall' style={
+      <Text variant='bodyMedium' style={
         styles.onBackground
         }>
         Now switch to a different app and we will track your phone position and angle.
         </Text>
-        <Text variant='bodySmall'
+        <Text variant='bodyMedium'
         style={styles.onBackground}
         >
            When the phone vibrates, adjust your phone to a better position!
            </Text>
       </>
+      
       }
+     
   </View>
   )
 
 }
 //region styles
+const ICON_SIZE = 16;
 const GLOBAL_PADDING_HORIZONTAL = 20;
 const GLOBAL_PADDING_VERTICAL = 20;
 const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
@@ -206,6 +239,11 @@ const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
   },
   onBackground: {
     color: theme.colors.onBackground
+  },
+  buttonChildContainer: {
+    flexDirection:"row",
+    alignItems:"center",
+    gap: 4,
   }
 })
 //region background task
@@ -392,9 +430,7 @@ const defaultOptions = {
 } satisfies ExtendedOptions;
 
 type ExtendedOptions = BackgroundTaskOptions & {parameters:BackgroundTaskParams}
-//npm i -g @expo/ngrok
-//npx expo start --tunnel
-//npx eas build --platform android --profile production
+
 
 //region functions
 function isBadAngle(event:SensorEvent,config: BackgroundTaskParams){
@@ -408,3 +444,9 @@ const useStateImediate = <T,>(initialData:T) => {
     
   }
 }
+
+//region links 
+//https://pixabay.com/images/search/life/?order=ec
+//npm i -g @expo/ngrok
+//npx expo start --tunnel
+//npx eas build --platform android --profile production
