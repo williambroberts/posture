@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { AppState, StyleSheet, View } from 'react-native'
+import { Alert, AppState, StyleSheet, View } from 'react-native'
 // import { gyroscope, SensorData } from "react-native-sensors";
 import BackgroundService, { BackgroundTaskOptions } from 'react-native-background-actions';
 // import { NativeModules, DeviceEventEmitter } from 'react-native';
@@ -16,6 +16,7 @@ export const Application = () => {
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
   const isBackgroundRunningRef = useRef<boolean>(false);
   const styles = useThemedStyles(stylesCallback)
+  
   useEffect(()=>{
     const sub = AppState.addEventListener("change",event => {
       if (event === "active"){
@@ -29,7 +30,8 @@ export const Application = () => {
             myModule.stopOrientation()
           ])
         })().finally(()=>{
-          setIsBackgroundRunning(false)//todow remove this state
+          setIsBackgroundRunning(false)
+          isBackgroundRunningRef.current = false
         })
       } else if (event === "background"){
       
@@ -76,7 +78,7 @@ export const Application = () => {
       disabled={isBackgroundRunning}
     
       onPress={()=> {
-        myModule.warningAsync();
+        myModule.selectionAsync();
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["60"]}})
       }}
       >
@@ -93,7 +95,8 @@ export const Application = () => {
             myModule.stopLinearMovementDetection(),
             myModule.stopOrientation()
           ])
-          setIsBackgroundRunning(false)
+          setIsBackgroundRunning(false);
+          isBackgroundRunningRef.current = false;
         })
       }}
       >
@@ -103,6 +106,10 @@ export const Application = () => {
        disabled={isBackgroundRunning}
       onPress={()=>{
         if (BackgroundService.isRunning()){
+          return;
+        }
+        if (!myModule.isOrientationAvailable() || !myModule.isLinearMovementDetectionAvailable()){
+          Alert.alert("Sensor Malfunction","Movement detection is unavailable at this time.")
           return;
         }
         myModule.warningAsync();
@@ -122,9 +129,6 @@ export const Application = () => {
   )
 
 }
-//region constants
-const ALPHA = 0.8; // Gravity filter constant
-const DECAY = 0.98; // Helps reduce drift
 //region styles
 const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
   controls:{
@@ -146,8 +150,7 @@ const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
 type BackgroundTaskParams = {
   delay: number;// power saving var
   values: (typeof angleValuesMap)[keyof typeof angleValuesMap];
-  strictness: number;
-  //strictness: number; // max strikes at bad angle -> vibrate 
+  strictness: number;// max strikes at bad angle -> vibrate 
 }
 const angleValuesMap = {
   30:  {y:4.9,z:8.5,angle:30,name:"Light" as const},
@@ -176,12 +179,6 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
   const key = "a-key" as const;
   // BAD ANGLE, ARCH DOWN, MOVE DOWN,
 
-  const runTheLock = () => runWithLock({
-    cb: myModule.errorAsync,
-    key,
-    lockTime: 1000,
-    runLock: runLockRef.current
-  })
   await new Promise( async (resolve) => {
     
     for (let i = 0; BackgroundService.isRunning(); i++) {
@@ -213,13 +210,13 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
           linearAccelerationRef2.current = null
           orientationRef.current = null
           console.log("running bg !")
-          // myModule.errorAsync();
-          runWithLock({
-            cb: myModule.errorAsync,
-            key,
-            lockTime: 500,
-            runLock: runLockRef.current
-          })
+          myModule.errorAsync();
+          // runWithLock({
+          //   cb: myModule.errorAsync,
+          //   key,
+          //   lockTime: 500,
+          //   runLock: runLockRef.current
+          // })
         }
 
         //------ UP / DOWN ---------------//
@@ -232,13 +229,13 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
         }
         if (e.y > VAR && linearAccelerationRef.current < -VAR){
           console.log(linearAccelerationRef.current,e.y,"background,onLinearMovementDetectedVertical")
-          // myModule.errorAsync();
-          runWithLock({
-            cb: myModule.errorAsync,
-            key,
-            lockTime: 500,
-            runLock: runLockRef.current
-          })
+          myModule.errorAsync();
+          // runWithLock({
+          //   cb: myModule.errorAsync,
+          //   key,
+          //   lockTime: 500,
+          //   runLock: runLockRef.current
+          // })
           linearAccelerationRef.current = null;
         }
 
@@ -285,18 +282,23 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
       await new Promise(r => setTimeout(r,200));
       if (badAngleRef.current.isBadAngle){//todow configure from user settings
         console.log("bad angle")
-        runWithLock({
-          cb: myModule.warningAsync,
-          key,
-          lockTime: 1000,
-          runLock: runLockRef.current
-        })
+        myModule.errorAsync();
+        // runWithLock({
+        //   cb: myModule.warningAsync,
+        //   key,
+        //   lockTime: 1000,
+        //   runLock: runLockRef.current
+        // })
       }
       
     }
     resolve("done")
   })
 }
+//region config
+const appConfigProperties = {
+  scheme: "postureKeep"
+} as const;
 type RunLock = {[key:`${string}-key`]:boolean}
 type RunWithLock = {
     cb: () => void;
@@ -319,151 +321,23 @@ type OnLinearMovementDetectedVertical = {
   var: number;
   linearRef:NullableNumberRef
 }
-const onLinearMovementDetectedVertical = (args:OnLinearMovementDetectedVertical) => {
-  const {cb,e, linearRef: linearAccelerationRef,var:VAR} = args
-  if (e.y < -VAR){
-    linearAccelerationRef.current = e.y
-    console.log("hmm")
-  }
-  if (!linearAccelerationRef.current){
-    return;
-  }
-  if (e.y > VAR && linearAccelerationRef.current < -VAR){
-    console.log(linearAccelerationRef.current,e.y,"background,onLinearMovementDetectedVertical")
-    myModule.errorAsync();
-    linearAccelerationRef.current = null;
-  }
-}
+
 type OnLinearMovementDetectedAngle = {
   e:SensorEvent;
   orientationRef:OrientationRef;
   linearRef: NullableNumberRef;
   cb: () => void
 }
-const onLinearMovementDetectedAngle = (args:OnLinearMovementDetectedAngle) => {
-  const NconsecutiveAcceleration = 10
-        const NconsecutiveAngleGotWorse = 10;
-        const {e,linearRef,orientationRef} = args
-       
-        // dont do anything until phone set to a good angle
-        if (!orientationRef.current){
-          return;
-        }
-        //-	Z direction is for linear acceleration tilting bad/good reading angle (good->bad posture)
-        if (Math.abs(e.z) > 2){
-          linearRef.current = (linearRef.current ?? 0) +1
-        }
-        if (!linearRef.current){
-          return;
-        }
-        if (linearRef.current > NconsecutiveAcceleration 
-          && orientationRef.current?.count > NconsecutiveAngleGotWorse){
-          linearRef.current = null
-          orientationRef.current = null
-          console.log("running bg !")
-          void args.cb()
-        }
-}
-const onOrientationChangeBadAngle = (badAngleRef:BadAngleRef,e:SensorEvent,config:BackgroundTaskParams) => {
-  const badAngle = isBadAngle(e,config);
-  if (badAngle){
-    badAngleRef.current.isBadAngle = true;
-  } else {
-    badAngleRef.current.isBadAngle = false;
-  }
-}
-const onOrientationChangeArch = (orientationRef:OrientationRef,e:SensorEvent) => {
-  const DIFF = 0.25;
-  if (!orientationRef.current && e.y > 7){//todow make configurable to "user's selected good reading angle e.g 45,60,75"
-    orientationRef.current ={y: e.y,count:1};
-    return;
-  }
-  // if not yet good angle, do nothing
-  if (!orientationRef.current){
-    return;
-  }
-  // angle getting worse
-  if (e.y < orientationRef.current.y-DIFF){
-  orientationRef.current = {y: e.y,count:++orientationRef.current.count}
-  
-  } 
-  // angle getting better
-   if (e.y > orientationRef.current.y+DIFF){
-    orientationRef.current = {y: e.y,count:--orientationRef.current.count}
-  }
-  // reset so that if the angle is bad N times will result in a haptic
-  if (orientationRef.current.count < 0){
-    orientationRef.current.count = 0;
-  } 
-}
-const veryIntensiveTask = async (taskData?:BackgroundTaskParams) => {
-  const config = taskData ?? defaultConfig
-  const {delay,values,strictness} = config;
-  const countRef: {current: number} = {current:0}//todow generic
-  const sensorEventRef:{current:SensorEvent| null} = {current:null} 
-  const isBadAngleRef: {current:boolean} = {current: false}
-  const streakRef: RefType<number> = {current:0}
-  const maxStreak = 10; // if 10 streak then stop playing
-  const goToErrorOn = 3; // after streak =3 play error haptic
-  await new Promise( async (resolve) => {
-    if (!myModule.isOrientationAvailable()){
-      //todow notify user?
-      return resolve("done");
-    }
-    console.log(values,delay,"values,delay")
-    for (let i = 0; BackgroundService.isRunning(); i++) {
-      countRef.current = 0;
-      // delay
-      // listen for angle
-      myModule.startOrientation(); 
-      myModule.addListener("onOrientationChange",(event) => {
-        sensorEventRef.current = event;
-        const badAngle = isBadAngle(event,config)
-        if (badAngle){
-          countRef.current++
-          isBadAngleRef.current = true;
-        } else {
-          isBadAngleRef.current = false;
-          streakRef.current = 0;
-        }
-      })
-      // ON for delay length of time
-      await new Promise(r => setTimeout(r,delay));
-      
-      myModule.stopOrientation().finally(()=>console.log("ok"));
-      myModule.removeAllListeners("onOrientationChange")
-
-      console.log(countRef.current,"ref",isBadAngleRef.current,sensorEventRef.current);
-      if (countRef.current > strictness && isBadAngleRef.current){
-        streakRef.current++;
-        if (streakRef.current > goToErrorOn){// can put into var
-          myModule.errorAsync();
-        }else {
-          myModule.warningAsync();
-        }
-        if (streakRef.current > maxStreak){
-          //todow warning etc notify user
-          //end the background task
-          resolve("done");
-        }
-      }
-      // OFF for delay length of time
-      await new Promise(r => setTimeout(r,delay));
-    }
-    resolve("done")
-});
-}
-
 
 const defaultOptions = {
-  taskName: 'Example',
-  taskTitle: 'ExampleTask title',
-  taskDesc: 'ExampleTask description',
+  taskName:  "PostureKeep",
+  taskTitle: 'Tracking',
+  taskDesc: 'monitoring your phone posture',
   taskIcon: {
       name: 'ic_launcher',
       type: 'mipmap',
   },
-  color: '#ff00ff',
+  color: '#75e371',
   linkingURI: 'postureKeep://', // See Deep Linking for more info
   parameters: defaultConfig satisfies BackgroundTaskParams,
 
