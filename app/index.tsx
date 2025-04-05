@@ -9,15 +9,12 @@ import {
 
 //region component
 const Index = () => {
-  const colorScheme = useColorScheme();
- const theme = colorScheme === "dark" 
-  ? MD3DarkTheme
-  : MD3LightTheme
+ 
   //jsx
   return (
-    <PaperProvider theme={theme}>
+    // <PaperProvider theme={theme}>
       <Application/>
-    </PaperProvider>
+    // </PaperProvider>
   )
 }
 

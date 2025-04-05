@@ -133,7 +133,12 @@ export const Application = () => {
         })
       }}
       >
-         <Text variant="bodySmall" style={styles.text}>stop background</Text>
+         <Text variant="bodySmall" 
+         style={[!isBackgroundRunning 
+          ? styles.textDisabled 
+          : styles.text
+          ]}
+         >stop background</Text>
       </CustomButton>
        <CustomButton
        disabled={isBackgroundRunning}
@@ -150,22 +155,35 @@ export const Application = () => {
         isBackgroundRunningRef.current = true;
       }}
       > 
-      <Text variant="titleSmall"style={styles.text}>{`Start in ${options.parameters.values.name}`} mode</Text>
+      <Text variant="bodySmall"
+      style={[isBackgroundRunning 
+        ? styles.textDisabled 
+        : styles.text
+        ]}>
+          {`Start in ${options.parameters.values.name}`} mode</Text>
       </CustomButton>
 
-      <Text style={styles.text}>${options.parameters.values.name}</Text>
+      {/* <Text style={}>${options.parameters.values.name}</Text> */}
       {isBackgroundRunning && 
+      <>
       <Text variant='bodySmall' style={
         styles.onBackground
         }>
-        Now switch to a different task and we will track your phone posture.
-        </Text>}
+        Now switch to a different app and we will track your phone position and angle.
+        </Text>
+        <Text variant='bodySmall'
+        style={styles.onBackground}
+        >
+           When the phone vibrates, adjust your phone to a better position!
+           </Text>
+      </>
+      }
   </View>
   )
 
 }
 //region styles
-const GLOBAL_PADDING_HORIZONTAL = 10;
+const GLOBAL_PADDING_HORIZONTAL = 20;
 const GLOBAL_PADDING_VERTICAL = 20;
 const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
   container:{
@@ -182,6 +200,9 @@ const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
   },
   text:{
     color: theme.colors.onTertiary,
+  },
+  textDisabled:{
+    color: theme.colors.onSurfaceDisabled,
   },
   onBackground: {
     color: theme.colors.onBackground

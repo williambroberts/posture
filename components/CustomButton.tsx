@@ -40,7 +40,7 @@ const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
   container:{
     backgroundColor:theme.colors.tertiary,
     padding: 8,
-    margin: 4,
+    marginVertical: 4,
     borderRadius: 8,
   },
   containerDisabled:{
