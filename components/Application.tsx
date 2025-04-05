@@ -58,7 +58,7 @@ export const Application = () => {
   <View style={styles.container}>
       <CustomButton
       containerStyle={[
-        options.parameters.values.name === "Light" 
+        options.parameters.values.name === angleValuesMap[30].name
         ? styles.selectedButton 
         : {}
       ]}
@@ -70,7 +70,7 @@ export const Application = () => {
       >
       <Text variant="bodySmall" 
       style={[styles.text,
-        options.parameters.values.name === "Light" 
+        options.parameters.values.name === angleValuesMap[30].name
         ? styles.selectedButtonText 
         : {}
       ]}
@@ -79,7 +79,7 @@ export const Application = () => {
       </CustomButton>
       <CustomButton
       containerStyle={[
-        options.parameters.values.name === "Normal" 
+        options.parameters.values.name === angleValuesMap[45].name
         ? styles.selectedButton 
         : {}
       ]}
@@ -91,14 +91,14 @@ export const Application = () => {
       >
         <Text variant="bodySmall" style={[
           styles.text,
-           options.parameters.values.name === "Normal" 
+           options.parameters.values.name === angleValuesMap[45].name
            ? styles.selectedButtonText 
            : {}
         ]}>{angleValuesMap[45].name}</Text>
       </CustomButton>
       <CustomButton
       containerStyle={[
-        options.parameters.values.name === "Strict" 
+        options.parameters.values.name === angleValuesMap[60].name
         ? styles.selectedButton 
         : {}
       ]}
@@ -112,7 +112,7 @@ export const Application = () => {
         <Text variant="bodySmall" 
         style={[
           styles.text,
-          options.parameters.values.name === "Strict" 
+          options.parameters.values.name === angleValuesMap[60].name
           ? styles.selectedButtonText 
           : {}
         ]}>{angleValuesMap[60].name}</Text>
@@ -150,7 +150,7 @@ export const Application = () => {
         isBackgroundRunningRef.current = true;
       }}
       > 
-      <Text variant="titleSmall"style={styles.text}>{`start background ${options.parameters.values.angle}`}</Text>
+      <Text variant="titleSmall"style={styles.text}>{`Start in ${options.parameters.values.name}`} mode</Text>
       </CustomButton>
 
       <Text style={styles.text}>${options.parameters.values.name}</Text>
