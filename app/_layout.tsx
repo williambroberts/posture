@@ -7,7 +7,7 @@ import myModule from '../modules/my-module';
 export default function RootLayout() {
   useEffect(()=>{
       const handleOpenURL = (event:{url:string}) => {
-        console.log(event,"Link event")
+        //
       }
       Linking.addEventListener('url', handleOpenURL);
   
@@ -16,7 +16,6 @@ export default function RootLayout() {
         myModule.stopOrientation();
         Linking.removeAllListeners("url")
       }
-      // console.log(myModule.hello(),myModule.PI)
     },[])
   return (
       <Stack

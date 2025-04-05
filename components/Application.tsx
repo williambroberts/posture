@@ -55,26 +55,53 @@ export const Application = () => {
   },[])
 
   return (
-  <View >
+  <View style={styles.container}>
       <CustomButton
+      containerStyle={[
+        options.parameters.values.name === "Light" 
+        ? styles.selectedButton 
+        : {}
+      ]}
       disabled={isBackgroundRunning}
       onPress={()=> {
         myModule.selectionAsync();
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["30"]}})
       }}
       >
-      <Text variant="bodySmall" style={styles.text}>{angleValuesMap[30].name}</Text>
+      <Text variant="bodySmall" 
+      style={[styles.text,
+        options.parameters.values.name === "Light" 
+        ? styles.selectedButtonText 
+        : {}
+      ]}
+      
+      >{angleValuesMap[30].name}</Text>
       </CustomButton>
       <CustomButton
+      containerStyle={[
+        options.parameters.values.name === "Normal" 
+        ? styles.selectedButton 
+        : {}
+      ]}
       disabled={isBackgroundRunning}
       onPress={()=> {
         myModule.selectionAsync();
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["45"]}})
       }}
       >
-        <Text variant="bodySmall" style={styles.text}>{angleValuesMap[45].name}</Text>
+        <Text variant="bodySmall" style={[
+          styles.text,
+           options.parameters.values.name === "Normal" 
+           ? styles.selectedButtonText 
+           : {}
+        ]}>{angleValuesMap[45].name}</Text>
       </CustomButton>
       <CustomButton
+      containerStyle={[
+        options.parameters.values.name === "Strict" 
+        ? styles.selectedButton 
+        : {}
+      ]}
       disabled={isBackgroundRunning}
     
       onPress={()=> {
@@ -82,7 +109,13 @@ export const Application = () => {
         setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["60"]}})
       }}
       >
-        <Text variant="bodySmall" style={styles.text}>{angleValuesMap[60].name}</Text>
+        <Text variant="bodySmall" 
+        style={[
+          styles.text,
+          options.parameters.values.name === "Strict" 
+          ? styles.selectedButtonText 
+          : {}
+        ]}>{angleValuesMap[60].name}</Text>
       </CustomButton>
       <CustomButton
       disabled={!isBackgroundRunning}
@@ -122,28 +155,36 @@ export const Application = () => {
 
       <Text style={styles.text}>${options.parameters.values.name}</Text>
       {isBackgroundRunning && 
-      <Text variant='bodySmall' style={styles.text}>
-        Now switch to a different task and we will track your phone posture
+      <Text variant='bodySmall' style={
+        styles.onBackground
+        }>
+        Now switch to a different task and we will track your phone posture.
         </Text>}
   </View>
   )
 
 }
 //region styles
+const GLOBAL_PADDING_HORIZONTAL = 10;
+const GLOBAL_PADDING_VERTICAL = 20;
 const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
-  controls:{
-    flexDirection:"row",
-    alignItems:"center",
-    gap:4,
-    justifyContent:"space-evenly",
-    margin: 4,
-    padding:4,
-    borderRadius: 8,
-    backgroundColor: theme.colors.surface,
-    // display:"none"
+  container:{
+    backgroundColor: theme.colors.background,
+    flex:1,
+    paddingVertical: GLOBAL_PADDING_VERTICAL,
+    paddingHorizontal: GLOBAL_PADDING_HORIZONTAL,
+  },
+  selectedButton:{
+    backgroundColor: theme.colors.tertiaryContainer,
+  },
+  selectedButtonText:{
+    color: theme.colors.onTertiaryContainer,
   },
   text:{
     color: theme.colors.onTertiary,
+  },
+  onBackground: {
+    color: theme.colors.onBackground
   }
 })
 //region background task
@@ -296,9 +337,7 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
   })
 }
 //region config
-const appConfigProperties = {
-  scheme: "postureKeep"
-} as const;
+
 type RunLock = {[key:`${string}-key`]:boolean}
 type RunWithLock = {
     cb: () => void;
@@ -315,24 +354,12 @@ const runWithLock = (args:RunWithLock) => {
   cb();
   setTimeout(()=>{runLock[key] = false},lockTime)
 }
-type OnLinearMovementDetectedVertical = {
-  e: SensorEvent;
-  cb: () => void;
-  var: number;
-  linearRef:NullableNumberRef
-}
 
-type OnLinearMovementDetectedAngle = {
-  e:SensorEvent;
-  orientationRef:OrientationRef;
-  linearRef: NullableNumberRef;
-  cb: () => void
-}
 
 const defaultOptions = {
   taskName:  "PostureKeep",
-  taskTitle: 'Tracking',
-  taskDesc: 'monitoring your phone posture',
+  taskTitle: 'Tracking for you',
+  taskDesc: 'Monitoring your phone posture & reading angle',
   taskIcon: {
       name: 'ic_launcher',
       type: 'mipmap',
