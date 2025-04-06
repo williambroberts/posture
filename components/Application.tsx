@@ -410,84 +410,84 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
         console.log("not avaivlable, bg")
         return resolve("done");
       }
-      // myModule.startLinearMovementDetection();
-      // myModule.startOrientation();
+      myModule.startLinearMovementDetection();
+      myModule.startOrientation();
       
       for (let i = 0; BackgroundService.isRunning(); i++){
-        // myModule.addListener("onLinearMovementDetected",e =>{
-        //   // dont do anything until phone set to a good angle
-        //   if (!orientationRef.current){
-        //     return;
-        //   }
+        myModule.addListener("onLinearMovementDetected",e =>{
+          // dont do anything until phone set to a good angle
+          if (!orientationRef.current){
+            return;
+          }
           
-        //   //disabled when the phone is at a bad angle
-        //   if (!linearAccelerationEnabledRef.current){
-        //     return;
-        //   }
-        //   //------ UP / DOWN ---------------//
-        //   if (!linearAccelerationRef.current){
-        //     linearAccelerationRef.current = 0;
-        //   }
-        //   if (e.y < -VAR){
-        //     linearAccelerationRef.current = e.y
-        //     // console.log("hmm")
-        //   }
-        //   if (e.y > VAR && linearAccelerationRef.current < -VAR){
-        //     console.log(linearAccelerationRef.current,e.y,"background,onLinearMovementDetectedVertical")
-        //     myModule.errorAsync();
-        //     linearAccelerationRef.current = null;
-        //   }
+          //disabled when the phone is at a bad angle
+          if (!linearAccelerationEnabledRef.current){
+            return;
+          }
+          //------ UP / DOWN ---------------//
+          if (!linearAccelerationRef.current){
+            linearAccelerationRef.current = 0;
+          }
+          if (e.y < -VAR){
+            linearAccelerationRef.current = e.y
+            // console.log("hmm")
+          }
+          if (e.y > VAR && linearAccelerationRef.current < -VAR){
+            console.log(linearAccelerationRef.current,e.y,"background,onLinearMovementDetectedVertical")
+            myModule.errorAsync();
+            linearAccelerationRef.current = null;
+          }
   
-        // })
-        // myModule.addListener("onOrientationChange",e => {
-        //   if (!orientationRef.current && e.y > 7){//todow make configurable to "user's selected good reading angle e.g 45,60,75"
-        //     orientationRef.current ={y: e.y,count:1};
-        //     return;
-        //   }
-        //   // if not yet good angle, do nothing
-        //   if (!orientationRef.current){
-        //     return;
-        //   }
-        //   //if phone is flat assume the user put phone down
-        //   if (Math.abs(e.y) < 1){
-        //     return;
-        //   }
+        })
+        myModule.addListener("onOrientationChange",e => {
+          if (!orientationRef.current && e.y > 7){//todow make configurable to "user's selected good reading angle e.g 45,60,75"
+            orientationRef.current ={y: e.y,count:1};
+            return;
+          }
+          // if not yet good angle, do nothing
+          if (!orientationRef.current){
+            return;
+          }
+          //if phone is flat assume the user put phone down
+          if (Math.abs(e.y) < 1){
+            return;
+          }
           
-        //   // --------- BAD ANGLE GENERALLY ---------// 
-        //   const badAngle = isBadAngle(e,config);
-        //   if (badAngle){
-        //     badAngleRef.current.isBadAngle = true;
-        //     ++badAngleRef.current.count
-        //     linearAccelerationEnabledRef.current = false;
-        //   } else {
-        //     badAngleRef.current.isBadAngle = false;
-        //     --badAngleRef.current.count
-        //     // the user moves phone from bad to good angle, re-enable UP/DOWN tracking
-        //     if (!linearAccelerationEnabledRef.current){
-        //       setTimeout(() => {
-        //         linearAccelerationEnabledRef.current = true;
-        //       }, 200);
-        //     }
-        //   }
-        //   if (badAngleRef.current.count < 0){
-        //     badAngleRef.current.count = 0;
-        //   }
-        //   if (badAngleRef.current.count > 200){//todow make this configurable {}
-        //       myModule.warningAsync();
-        //       ++badAngleRef.current.eventCount
-        //       badAngleRef.current.count = 0;
-        //       console.log("bad angle from bg task",badAngleRef.current)
-        //   }
-        // })
+          // --------- BAD ANGLE GENERALLY ---------// 
+          const badAngle = isBadAngle(e,config);
+          if (badAngle){
+            badAngleRef.current.isBadAngle = true;
+            ++badAngleRef.current.count
+            linearAccelerationEnabledRef.current = false;
+          } else {
+            badAngleRef.current.isBadAngle = false;
+            --badAngleRef.current.count
+            // the user moves phone from bad to good angle, re-enable UP/DOWN tracking
+            if (!linearAccelerationEnabledRef.current){
+              setTimeout(() => {
+                linearAccelerationEnabledRef.current = true;
+              }, 200);
+            }
+          }
+          if (badAngleRef.current.count < 0){
+            badAngleRef.current.count = 0;
+          }
+          if (badAngleRef.current.count > 200){//todow make this configurable {}
+              myModule.warningAsync();
+              ++badAngleRef.current.eventCount
+              badAngleRef.current.count = 0;
+              console.log("bad angle from bg task",badAngleRef.current)
+          }
+        })
         await new Promise(r => setTimeout(r,delay));
-        // myModule.removeAllListeners("onLinearMovementDetected")
-        // myModule.removeAllListeners("onOrientationChange")
-        // await Promise.all([
-        //   myModule.stopOrientation(),
-        //   myModule.stopLinearMovementDetection()
-        // ]);
-        myModule.errorAsync()
-        console.log("bg haptic")
+        myModule.removeAllListeners("onLinearMovementDetected")
+        myModule.removeAllListeners("onOrientationChange")
+        await Promise.all([
+          myModule.stopOrientation(),
+          myModule.stopLinearMovementDetection()
+        ]);
+        // myModule.errorAsync()
+        // console.log("bg haptic")
         await new Promise(r => setTimeout(r,400));//todow try diff values?
       }
       resolve("done")
