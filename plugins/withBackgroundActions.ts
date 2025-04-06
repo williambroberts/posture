@@ -10,6 +10,7 @@ export default function withBackgroundActions(config:ExpoConfig) {
     config = withPermissions(config, [
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE_DATA_SYNC", // for dataSync
       ]);
     return withAndroidManifest(config, (config) => {
         if (!config.modResults.manifest.application){

@@ -58,26 +58,26 @@ export const Application = () => {
   <View style={styles.container}>
       <CustomButton
       containerStyle={[
-        options.parameters.values.name === angleValuesMap[30].name
+        options.parameters.values.name === angleValuesMap["light"].name
         ? styles.selectedButton 
         : {}
       ]}
       disabled={isBackgroundRunning}
       onPress={()=> {
         myModule.selectionAsync();
-        setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["30"]}})
+        setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["light"]}})
       }}
       >
         <View style={styles.buttonChildContainer}>
         <Text variant="bodySmall" 
       style={[styles.text,
-        options.parameters.values.name === angleValuesMap[30].name
+        options.parameters.values.name === angleValuesMap["light"].name
         ? styles.selectedButtonText 
         : {}
       ]}
-      >{angleValuesMap[30].name}
+      >{angleValuesMap["light"].name}
       </Text>
-      {options.parameters.values.name === angleValuesMap[30].name && (
+      {options.parameters.values.name === angleValuesMap["light"].name && (
         <Icon
         size={ICON_SIZE}
         color={styles.selectedButtonText.color}
@@ -89,24 +89,24 @@ export const Application = () => {
       </CustomButton>
       <CustomButton
       containerStyle={[
-        options.parameters.values.name === angleValuesMap[45].name
+        options.parameters.values.name === angleValuesMap["normal"].name
         ? styles.selectedButton 
         : {}
       ]}
       disabled={isBackgroundRunning}
       onPress={()=> {
         myModule.selectionAsync();
-        setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["45"]}})
+        setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["normal"]}})
       }}
       >
         <View style={styles.buttonChildContainer}>
         <Text variant="bodySmall" style={[
           styles.text,
-           options.parameters.values.name === angleValuesMap[45].name
+           options.parameters.values.name === angleValuesMap["normal"].name
            ? styles.selectedButtonText 
            : {}
-        ]}>{angleValuesMap[45].name}</Text>
-        {options.parameters.values.name === angleValuesMap[45].name && (
+        ]}>{angleValuesMap["normal"].name}</Text>
+        {options.parameters.values.name === angleValuesMap["normal"].name && (
         <Icon
         size={ICON_SIZE}
         color={styles.selectedButtonText.color}
@@ -117,7 +117,7 @@ export const Application = () => {
       </CustomButton>
       <CustomButton
       containerStyle={[
-        options.parameters.values.name === angleValuesMap[60].name
+        options.parameters.values.name === angleValuesMap["strict"].name
         ? styles.selectedButton 
         : {}
       ]}
@@ -125,18 +125,18 @@ export const Application = () => {
     
       onPress={()=> {
         myModule.selectionAsync();
-        setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["60"]}})
+        setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["strict"]}})
       }}
       >
         <View style={styles.buttonChildContainer}>
         <Text variant="bodySmall" 
         style={[
           styles.text,
-          options.parameters.values.name === angleValuesMap[60].name
+          options.parameters.values.name === angleValuesMap["strict"].name
           ? styles.selectedButtonText 
           : {}
-        ]}>{angleValuesMap[60].name}</Text>
-        {options.parameters.values.name === angleValuesMap[60].name && (
+        ]}>{angleValuesMap["strict"].name}</Text>
+        {options.parameters.values.name === angleValuesMap["strict"].name && (
         <Icon
         size={ICON_SIZE}
         color={styles.selectedButtonText.color}
@@ -196,15 +196,21 @@ export const Application = () => {
       {/* <Text style={}>${options.parameters.values.name}</Text> */}
       {isBackgroundRunning && 
       <>
-      <Text variant='bodyMedium' style={
-        styles.onBackground
-        }>
+      <Text variant='bodyMedium' style={[styles.textWarning]}>
         Now switch to a different app and we will track your phone position and angle.
+        {/* todow icons */}
         </Text>
         <Text variant='bodyMedium'
-        style={styles.onBackground}
+        style={[styles.textWarning]}
         >
            When the phone vibrates, adjust your phone to a better position!
+           {/* todow icons */}
+           </Text>
+           <Text variant='bodySmall'
+        style={[styles.textWarning]}
+        >
+           Please set "Allow background activity" to true for this App in your device's App battery management settings, to allow us to freely track your phone's position
+           {/* todow text & icons*/}
            </Text>
       </>
       
@@ -226,10 +232,10 @@ const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
     paddingHorizontal: GLOBAL_PADDING_HORIZONTAL,
   },
   selectedButton:{
-    backgroundColor: theme.colors.tertiaryContainer,
+    backgroundColor: theme.colors.primary,
   },
   selectedButtonText:{
-    color: theme.colors.onTertiaryContainer,
+    color: theme.colors.onPrimary,
   },
   text:{
     color: theme.colors.onTertiary,
@@ -244,7 +250,14 @@ const stylesCallback = (theme:MD3Theme) => StyleSheet.create({
     flexDirection:"row",
     alignItems:"center",
     gap: 4,
-  }
+  },
+  textWarning: {
+    padding: 8,
+    borderRadius: 8,
+    marginVertical: 4,
+    color: theme.colors.onTertiary,
+    backgroundColor: theme.colors.tertiary,
+  },
 })
 //region background task
 type BackgroundTaskParams = {
@@ -253,14 +266,14 @@ type BackgroundTaskParams = {
   strictness: number;// max strikes at bad angle -> vibrate 
 }
 const angleValuesMap = {
-  30:  {y:4.9,z:8.5,angle:30,name:"Light" as const},
-  45:  {y:6.94,z:6.94,angle:45,name:"Normal" as const},
-  60:  {y:8.5,z:4.9,angle:60,name:"Strict" as const},
+  "light":  {y:4.9,z:8.5,angle:30,name:"Light" as const},
+  "normal":  {y:6.94,z:6.94,angle:45,name:"Normal" as const},
+  "strict":  {y:8.5,z:4.9,angle:60,name:"Strict" as const},
   
-} satisfies {[key:number]:{y:number,z:number,angle:number,name:string}}
+} satisfies {[key:string]:{y:number,z:number,angle:number,name:string}}
 const defaultConfig = {
   delay: 5000 as const,
-  values: angleValuesMap["60"],
+  values: angleValuesMap["strict"],
   strictness: 1
 } satisfies BackgroundTaskParams
 type RefType<T> = {current:T};
@@ -398,7 +411,7 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
 
 const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
   const config = taskData ?? defaultConfig
-  const {delay} = config;
+  const {delay,values} = config;
   const badAngleRef:BadAngleRef = {current:{isBadAngle:false,count:0,eventCount:0}}
   const orientationRef:OrientationRef = {current:{count:0,y:0}}
   const linearAccelerationRef: NullableNumberRef = {current:null}
@@ -410,10 +423,12 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
         console.log("not avaivlable, bg")
         return resolve("done");
       }
-      myModule.startLinearMovementDetection();
-      myModule.startOrientation();
       
+      console.log("3")
+      let s = performance.now();
       for (let i = 0; BackgroundService.isRunning(); i++){
+        myModule.startLinearMovementDetection();
+        myModule.startOrientation();
         myModule.addListener("onLinearMovementDetected",e =>{
           // dont do anything until phone set to a good angle
           if (!orientationRef.current){
@@ -440,7 +455,7 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
   
         })
         myModule.addListener("onOrientationChange",e => {
-          if (!orientationRef.current && e.y > 7){//todow make configurable to "user's selected good reading angle e.g 45,60,75"
+          if (!orientationRef.current && e.y > values.y){// configurable to "user's selected good reading angle e.g 45,60,75"
             orientationRef.current ={y: e.y,count:1};
             return;
           }
@@ -486,9 +501,8 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
           myModule.stopOrientation(),
           myModule.stopLinearMovementDetection()
         ]);
-        // myModule.errorAsync()
-        // console.log("bg haptic")
-        await new Promise(r => setTimeout(r,400));//todow try diff values?
+        console.log(Math.round((performance.now() - s)/1000))//clock
+        await new Promise(r => setTimeout(r,300));//todow try diff values?
       }
       resolve("done")
   })
@@ -515,8 +529,8 @@ const runWithLock = (args:RunWithLock) => {
 
 const defaultOptions = {
   taskName:  "PostureKeep",
-  taskTitle: 'Tracking for you',
-  taskDesc: 'Monitoring your phone posture & reading angle',
+  taskTitle: 'MEASURING & TRACKING',
+  taskDesc: 'Monitoring your phone position & angle',
   taskIcon: {
       name: 'ic_launcher',
       type: 'mipmap',
@@ -547,7 +561,7 @@ function isBadAngle(event:SensorEvent,config: BackgroundTaskParams){
 /**
  *  - if too close to eyes
  *  - landscape
- *  - flat on table (stop / pause ???)
+ *  
  *  - add the splash image
  *  - branding stuff
  *  - help messages & explainations

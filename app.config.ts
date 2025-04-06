@@ -7,7 +7,7 @@ import { withSensorsAppBuildGradle, withSensorsMainApplication, withSensorsSetti
 import { withGyroscopeMainActivity, withGyroscopeMainApplication } from './plugins/my';
 
 const config:ExpoConfig = {
-    "name": "posture",
+    "name": "posture",//todow
     "slug": "posture",
     "version": "1.0.0",
     "orientation": "portrait",
