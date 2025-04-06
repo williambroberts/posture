@@ -67,7 +67,7 @@ class MyModule : Module() {
         sensorManager?.registerListener(
             gravityListener,
             gravitySensor,
-            SensorManager.SENSOR_DELAY_UI
+            SensorManager.SENSOR_DELAY_GAME
         )
     }
 

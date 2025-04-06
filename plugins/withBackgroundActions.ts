@@ -21,7 +21,8 @@ export default function withBackgroundActions(config:ExpoConfig) {
         config.modResults.manifest.application[0].service.push({
             $: {
                 "android:name": "com.asterinet.react.bgactions.RNBackgroundActionsTask",
-                "android:foregroundServiceType": "shortService", // Add this line
+                "android:foregroundServiceType": "dataSync", // Add this line
+                // "android:foregroundServiceType": "shortService", // Add this line
               },
           });
        console.log("🧧")

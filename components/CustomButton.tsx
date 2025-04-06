@@ -11,7 +11,7 @@ type Props = {
   // textStyle?:StyleProp<TextStyle>
   children: React.ReactNode;
 }
-
+//todow variants & compound component for the children / icon & text
 export const CustomButton = ({
   onPress,
   disabled,
