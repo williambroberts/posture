@@ -9,14 +9,27 @@ import { SensorEvent } from '@/modules/my-module/src/MyModule';
 import { Icon, MD3Theme, Text, } from 'react-native-paper';
 import { CustomButton } from './CustomButton';
 import { useThemedStyles } from '@/utilities/theme';
+import * as SQLite from 'expo-sqlite';
 //region component
 export const Application = () => {
 
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
+  const [debug,setDebug] = useState<any>();
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
   const isBackgroundRunningRef = useRef<boolean>(false);
   const styles = useThemedStyles(stylesCallback)
-  
+  useEffect(()=> {
+   (async () => {
+    const db = await SQLite.openDatabaseAsync('databaseName');
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY NOT NULL, value TEXT NOT NULL, intValue INTEGER);
+      `);
+      const firstRow = await db.getFirstAsync('SELECT * FROM test');
+      setDebug(firstRow)
+      await db.closeAsync();
+   })()
+  // setDebug(isBackgroundRunning)
+  },[isBackgroundRunning])
   useEffect(()=>{
     const sub = AppState.addEventListener("change",event => {
       if (event === "active"){
@@ -34,16 +47,16 @@ export const Application = () => {
           isBackgroundRunningRef.current = false
         })
       } else if (event === "background"){
-      
+         console.log("backgrounding")
         if (!isBackgroundRunningRef.current){
           return;
         }
         // launch background task from here
         console.log("Starting...",isBackgroundRunningRef.current);
-        
+
         (async () => {
           await BackgroundService
-          .start(veryIntensiveTask3, options)
+          .start(veryIntensiveTask4, options)
         })()
         
         //todow nice animation e.g success
@@ -172,7 +185,7 @@ export const Application = () => {
       </CustomButton>
        <CustomButton
        disabled={isBackgroundRunning}
-      onPress={()=>{
+      onPress={async ()=>{
         if (BackgroundService.isRunning()){
           return;
         }
@@ -182,6 +195,10 @@ export const Application = () => {
         }
         myModule.warningAsync();
         setIsBackgroundRunning(true);
+        // const db = await SQLite.openDatabaseAsync('databaseName');
+        // const firstRow = await db.getFirstAsync('SELECT * FROM test');
+        setDebug("🐻🐻🐻");
+
         isBackgroundRunningRef.current = true;
       }}
       > 
@@ -215,7 +232,7 @@ export const Application = () => {
       </>
       
       }
-     
+     <Text>DEBUG:{JSON.stringify(debug,null,2)}</Text>
   </View>
   )
 
@@ -418,6 +435,7 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
   const linearAccelerationEnabledRef: RefType<boolean> = {current:true}
   const VAR = 1.5;
   await new Promise( async (resolve) => {
+     
       if (!myModule.isOrientationAvailable() || !myModule.isLinearMovementDetectionAvailable()){
         //todow notify user?
         console.log("not avaivlable, bg")
@@ -504,9 +522,30 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
         console.log(Math.round((performance.now() - s)/1000))//clock
         await new Promise(r => setTimeout(r,300));//todow try diff values?
       }
+      await db.closeAsync();
       resolve("done")
   })
 } 
+
+const veryIntensiveTask4 = async (taskData?:BackgroundTaskParams) => {
+  await new Promise(async (resolve) => {
+    const db = await SQLite.openDatabaseAsync('databaseName');
+    await db.runAsync(
+      'INSERT OR REPLACE INTO test (value, intValue) VALUES (?, ?)',
+      'test1',
+      0
+    );
+    for (let i = 0; BackgroundService.isRunning(); i++){
+      await new Promise(r => setTimeout(r,5000));
+      const firstRow = await db.getFirstAsync<{intValue:string,value:string}>('SELECT * FROM test');
+      if (firstRow){
+        await db.runAsync('UPDATE test SET intValue = ? WHERE value = ?', Number(firstRow.intValue) + 1, 'test1'); // Binding unnamed parameters from variadic arguments
+        myModule.errorAsync();
+      }
+    }
+    resolve("done")
+  })
+}
 //region config
 
 type RunLock = {[key:`${string}-key`]:boolean}
@@ -554,6 +593,8 @@ function isBadAngle(event:SensorEvent,config: BackgroundTaskParams){
 //npm i -g @expo/ngrok
 //npx expo start --tunnel
 //npx eas build --platform android --profile production
+//npx expo start --localhost
+
 
 
 
