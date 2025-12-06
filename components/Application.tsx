@@ -10,6 +10,8 @@ import { Icon, MD3Theme, Text, } from 'react-native-paper';
 import { CustomButton } from './CustomButton';
 import { useThemedStyles } from '@/utilities/theme';
 import * as SQLite from 'expo-sqlite';
+import { EventEmitter } from 'expo-modules-core';
+
 //region component
 export const Application = () => {
 
@@ -56,7 +58,7 @@ export const Application = () => {
 
         (async () => {
           await BackgroundService
-          .start(veryIntensiveTask4, options)
+          .start(veryIntensiveTask3, options)
         })()
         
         //todow nice animation e.g success
@@ -434,6 +436,13 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
   const linearAccelerationRef: NullableNumberRef = {current:null}
   const linearAccelerationEnabledRef: RefType<boolean> = {current:true}
   const VAR = 1.5;
+  const db = await SQLite.openDatabaseAsync('databaseName');
+  const dbEmitter = new EventEmitter<EventsMap>();
+   dbEmitter.addListener("insert",async (e)=> {
+      myModule.errorAsync();
+      console.log(e,"here")        // myModule.warningAsync();
+      await db.runAsync('UPDATE test SET intValue = ? WHERE value = ?', 0, 'test1'); 
+   })
   await new Promise( async (resolve) => {
      
       if (!myModule.isOrientationAvailable() || !myModule.isLinearMovementDetectionAvailable()){
@@ -441,8 +450,12 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
         console.log("not avaivlable, bg")
         return resolve("done");
       }
-      
-      console.log("3")
+      console.warn("3 starting...")
+      await db.runAsync(
+        'INSERT OR REPLACE INTO test (value, intValue) VALUES (?, ?)',
+        'test1',
+        0
+      );
       let s = performance.now();
       for (let i = 0; BackgroundService.isRunning(); i++){
         myModule.startLinearMovementDetection();
@@ -466,8 +479,9 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
             // console.log("hmm")
           }
           if (e.y > VAR && linearAccelerationRef.current < -VAR){
-            console.log(linearAccelerationRef.current,e.y,"background,onLinearMovementDetectedVertical")
-            myModule.errorAsync();
+            // console.log(linearAccelerationRef.current,e.y,"background,onLinearMovementDetectedVertical")
+            //⏰🔔
+            dbEmitter.emit("insert",{intValue: "0",value: "test1"})
             linearAccelerationRef.current = null;
           }
   
@@ -506,10 +520,11 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
             badAngleRef.current.count = 0;
           }
           if (badAngleRef.current.count > 200){//todow make this configurable {}
-              myModule.warningAsync();
+               //⏰🔔
+              dbEmitter.emit("insert",{intValue: "0",value: "test1"})
               ++badAngleRef.current.eventCount
               badAngleRef.current.count = 0;
-              console.log("bad angle from bg task",badAngleRef.current)
+              // console.log("bad angle from bg task",badAngleRef.current)
           }
         })
         await new Promise(r => setTimeout(r,delay));
@@ -519,30 +534,45 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
           myModule.stopOrientation(),
           myModule.stopLinearMovementDetection()
         ]);
-        console.log(Math.round((performance.now() - s)/1000))//clock
+        // console.log(Math.round((performance.now() - s)/1000))//clock
         await new Promise(r => setTimeout(r,300));//todow try diff values?
       }
-      await db.closeAsync();
       resolve("done")
   })
 } 
 
+type EventsMap = {
+  "insert": (arg:{intValue:string,value:string})=> void;
+}
 const veryIntensiveTask4 = async (taskData?:BackgroundTaskParams) => {
+  const db = await SQLite.openDatabaseAsync('databaseName');
+  const dbEmitter = new EventEmitter<EventsMap>();
+   dbEmitter.addListener("insert",async (e)=> {
+      myModule.errorAsync();
+      console.log(e,"here")        // myModule.warningAsync();
+      await db.runAsync('UPDATE test SET intValue = ? WHERE value = ?', 0, 'test1'); 
+
+   })
   await new Promise(async (resolve) => {
-    const db = await SQLite.openDatabaseAsync('databaseName');
     await db.runAsync(
       'INSERT OR REPLACE INTO test (value, intValue) VALUES (?, ?)',
       'test1',
       0
     );
+    myModule.errorAsync();
     for (let i = 0; BackgroundService.isRunning(); i++){
       await new Promise(r => setTimeout(r,5000));
-      const firstRow = await db.getFirstAsync<{intValue:string,value:string}>('SELECT * FROM test');
+      //below if (bad angle etc const firstRow...)
+      const firstRow = await db.getFirstAsync<{intValue:string,value:string}>('SELECT * FROM test WHERE intValue = 0');
       if (firstRow){
-        await db.runAsync('UPDATE test SET intValue = ? WHERE value = ?', Number(firstRow.intValue) + 1, 'test1'); // Binding unnamed parameters from variadic arguments
-        myModule.errorAsync();
+        await db.runAsync('UPDATE test SET intValue = ? WHERE value = ?', 1, 'test1'); 
+        dbEmitter.emit("insert",firstRow);
+        // myModule.errorAsync();
+      } else {
+        console.warn("No value");
       }
     }
+    dbEmitter.removeAllListeners("insert");
     resolve("done")
   })
 }
