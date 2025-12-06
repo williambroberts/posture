@@ -23,11 +23,21 @@ export const Application = () => {
   useEffect(()=> {
    (async () => {
     const db = await SQLite.openDatabaseAsync('databaseName');
+    // await db.execAsync(`DROP TABLE IF EXISTS event_log;`);
     await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY NOT NULL, value TEXT NOT NULL, intValue INTEGER);
-      `);
-      const firstRow = await db.getFirstAsync('SELECT * FROM test');
-      setDebug(firstRow)
+      CREATE TABLE IF NOT EXISTS event_log (
+        id INTEGER PRIMARY KEY NOT NULL, 
+        value TEXT NOT NULL, 
+        createdAt TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+    `);
+    const allRows = await db.getAllAsync<EVENT_LOG_VALUES>('SELECT * FROM event_log');
+    console.log(allRows);
+    setDebug({
+      count: allRows.length,
+      alerted: allRows.filter(r => r.value === EVENT_LOG_VALUES[1]).length,
+    })
+    db.runAsync("DELETE FROM event_log");
       await db.closeAsync();
    })()
   // setDebug(isBackgroundRunning)
@@ -45,6 +55,7 @@ export const Application = () => {
             myModule.stopOrientation()
           ])
         })().finally(()=>{
+          
           setIsBackgroundRunning(false)
           isBackgroundRunningRef.current = false
         })
@@ -197,8 +208,6 @@ export const Application = () => {
         }
         myModule.warningAsync();
         setIsBackgroundRunning(true);
-        // const db = await SQLite.openDatabaseAsync('databaseName');
-        // const firstRow = await db.getFirstAsync('SELECT * FROM test');
         setDebug("🐻🐻🐻");
 
         isBackgroundRunningRef.current = true;
@@ -284,11 +293,11 @@ type BackgroundTaskParams = {
   values: (typeof angleValuesMap)[keyof typeof angleValuesMap];
   strictness: number;// max strikes at bad angle -> vibrate 
 }
+const EVENT_LOG_VALUES = ["LOGGED","ALERTED"] as const
 const angleValuesMap = {
   "light":  {y:4.9,z:8.5,angle:30,name:"Light" as const},
   "normal":  {y:6.94,z:6.94,angle:45,name:"Normal" as const},
   "strict":  {y:8.5,z:4.9,angle:60,name:"Strict" as const},
-  
 } satisfies {[key:string]:{y:number,z:number,angle:number,name:string}}
 const defaultConfig = {
   delay: 5000 as const,
@@ -440,8 +449,10 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
   const dbEmitter = new EventEmitter<EventsMap>();
    dbEmitter.addListener("insert",async (e)=> {
       myModule.errorAsync();
-      console.log(e,"here")        // myModule.warningAsync();
-      await db.runAsync('UPDATE test SET intValue = ? WHERE value = ?', 0, 'test1'); 
+      await db.runAsync(
+        'INSERT INTO event_log (value) VALUES (?)',
+         EVENT_LOG_VALUES[1]
+      ); 
    })
   await new Promise( async (resolve) => {
      
@@ -451,11 +462,6 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
         return resolve("done");
       }
       console.warn("3 starting...")
-      await db.runAsync(
-        'INSERT OR REPLACE INTO test (value, intValue) VALUES (?, ?)',
-        'test1',
-        0
-      );
       let s = performance.now();
       for (let i = 0; BackgroundService.isRunning(); i++){
         myModule.startLinearMovementDetection();
@@ -481,7 +487,7 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
           if (e.y > VAR && linearAccelerationRef.current < -VAR){
             // console.log(linearAccelerationRef.current,e.y,"background,onLinearMovementDetectedVertical")
             //⏰🔔
-            dbEmitter.emit("insert",{intValue: "0",value: "test1"})
+            dbEmitter.emit("insert");
             linearAccelerationRef.current = null;
           }
   
@@ -521,7 +527,7 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
           }
           if (badAngleRef.current.count > 200){//todow make this configurable {}
                //⏰🔔
-              dbEmitter.emit("insert",{intValue: "0",value: "test1"})
+              dbEmitter.emit("insert");
               ++badAngleRef.current.eventCount
               badAngleRef.current.count = 0;
               // console.log("bad angle from bg task",badAngleRef.current)
@@ -537,12 +543,18 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
         // console.log(Math.round((performance.now() - s)/1000))//clock
         await new Promise(r => setTimeout(r,300));//todow try diff values?
       }
+      await db.closeAsync()
+      dbEmitter.removeAllListeners("insert");
       resolve("done")
   })
 } 
-
+type EVENT_LOG_VALUES = {
+  id: number;
+  value: string;
+  createdAt: string;
+}
 type EventsMap = {
-  "insert": (arg:{intValue:string,value:string})=> void;
+  "insert": (arg?:EVENT_LOG_VALUES)=> void;
 }
 const veryIntensiveTask4 = async (taskData?:BackgroundTaskParams) => {
   const db = await SQLite.openDatabaseAsync('databaseName');
@@ -550,27 +562,18 @@ const veryIntensiveTask4 = async (taskData?:BackgroundTaskParams) => {
    dbEmitter.addListener("insert",async (e)=> {
       myModule.errorAsync();
       console.log(e,"here")        // myModule.warningAsync();
-      await db.runAsync('UPDATE test SET intValue = ? WHERE value = ?', 0, 'test1'); 
+      //await db.runAsync('UPDATE test SET intValue = ? WHERE value = ?', 0, 'test1'); 
 
    })
   await new Promise(async (resolve) => {
-    await db.runAsync(
-      'INSERT OR REPLACE INTO test (value, intValue) VALUES (?, ?)',
-      'test1',
-      0
-    );
+    // await db.runAsync(
+    //   'INSERT OR REPLACE INTO test (value, intValue) VALUES (?, ?)',
+    //   'test1',
+    //   0
+    // );
     myModule.errorAsync();
     for (let i = 0; BackgroundService.isRunning(); i++){
       await new Promise(r => setTimeout(r,5000));
-      //below if (bad angle etc const firstRow...)
-      const firstRow = await db.getFirstAsync<{intValue:string,value:string}>('SELECT * FROM test WHERE intValue = 0');
-      if (firstRow){
-        await db.runAsync('UPDATE test SET intValue = ? WHERE value = ?', 1, 'test1'); 
-        dbEmitter.emit("insert",firstRow);
-        // myModule.errorAsync();
-      } else {
-        console.warn("No value");
-      }
     }
     dbEmitter.removeAllListeners("insert");
     resolve("done")
