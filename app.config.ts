@@ -1,7 +1,8 @@
 // const {withBackgroundActions} = require("./plugins/plugin")
 import 'ts-node/register'; // Add this to import TypeScript files
 import { ExpoConfig } from 'expo/config';
-import withBackgroundActions from './plugins/withBackgroundActions';
+const withBackgroundActions = require('./plugins/withBackgroundActions');
+
 // import { withPlugins } from '@expo/config-plugins';
 // import { withSensorsAppBuildGradle, withSensorsMainApplication, withSensorsSettingsGradle } from './plugins/sensors';
 // import { withGyroscopeMainActivity, withGyroscopeMainApplication } from './plugins/my';
