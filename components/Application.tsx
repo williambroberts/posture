@@ -17,6 +17,7 @@ export const Application = () => {
 
   const [options,setOptions] = useState<ExtendedOptions>(defaultOptions)
   const [debug,setDebug] = useState<any>();
+  const [isPositionOK,setIsPositionOk] = useState<boolean>(false);
   const [isBackgroundRunning,setIsBackgroundRunning] = useState<boolean>(false)
   const isBackgroundRunningRef = useRef<boolean>(false);
   const styles = useThemedStyles(stylesCallback)
@@ -83,6 +84,36 @@ export const Application = () => {
       sub.remove();
     }
   },[])
+  
+  useEffect(()=> {
+    let count = 0;
+    if (!myModule.isOrientationAvailable()){
+      return;
+    }
+    myModule.startOrientation();
+    setIsPositionOk(false);
+    const handleOrientationChange = (e:SensorEvent) => {
+       const badAngle = isBadAngle(e,options.parameters);
+       if (badAngle){
+        count = count -10;
+        count = Math.max(count,0)
+       } else {
+        count++
+       }
+       if (count >= ANGLE_LIMIT * 0.5){//100 seems ok.
+        setIsPositionOk(true);
+       }
+       if (count === 0){
+        setIsPositionOk(false);
+       }
+    }
+    myModule.addListener("onOrientationChange",handleOrientationChange);
+    return () => {
+     myModule.removeAllListeners("onOrientationChange");
+     myModule.stopOrientation();
+     setIsPositionOk(false);
+    }
+  },[options])
 
   return (
   <View style={styles.container}>
@@ -231,7 +262,7 @@ export const Application = () => {
          </Text>
       </CustomButton>
        <CustomButton
-       disabled={isBackgroundRunning}
+       disabled={(isBackgroundRunning || !isPositionOK)}
       onPress={async ()=>{
         if (BackgroundService.isRunning()){
           return;
@@ -242,19 +273,17 @@ export const Application = () => {
         }
         myModule.warningAsync();
         setIsBackgroundRunning(true);
-        setDebug("🐻🐻🐻");
-
         isBackgroundRunningRef.current = true;
       }}
       > 
       <Text variant="bodySmall"
-      style={[isBackgroundRunning 
+      style={[(isBackgroundRunning || !isPositionOK) 
         ? styles.textDisabled 
         : styles.text
         ]}>
-          {`Start in ${options.parameters.values.name}`} mode</Text>
+          {isPositionOK ? `Start in ${options.parameters.values.name} mode` : "Put your phone upright"}
+          </Text>
       </CustomButton>
-
       {/* <Text style={}>${options.parameters.values.name}</Text> */}
       {isBackgroundRunning && 
       <>
@@ -568,7 +597,7 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
           if (badAngleRef.current.count < 0){
             badAngleRef.current.count = 0;
           }
-          if (badAngleRef.current.count > 200){//todow make this configurable {}
+          if (badAngleRef.current.count > ANGLE_LIMIT){//todow make this configurable {}
                //⏰🔔
               dbEmitter.emit("insert");
               ++badAngleRef.current.eventCount
@@ -596,6 +625,7 @@ type EVENT_LOG_VALUES = {
   value: string;
   createdAt: string;
 }
+const ANGLE_LIMIT = 200;
 type EventsMap = {
   "insert": (arg?:EVENT_LOG_VALUES)=> void;
 }
@@ -678,7 +708,7 @@ function isBadAngle(event:SensorEvent,config: BackgroundTaskParams){
 /**
  *  - if too close to eyes
  *  - landscape
- *  
+ *  - expo update
  *  - add the splash image
  *  - branding stuff
  *  - help messages & explainations
