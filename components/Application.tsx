@@ -8,11 +8,12 @@ import BackgroundService, {
 // import MyModule from '../modules/my-module';
 import myModule from "../modules/my-module";
 import { SensorEvent } from "@/modules/my-module/src/MyModule";
-import { Icon, MD3Theme, Text } from "react-native-paper";
+import { Divider, Icon, MD3Theme, Text } from "react-native-paper";
 import { CustomButton } from "./CustomButton";
 import { useThemedStyles } from "@/utilities/theme";
 import * as SQLite from "expo-sqlite";
 import { EventEmitter } from "expo-modules-core";
+import { CircleIcon } from "./CircleIcon";
 
 //region component
 export const Application = () => {
@@ -91,11 +92,11 @@ export const Application = () => {
 
   useEffect(() => {
     let count = 0;
+    setIsPositionOk(false);
     if (!myModule.isOrientationAvailable()) {
       return;
     }
     myModule.startOrientation();
-    setIsPositionOk(false);
     const handleOrientationChange = (e: SensorEvent) => {
       const badAngle = isBadAngle(e, options.parameters);
       if (badAngle) {
@@ -122,6 +123,26 @@ export const Application = () => {
 
   return (
     <View style={styles.container}>
+      <Divider style={styles.divider} />
+      <Text variant="titleMedium" style={styles.title}>
+        POSTURE KEEP
+      </Text>
+      <Divider style={styles.divider} />
+      <Text variant="bodyMedium" style={styles.onBackground}>
+        Posture tracking & monitoring
+      </Text>
+      <Icon
+        size={ICON_SIZE}
+        source={"arrow-down-thin"}
+        color={styles.onBackground.color}
+      />
+      {!isBackgroundRunning && (
+        <View style={{ alignItems: "center", justifyContent: "center" }}>
+          <CircleIcon iconName={"package-variant"} variant={"selected"} />
+          <Text variant="titleSmall">Configure </Text>
+          <Text variant="bodySmall">Choose the setting right for you.</Text>
+        </View>
+      )}
       <CustomButton
         containerStyle={[
           options.parameters.values.name === angleValuesMap["veryLight"].name
@@ -187,7 +208,7 @@ export const Application = () => {
           <Icon
             size={ICON_SIZE}
             color={styles.selectedButtonText.color}
-            source={"tally-mark-1"}
+            source={"tally-mark-2"}
           />
           <Text
             variant="bodySmall"
@@ -228,7 +249,7 @@ export const Application = () => {
           <Icon
             size={ICON_SIZE}
             color={styles.selectedButtonText.color}
-            source={"tally-mark-1"}
+            source={"tally-mark-3"}
           />
           <Text
             variant="bodySmall"
@@ -269,7 +290,7 @@ export const Application = () => {
           <Icon
             size={ICON_SIZE}
             color={styles.selectedButtonText.color}
-            source={"tally-mark-1"}
+            source={"tally-mark-4"}
           />
           <Text
             variant="bodySmall"
@@ -291,29 +312,99 @@ export const Application = () => {
           )}
         </View>
       </CustomButton>
-      <CustomButton
-        disabled={!isBackgroundRunning}
-        onPress={() => {
-          myModule.warningAsync();
-          BackgroundService.stop().finally(async () => {
-            myModule.removeAllListeners("onLinearMovementDetected");
-            myModule.removeAllListeners("onOrientationChange");
-            await Promise.all([
-              myModule.stopLinearMovementDetection(),
-              myModule.stopOrientation(),
-            ]);
-            setIsBackgroundRunning(false);
-            isBackgroundRunningRef.current = false;
-          });
-        }}
-      >
-        <Text
-          variant="bodySmall"
-          style={[!isBackgroundRunning ? styles.textDisabled : styles.text]}
+      {isBackgroundRunning && (
+        <CustomButton
+          disabled={!isBackgroundRunning}
+          onPress={() => {
+            myModule.warningAsync();
+            BackgroundService.stop().finally(async () => {
+              myModule.removeAllListeners("onLinearMovementDetected");
+              myModule.removeAllListeners("onOrientationChange");
+              await Promise.all([
+                myModule.stopLinearMovementDetection(),
+                myModule.stopOrientation(),
+              ]);
+              setIsBackgroundRunning(false);
+              isBackgroundRunningRef.current = false;
+            });
+          }}
         >
-          stop background
-        </Text>
-      </CustomButton>
+          <Text
+            variant="bodySmall"
+            style={[!isBackgroundRunning ? styles.textDisabled : styles.text]}
+          >
+            stop background
+          </Text>
+        </CustomButton>
+      )}
+      {!isBackgroundRunning && (
+        <View style={{ alignItems: "center", justifyContent: "center" }}>
+          <Icon
+            size={ICON_SIZE}
+            source={"arrow-down-thin"}
+            color={
+              isPositionOK
+                ? styles.onBackground.color
+                : styles.textDisabled.color
+            }
+          />
+          <CircleIcon
+            iconName={"angle-obtuse"}
+            variant={isPositionOK ? "success" : "warning"}
+          />
+          <Text
+            variant="titleSmall"
+            style={isPositionOK ? styles.textDisabled : styles.onBackground}
+          >
+            Put your phone upright
+          </Text>
+          <Text
+            variant="bodySmall"
+            style={isPositionOK ? styles.textDisabled : styles.onBackground}
+          >
+            Then we can monitor & measure your posture
+          </Text>
+        </View>
+      )}
+      {!isBackgroundRunning && (
+        <View style={{ alignItems: "center", justifyContent: "center" }}>
+          <Icon
+            size={ICON_SIZE}
+            source={"arrow-down-thin"}
+            color={
+              isPositionOK
+                ? styles.onBackground.color
+                : styles.textDisabled.color
+            }
+          />
+          <CircleIcon
+            iconName={"graph-outline"}
+            variant={isPositionOK ? "selected" : "disabled"}
+          />
+          <Text
+            variant="titleSmall"
+            style={isPositionOK ? styles.onBackground : styles.textDisabled}
+          >
+            Start Measuring
+          </Text>
+          <Text
+            style={isPositionOK ? styles.onBackground : styles.textDisabled}
+            variant="bodySmall"
+          >
+            You are ready, let's start measuring.
+          </Text>
+          <Icon
+            size={ICON_SIZE}
+            source={"arrow-down-thin"}
+            color={
+              isPositionOK
+                ? styles.onBackground.color
+                : styles.textDisabled.color
+            }
+          />
+        </View>
+      )}
+
       <CustomButton
         disabled={isBackgroundRunning || !isPositionOK}
         onPress={async () => {
@@ -348,6 +439,36 @@ export const Application = () => {
             : "Put your phone upright"}
         </Text>
       </CustomButton>
+      {!isBackgroundRunning && (
+        <View style={{ alignItems: "center", justifyContent: "center" }}>
+          <Icon
+            size={ICON_SIZE}
+            source={"arrow-down-thin"}
+            color={
+              isPositionOK
+                ? styles.onBackground.color
+                : styles.textDisabled.color
+            }
+          />
+          <CircleIcon
+            iconName={"angle-acute"}
+            variant={isPositionOK ? "selected" : "disabled"}
+          />
+          <Text
+            variant="titleSmall"
+            style={isPositionOK ? styles.onBackground : styles.textDisabled}
+          >
+            Adjust your phone
+          </Text>
+          <Text
+            style={isPositionOK ? styles.onBackground : styles.textDisabled}
+            variant="bodySmall"
+          >
+            When alerted, move your device to a better position.
+          </Text>
+        </View>
+      )}
+      <Divider style={[styles.divider, { marginTop: 8 }]} />
       {/* <Text style={}>${options.parameters.values.name}</Text> */}
       {isBackgroundRunning && (
         <>
@@ -381,8 +502,19 @@ const stylesCallback = (theme: MD3Theme) =>
     container: {
       backgroundColor: theme.colors.background,
       flex: 1,
+      alignItems: "center",
       paddingVertical: GLOBAL_PADDING_VERTICAL,
       paddingHorizontal: GLOBAL_PADDING_HORIZONTAL,
+    },
+    divider: {
+      backgroundColor: theme.colors.primary,
+      width: "100%",
+    },
+    title: {
+      textDecorationLine: "underline",
+      alignSelf: "center",
+      textDecorationColor: theme.colors.primary,
+      color: theme.colors.primary,
     },
     selectedButton: {
       backgroundColor: theme.colors.primary,
