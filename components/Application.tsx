@@ -337,6 +337,26 @@ export const Application = () => {
           </Text>
         </CustomButton>
       )}
+      {isBackgroundRunning && (
+        <View style={{ alignItems: "center", justifyContent: "center" }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <CircleIcon iconName="chevron-right" variant="disabled" />
+            <Icon
+              size={ICON_SIZE}
+              source={"arrow-right-thin"}
+              color={styles.onBackground.color}
+            />
+            <CircleIcon iconName="chevron-double-right" variant="disabled" />
+            <Icon
+              size={ICON_SIZE}
+              source={"arrow-right-thin"}
+              color={styles.onBackground.color}
+            />
+            <CircleIcon iconName="chevron-triple-right" variant="selected" />
+          </View>
+          <Text variant="bodySmall">Ready for monitoring & tracking.</Text>
+        </View>
+      )}
       {!isBackgroundRunning && (
         <View style={{ alignItems: "center", justifyContent: "center" }}>
           <Icon
@@ -405,40 +425,42 @@ export const Application = () => {
         </View>
       )}
 
-      <CustomButton
-        disabled={isBackgroundRunning || !isPositionOK}
-        onPress={async () => {
-          if (BackgroundService.isRunning()) {
-            return;
-          }
-          if (
-            !myModule.isOrientationAvailable() ||
-            !myModule.isLinearMovementDetectionAvailable()
-          ) {
-            Alert.alert(
-              "Sensor Malfunction",
-              "Movement detection is unavailable at this time."
-            );
-            return;
-          }
-          myModule.warningAsync();
-          setIsBackgroundRunning(true);
-          isBackgroundRunningRef.current = true;
-        }}
-      >
-        <Text
-          variant="bodySmall"
-          style={[
-            isBackgroundRunning || !isPositionOK
-              ? styles.textDisabled
-              : styles.text,
-          ]}
+      {!isBackgroundRunning && (
+        <CustomButton
+          disabled={isBackgroundRunning || !isPositionOK}
+          onPress={async () => {
+            if (BackgroundService.isRunning()) {
+              return;
+            }
+            if (
+              !myModule.isOrientationAvailable() ||
+              !myModule.isLinearMovementDetectionAvailable()
+            ) {
+              Alert.alert(
+                "Sensor Malfunction",
+                "Movement detection is unavailable at this time."
+              );
+              return;
+            }
+            myModule.warningAsync();
+            setIsBackgroundRunning(true);
+            isBackgroundRunningRef.current = true;
+          }}
         >
-          {isPositionOK
-            ? `Start in ${options.parameters.values.name} mode`
-            : "Put your phone upright"}
-        </Text>
-      </CustomButton>
+          <Text
+            variant="bodySmall"
+            style={[
+              isBackgroundRunning || !isPositionOK
+                ? styles.textDisabled
+                : styles.text,
+            ]}
+          >
+            {isPositionOK
+              ? `Start in ${options.parameters.values.name} mode`
+              : "Put your phone upright"}
+          </Text>
+        </CustomButton>
+      )}
       {!isBackgroundRunning && (
         <View style={{ alignItems: "center", justifyContent: "center" }}>
           <Icon
