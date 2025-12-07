@@ -130,7 +130,7 @@ export const Application = () => {
       }}
       >
         <View style={styles.buttonChildContainer}>
-           <Icon
+          <Icon
         size={ICON_SIZE}
         color={styles.selectedButtonText.color}
         source={"tally-mark-1"}
@@ -165,6 +165,11 @@ export const Application = () => {
       }}
       >
         <View style={styles.buttonChildContainer}>
+             <Icon
+        size={ICON_SIZE}
+        color={styles.selectedButtonText.color}
+        source={"tally-mark-1"}
+        />
         <Text variant="bodySmall" 
       style={[styles.text,
         options.parameters.values.name === angleValuesMap["light"].name
@@ -196,6 +201,11 @@ export const Application = () => {
       }}
       >
         <View style={styles.buttonChildContainer}>
+             <Icon
+        size={ICON_SIZE}
+        color={styles.selectedButtonText.color}
+        source={"tally-mark-1"}
+        />
         <Text variant="bodySmall" style={[
           styles.text,
            options.parameters.values.name === angleValuesMap["normal"].name
@@ -225,6 +235,11 @@ export const Application = () => {
       }}
       >
         <View style={styles.buttonChildContainer}>
+             <Icon
+        size={ICON_SIZE}
+        color={styles.selectedButtonText.color}
+        source={"tally-mark-1"}
+        />
         <Text variant="bodySmall" 
         style={[
           styles.text,
