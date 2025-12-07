@@ -36,6 +36,14 @@ const config:ExpoConfig = {
       "expo-router",
       "expo-sqlite",
       [
+      "expo-build-properties",
+      {
+        "android": {
+          "gradleVersion": "8.13"
+        }
+      }
+    ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
