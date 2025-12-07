@@ -2,9 +2,9 @@
 import 'ts-node/register'; // Add this to import TypeScript files
 import { ExpoConfig } from 'expo/config';
 import withBackgroundActions from './plugins/withBackgroundActions';
-import { withPlugins } from '@expo/config-plugins';
-import { withSensorsAppBuildGradle, withSensorsMainApplication, withSensorsSettingsGradle } from './plugins/sensors';
-import { withGyroscopeMainActivity, withGyroscopeMainApplication } from './plugins/my';
+// import { withPlugins } from '@expo/config-plugins';
+// import { withSensorsAppBuildGradle, withSensorsMainApplication, withSensorsSettingsGradle } from './plugins/sensors';
+// import { withGyroscopeMainActivity, withGyroscopeMainApplication } from './plugins/my';
 
 const config:ExpoConfig = {
     "name": "posture",//todow
@@ -14,7 +14,7 @@ const config:ExpoConfig = {
     "icon": "./assets/images/icon.png",
     "scheme": "postureKeep",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
