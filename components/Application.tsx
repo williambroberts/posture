@@ -792,7 +792,8 @@ function isBadAngle(event: SensorEvent, config: BackgroundTaskParams) {
 /**
  *  - if too close to eyes
  *  - landscape
- *  - expo update
+ *  - mode into popup message
+ *  - styles
  *  - add the splash image
  *  - branding stuff
  *  - help messages & explainations
