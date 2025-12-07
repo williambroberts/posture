@@ -33,12 +33,16 @@ export const Application = () => {
     `);
     const allRows = await db.getAllAsync<EVENT_LOG_VALUES>('SELECT * FROM event_log');
     console.log(allRows);
-    setDebug({
-      count: allRows.length,
-      alerted: allRows.filter(r => r.value === EVENT_LOG_VALUES[1]).length,
-    })
-    db.runAsync("DELETE FROM event_log");
-      await db.closeAsync();
+    if (allRows.some(r => r.value === EVENT_LOG_VALUES[2])){
+      setDebug("Failed to inject config into task")
+    } else {
+      setDebug({
+        count: allRows.length,
+        alerted: allRows.filter(r => r.value === EVENT_LOG_VALUES[1]).length,
+      })
+    }
+    await db.runAsync("DELETE FROM event_log");
+    await db.closeAsync();
    })()
   // setDebug(isBackgroundRunning)
   },[isBackgroundRunning])
@@ -82,6 +86,36 @@ export const Application = () => {
 
   return (
   <View style={styles.container}>
+  <CustomButton
+      containerStyle={[
+        options.parameters.values.name === angleValuesMap["veryLight"].name
+        ? styles.selectedButton 
+        : {}
+      ]}
+      disabled={isBackgroundRunning}
+      onPress={()=> {
+        myModule.selectionAsync();
+        setOptions({...defaultOptions,parameters:{...defaultConfig,values: angleValuesMap["veryLight"]}})
+      }}
+      >
+        <View style={styles.buttonChildContainer}>
+        <Text variant="bodySmall" 
+      style={[styles.text,
+        options.parameters.values.name === angleValuesMap["veryLight"].name
+        ? styles.selectedButtonText 
+        : {}
+      ]}
+      >{angleValuesMap["veryLight"].name}
+      </Text>
+      {options.parameters.values.name === angleValuesMap["veryLight"].name && (
+        <Icon
+        size={ICON_SIZE}
+        color={styles.selectedButtonText.color}
+        source={"check"}
+        />
+        )}
+        </View>
+      </CustomButton>
       <CustomButton
       containerStyle={[
         options.parameters.values.name === angleValuesMap["light"].name
@@ -293,15 +327,16 @@ type BackgroundTaskParams = {
   values: (typeof angleValuesMap)[keyof typeof angleValuesMap];
   strictness: number;// max strikes at bad angle -> vibrate 
 }
-const EVENT_LOG_VALUES = ["LOGGED","ALERTED"] as const
+const EVENT_LOG_VALUES = ["LOGGED","ALERTED","ERROR"] as const
 const angleValuesMap = {
+  "veryLight": {y: 2.54, z: 9.47, angle: 15, name: "VeryLight" as const},
   "light":  {y:4.9,z:8.5,angle:30,name:"Light" as const},
   "normal":  {y:6.94,z:6.94,angle:45,name:"Normal" as const},
   "strict":  {y:8.5,z:4.9,angle:60,name:"Strict" as const},
 } satisfies {[key:string]:{y:number,z:number,angle:number,name:string}}
 const defaultConfig = {
   delay: 5000 as const,
-  values: angleValuesMap["strict"],
+  values: angleValuesMap["light"],
   strictness: 1
 } satisfies BackgroundTaskParams
 type RefType<T> = {current:T};
@@ -438,6 +473,7 @@ const veryIntensiveTask2 = async (taskData?:BackgroundTaskParams) => {
 }
 
 const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
+  
   const config = taskData ?? defaultConfig
   const {delay,values} = config;
   const badAngleRef:BadAngleRef = {current:{isBadAngle:false,count:0,eventCount:0}}
@@ -446,6 +482,13 @@ const veryIntensiveTask3 = async (taskData?:BackgroundTaskParams) => {
   const linearAccelerationEnabledRef: RefType<boolean> = {current:true}
   const VAR = 1.5;
   const db = await SQLite.openDatabaseAsync('databaseName');
+  if (!taskData){
+    db.runAsync(
+      'INSERT INTO event_log (value) VALUES (?)',
+       EVENT_LOG_VALUES[2]
+    )
+    myModule.errorAsync();
+  }
   const dbEmitter = new EventEmitter<EventsMap>();
    dbEmitter.addListener("insert",async (e)=> {
       myModule.errorAsync();
