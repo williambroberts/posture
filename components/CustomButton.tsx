@@ -44,13 +44,16 @@ export const CustomButton = ({
 const stylesCallback = (theme: MD3Theme) =>
   StyleSheet.create({
     container: {
-      backgroundColor: theme.colors.tertiary,
+      backgroundColor: theme.colors.surface,
       padding: 8,
       marginVertical: 4,
       borderRadius: 8,
       minWidth: 160,
+      borderWidth: 1,
+      borderColor: theme.colors.onSurface,
     },
     containerDisabled: {
       backgroundColor: theme.colors.surfaceDisabled,
+      borderColor: theme.colors.onSurfaceDisabled,
     },
   });

@@ -38,9 +38,12 @@ export const Application = () => {
       const allRows = await db.getAllAsync<EVENT_LOG_VALUES>(
         "SELECT * FROM event_log"
       );
-      console.log(allRows);
-      if (allRows.some((r) => r.value === EVENT_LOG_VALUES[2])) {
-        setDebug("Failed to inject config into task");
+      const errors = allRows.filter(
+        (r) =>
+          r.value === EVENT_LOG_VALUES[2] || r.value === EVENT_LOG_VALUES[3]
+      );
+      if (errors.length > 0) {
+        setDebug(errors);
       } else {
         setDebug({
           count: allRows.length,
@@ -79,6 +82,12 @@ export const Application = () => {
         console.log("Starting...", isBackgroundRunningRef.current);
 
         (async () => {
+          const db = await SQLite.openDatabaseAsync("databaseName");
+          await db.runAsync(
+            "INSERT INTO event_log (value) VALUES (?)",
+            options.parameters.values.name
+          );
+          await db.closeAsync();
           await BackgroundService.start(veryIntensiveTask3, options);
         })();
 
@@ -92,6 +101,7 @@ export const Application = () => {
 
   useEffect(() => {
     let count = 0;
+    if (isBackgroundRunning) return;
     setIsPositionOk(false);
     if (!myModule.isOrientationAvailable()) {
       return;
@@ -119,7 +129,7 @@ export const Application = () => {
       myModule.stopOrientation();
       setIsPositionOk(false);
     };
-  }, [options]);
+  }, [options, isBackgroundRunning]);
 
   return (
     <View style={styles.container}>
@@ -164,7 +174,14 @@ export const Application = () => {
         <View style={styles.buttonChildContainer}>
           <Icon
             size={ICON_SIZE}
-            color={styles.selectedButtonText.color}
+            color={
+              options.parameters.values.name ===
+              angleValuesMap["veryLight"].name
+                ? styles.selectedButtonText.color
+                : isBackgroundRunning
+                ? styles.textDisabled.color
+                : styles.text.color
+            }
             source={"tally-mark-1"}
           />
           <Text
@@ -174,6 +191,8 @@ export const Application = () => {
               options.parameters.values.name ===
               angleValuesMap["veryLight"].name
                 ? styles.selectedButtonText
+                : isBackgroundRunning
+                ? styles.textDisabled
                 : {},
             ]}
           >
@@ -207,7 +226,13 @@ export const Application = () => {
         <View style={styles.buttonChildContainer}>
           <Icon
             size={ICON_SIZE}
-            color={styles.selectedButtonText.color}
+            color={
+              options.parameters.values.name === angleValuesMap["light"].name
+                ? styles.selectedButtonText.color
+                : isBackgroundRunning
+                ? styles.textDisabled.color
+                : styles.text.color
+            }
             source={"tally-mark-2"}
           />
           <Text
@@ -216,6 +241,8 @@ export const Application = () => {
               styles.text,
               options.parameters.values.name === angleValuesMap["light"].name
                 ? styles.selectedButtonText
+                : isBackgroundRunning
+                ? styles.textDisabled
                 : {},
             ]}
           >
@@ -248,7 +275,13 @@ export const Application = () => {
         <View style={styles.buttonChildContainer}>
           <Icon
             size={ICON_SIZE}
-            color={styles.selectedButtonText.color}
+            color={
+              options.parameters.values.name === angleValuesMap["normal"].name
+                ? styles.selectedButtonText.color
+                : isBackgroundRunning
+                ? styles.textDisabled.color
+                : styles.text.color
+            }
             source={"tally-mark-3"}
           />
           <Text
@@ -257,6 +290,8 @@ export const Application = () => {
               styles.text,
               options.parameters.values.name === angleValuesMap["normal"].name
                 ? styles.selectedButtonText
+                : isBackgroundRunning
+                ? styles.textDisabled
                 : {},
             ]}
           >
@@ -289,7 +324,13 @@ export const Application = () => {
         <View style={styles.buttonChildContainer}>
           <Icon
             size={ICON_SIZE}
-            color={styles.selectedButtonText.color}
+            color={
+              options.parameters.values.name === angleValuesMap["strict"].name
+                ? styles.selectedButtonText.color
+                : isBackgroundRunning
+                ? styles.textDisabled.color
+                : styles.text.color
+            }
             source={"tally-mark-4"}
           />
           <Text
@@ -298,6 +339,8 @@ export const Application = () => {
               styles.text,
               options.parameters.values.name === angleValuesMap["strict"].name
                 ? styles.selectedButtonText
+                : isBackgroundRunning
+                ? styles.textDisabled
                 : {},
             ]}
           >
@@ -312,31 +355,6 @@ export const Application = () => {
           )}
         </View>
       </CustomButton>
-      {isBackgroundRunning && (
-        <CustomButton
-          disabled={!isBackgroundRunning}
-          onPress={() => {
-            myModule.warningAsync();
-            BackgroundService.stop().finally(async () => {
-              myModule.removeAllListeners("onLinearMovementDetected");
-              myModule.removeAllListeners("onOrientationChange");
-              await Promise.all([
-                myModule.stopLinearMovementDetection(),
-                myModule.stopOrientation(),
-              ]);
-              setIsBackgroundRunning(false);
-              isBackgroundRunningRef.current = false;
-            });
-          }}
-        >
-          <Text
-            variant="bodySmall"
-            style={[!isBackgroundRunning ? styles.textDisabled : styles.text]}
-          >
-            stop background
-          </Text>
-        </CustomButton>
-      )}
       {isBackgroundRunning && (
         <View style={{ alignItems: "center", justifyContent: "center" }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -357,35 +375,43 @@ export const Application = () => {
           <Text variant="bodySmall">Ready for monitoring & tracking.</Text>
         </View>
       )}
-      {!isBackgroundRunning && (
-        <View style={{ alignItems: "center", justifyContent: "center" }}>
-          <Icon
-            size={ICON_SIZE}
-            source={"arrow-down-thin"}
-            color={
-              isPositionOK
-                ? styles.onBackground.color
-                : styles.textDisabled.color
-            }
-          />
-          <CircleIcon
-            iconName={"angle-obtuse"}
-            variant={isPositionOK ? "success" : "warning"}
-          />
-          <Text
-            variant="titleSmall"
-            style={isPositionOK ? styles.textDisabled : styles.onBackground}
-          >
-            Put your phone upright
-          </Text>
-          <Text
-            variant="bodySmall"
-            style={isPositionOK ? styles.textDisabled : styles.onBackground}
-          >
-            Then we can monitor & measure your posture
-          </Text>
-        </View>
+      {isBackgroundRunning && (
+        <CustomButton
+          disabled={!isBackgroundRunning}
+          onPress={() => {
+            myModule.warningAsync();
+            BackgroundService.stop().finally(async () => {
+              myModule.removeAllListeners("onLinearMovementDetected");
+              myModule.removeAllListeners("onOrientationChange");
+              await Promise.all([
+                myModule.stopLinearMovementDetection(),
+                myModule.stopOrientation(),
+              ]);
+              setIsBackgroundRunning(false);
+              isBackgroundRunningRef.current = false;
+            });
+          }}
+        >
+          <View style={styles.buttonChildContainer}>
+            <Icon
+              size={ICON_SIZE}
+              color={
+                !isBackgroundRunning
+                  ? styles.textDisabled.color
+                  : styles.text.color
+              }
+              source={"stop"}
+            />
+            <Text
+              variant="bodySmall"
+              style={[!isBackgroundRunning ? styles.textDisabled : styles.text]}
+            >
+              stop background
+            </Text>
+          </View>
+        </CustomButton>
       )}
+
       {!isBackgroundRunning && (
         <View style={{ alignItems: "center", justifyContent: "center" }}>
           <Icon
@@ -398,30 +424,23 @@ export const Application = () => {
             }
           />
           <CircleIcon
-            iconName={"graph-outline"}
-            variant={isPositionOK ? "selected" : "disabled"}
+            iconName={isPositionOK ? "graph-outline" : "angle-obtuse"}
+            variant={"selected"}
           />
           <Text
             variant="titleSmall"
-            style={isPositionOK ? styles.onBackground : styles.textDisabled}
+            style={isPositionOK ? styles.onBackground : styles.onBackground}
           >
-            Start Measuring
+            {isPositionOK ? "Start Measuring" : "Put your phone upright"}
           </Text>
           <Text
-            style={isPositionOK ? styles.onBackground : styles.textDisabled}
             variant="bodySmall"
+            style={isPositionOK ? styles.onBackground : styles.onBackground}
           >
-            You are ready, let's start measuring.
+            {isPositionOK
+              ? "You are ready, let's start measuring."
+              : "Then we can monitor & measure your posture"}
           </Text>
-          <Icon
-            size={ICON_SIZE}
-            source={"arrow-down-thin"}
-            color={
-              isPositionOK
-                ? styles.onBackground.color
-                : styles.textDisabled.color
-            }
-          />
         </View>
       )}
 
@@ -447,18 +466,25 @@ export const Application = () => {
             isBackgroundRunningRef.current = true;
           }}
         >
-          <Text
-            variant="bodySmall"
-            style={[
-              isBackgroundRunning || !isPositionOK
-                ? styles.textDisabled
-                : styles.text,
-            ]}
-          >
-            {isPositionOK
-              ? `Start in ${options.parameters.values.name} mode`
-              : "Put your phone upright"}
-          </Text>
+          <View style={styles.buttonChildContainer}>
+            <Icon
+              size={ICON_SIZE}
+              source={"cursor-default-click-outline"}
+              color={
+                isPositionOK
+                  ? styles.onBackground.color
+                  : styles.textDisabled.color
+              }
+            />
+            <Text
+              variant="bodySmall"
+              style={[!isPositionOK ? styles.textDisabled : styles.text]}
+            >
+              {isPositionOK
+                ? `Start in ${options.parameters.values.name} mode`
+                : "Put your phone upright"}
+            </Text>
+          </View>
         </CustomButton>
       )}
       {!isBackgroundRunning && (
@@ -522,30 +548,30 @@ const GLOBAL_PADDING_VERTICAL = 20;
 const stylesCallback = (theme: MD3Theme) =>
   StyleSheet.create({
     container: {
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.elevation.level5,
       flex: 1,
       alignItems: "center",
       paddingVertical: GLOBAL_PADDING_VERTICAL,
       paddingHorizontal: GLOBAL_PADDING_HORIZONTAL,
     },
     divider: {
-      backgroundColor: theme.colors.primary,
+      backgroundColor: theme.colors.onBackground,
       width: "100%",
     },
     title: {
       textDecorationLine: "underline",
       alignSelf: "center",
-      textDecorationColor: theme.colors.primary,
-      color: theme.colors.primary,
+      textDecorationColor: theme.colors.onBackground,
+      color: theme.colors.onBackground,
     },
     selectedButton: {
-      backgroundColor: theme.colors.primary,
+      backgroundColor: theme.colors.inverseSurface,
     },
     selectedButtonText: {
-      color: theme.colors.onPrimary,
+      color: theme.colors.inverseOnSurface,
     },
     text: {
-      color: theme.colors.onTertiary,
+      color: theme.colors.onBackground,
     },
     textDisabled: {
       color: theme.colors.onSurfaceDisabled,
@@ -562,8 +588,8 @@ const stylesCallback = (theme: MD3Theme) =>
       padding: 8,
       borderRadius: 8,
       marginVertical: 4,
-      color: theme.colors.onTertiary,
-      backgroundColor: theme.colors.tertiary,
+      color: theme.colors.onBackground,
+      backgroundColor: theme.colors.background,
     },
   });
 //region background task
@@ -572,7 +598,12 @@ type BackgroundTaskParams = {
   values: (typeof angleValuesMap)[keyof typeof angleValuesMap];
   strictness: number; // max strikes at bad angle -> vibrate
 };
-const EVENT_LOG_VALUES = ["LOGGED", "ALERTED", "ERROR"] as const;
+const EVENT_LOG_VALUES = {
+  0: "LOGGED",
+  1: "ALERTED",
+  2: "ERROR_NO_TASK_DATA_INJECTED",
+  3: "ERROR_NO_ANGLE_INSERTED_TO_DB",
+} as const;
 const angleValuesMap = {
   veryLight: { y: 2.54, z: 9.47, angle: 15, name: "VeryLight" as const },
   light: { y: 4.9, z: 8.5, angle: 30, name: "Light" as const },
@@ -581,6 +612,7 @@ const angleValuesMap = {
 } satisfies {
   [key: string]: { y: number; z: number; angle: number; name: string };
 };
+type ANGLE_NAMES = (typeof angleValuesMap)[keyof typeof angleValuesMap]["name"];
 const defaultConfig = {
   delay: 5000 as const,
   values: angleValuesMap["light"],
@@ -739,6 +771,23 @@ const veryIntensiveTask2 = async (taskData?: BackgroundTaskParams) => {
 };
 
 const veryIntensiveTask3 = async (taskData?: BackgroundTaskParams) => {
+  const db = await SQLite.openDatabaseAsync("databaseName");
+  const allRows = await db.getAllAsync<EVENT_LOG_VALUES>(
+    "SELECT * FROM event_log"
+  );
+  const dbTask = allRows.find((r) =>
+    Object.values(angleValuesMap)
+      .map((a) => a.name)
+      .some((n) => n === r.value)
+  );
+  if (!dbTask) {
+    console.log("no dbTask");
+    db.runAsync(
+      "INSERT INTO event_log (value) VALUES (?)",
+      EVENT_LOG_VALUES[3]
+    );
+    myModule.errorAsync();
+  }
   const config = taskData ?? defaultConfig;
   const { delay, values } = config;
   const badAngleRef: BadAngleRef = {
@@ -748,7 +797,7 @@ const veryIntensiveTask3 = async (taskData?: BackgroundTaskParams) => {
   const linearAccelerationRef: NullableNumberRef = { current: null };
   const linearAccelerationEnabledRef: RefType<boolean> = { current: true };
   const VAR = 1.5;
-  const db = await SQLite.openDatabaseAsync("databaseName");
+
   if (!taskData) {
     db.runAsync(
       "INSERT INTO event_log (value) VALUES (?)",

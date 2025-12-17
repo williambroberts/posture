@@ -50,38 +50,38 @@ const stylesCallback = (theme: MD3Theme) =>
       padding: 2,
     },
     [`icon${variants[1]}`]: {
-      color: theme.colors.primary,
+      color: theme.colors.onBackground,
     },
     [`outer${variants[1]}`]: {
       borderRadius: 999,
       overflow: "hidden",
-      backgroundColor: theme.colors.primary,
+      backgroundColor: theme.colors.background,
       padding: 2,
     },
     [`middle${variants[1]}`]: {
       borderRadius: 999,
       padding: 1,
       overflow: "hidden",
-      backgroundColor: theme.colors.primaryContainer,
+      backgroundColor: theme.colors.onBackground,
     },
     [`inner${variants[1]}`]: {
       borderRadius: 999,
       overflow: "hidden",
-      backgroundColor: theme.colors.surface,
+      backgroundColor: theme.colors.elevation.level4,
       padding: 2,
     },
     [`icon${variants[2]}`]: {
-      color: theme.colors.tertiary,
+      color: theme.colors.onSurface,
     },
     [`outer${variants[2]}`]: {
       borderRadius: 999,
-      backgroundColor: theme.colors.tertiary,
+      backgroundColor: theme.colors.surface,
       padding: 2,
     },
     [`middle${variants[2]}`]: {
       borderRadius: 999,
       padding: 1,
-      backgroundColor: theme.colors.tertiaryContainer,
+      backgroundColor: theme.colors.surface,
     },
     [`inner${variants[2]}`]: {
       borderRadius: 999,
@@ -89,21 +89,21 @@ const stylesCallback = (theme: MD3Theme) =>
       padding: 2,
     },
     [`icon${variants[3]}`]: {
-      color: theme.colors.secondary,
+      color: theme.colors.elevation.level3,
     },
     [`outer${variants[3]}`]: {
       borderRadius: 999,
-      backgroundColor: theme.colors.secondary,
+      backgroundColor: theme.colors.elevation.level3,
       padding: 2,
     },
     [`middle${variants[3]}`]: {
       borderRadius: 999,
       padding: 1,
-      backgroundColor: theme.colors.secondaryContainer,
+      backgroundColor: theme.colors.elevation.level3,
     },
     [`inner${variants[3]}`]: {
       borderRadius: 999,
-      backgroundColor: theme.colors.surface,
+      backgroundColor: theme.colors.elevation.level3,
       padding: 2,
     },
   });

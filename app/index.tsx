@@ -31,6 +31,6 @@ const stylesCallback = (theme: MD3Theme) =>
   StyleSheet.create({
     safeAreaView: {
       flex: 1,
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.elevation.level5,
     },
   });
