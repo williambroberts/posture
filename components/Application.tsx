@@ -45,8 +45,11 @@ export const Application = () => {
         setDebug(errors);
       } else {
         setDebug({
+          type: options.parameters.values.name,
           count: allRows.length,
           alerted: allRows.filter((r) => r.value === EVENT_LOG_VALUES[1])
+            .length,
+          corrected: allRows.filter((r) => r.value === EVENT_LOG_VALUES[4])
             .length,
         });
       }
