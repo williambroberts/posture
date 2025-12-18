@@ -27,7 +27,6 @@ export const Application = () => {
   useEffect(() => {
     (async () => {
       const db = await SQLite.openDatabaseAsync("databaseName");
-      // await db.execAsync(`DROP TABLE IF EXISTS event_log;`);
       await db.execAsync(`
       CREATE TABLE IF NOT EXISTS event_log (
         id INTEGER PRIMARY KEY NOT NULL, 
@@ -603,6 +602,7 @@ const EVENT_LOG_VALUES = {
   1: "ALERTED",
   2: "ERROR_NO_TASK_DATA_INJECTED",
   3: "ERROR_NO_ANGLE_INSERTED_TO_DB",
+  4: "CORRECTED",
 } as const;
 const angleValuesMap = {
   veryLight: { y: 2.54, z: 9.47, angle: 15, name: "VeryLight" as const },
@@ -806,11 +806,32 @@ const veryIntensiveTask3 = async (taskData?: BackgroundTaskParams) => {
     myModule.errorAsync();
   }
   const dbEmitter = new EventEmitter<EventsMap>();
+  let eventAt: number | null = null;
   dbEmitter.addListener("insert", async (e) => {
+    const now = new Date().getTime();
     myModule.errorAsync();
+    const APPROX_MAX_EVENT_RATE_MS = 3000; //3 seconds in ms
+    if (typeof eventAt === "number") {
+      if (now - eventAt < APPROX_MAX_EVENT_RATE_MS * 1.5) {
+        //delete the last optimistic correction.
+        // i.e the user has not corrected their phone position for the minimum length of time.
+        // MIN_CORRECTION_TIME = APPROX_MAX_EVENT_RATE_MS * 1.5
+        //slight overestimate. e.g 1 evt per 3 second if phone always at bad position.
+        await db.runAsync(
+          "DELETE FROM event_log WHERE value = ? ORDER BY id DESC LIMIT 1",
+          EVENT_LOG_VALUES[4]
+        );
+      }
+    }
+    eventAt = now;
     await db.runAsync(
       "INSERT INTO event_log (value) VALUES (?)",
       EVENT_LOG_VALUES[1]
+    );
+    //add that they corrected. optimistic logging
+    await db.runAsync(
+      "INSERT INTO event_log (value) VALUES (?)",
+      EVENT_LOG_VALUES[4]
     );
   });
   await new Promise(async (resolve) => {
@@ -880,7 +901,7 @@ const veryIntensiveTask3 = async (taskData?: BackgroundTaskParams) => {
           if (!linearAccelerationEnabledRef.current) {
             setTimeout(() => {
               linearAccelerationEnabledRef.current = true;
-            }, 200);
+            }, 20);
           }
         }
         if (badAngleRef.current.count < 0) {
