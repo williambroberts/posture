@@ -14,11 +14,13 @@ import { useThemedStyles } from "@/utilities/theme";
 import * as SQLite from "expo-sqlite";
 import { EventEmitter } from "expo-modules-core";
 import { CircleIcon } from "./CircleIcon";
+import { Chart } from "./Chart";
 
 //region component
 export const Application = () => {
   const [options, setOptions] = useState<ExtendedOptions>(defaultOptions);
   const [debug, setDebug] = useState<any>();
+  const [showLogs, setShowLogs] = useState<boolean>(false);
   const [isPositionOK, setIsPositionOk] = useState<boolean>(false);
   const [isBackgroundRunning, setIsBackgroundRunning] =
     useState<boolean>(false);
@@ -34,6 +36,15 @@ export const Application = () => {
         createdAt TEXT NOT NULL DEFAULT (datetime('now'))
       );
     `);
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS event_history (
+          id INTEGER PRIMARY KEY NOT NULL, 
+          createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+          type TEXT NOT NULL,
+          alerted INTEGER NOT NULL,
+          corrected INTEGER NOT NULL
+        );
+      `);
       const allRows = await db.getAllAsync<EVENT_LOG_VALUES>(
         "SELECT * FROM event_log"
       );
@@ -44,13 +55,25 @@ export const Application = () => {
       if (errors.length > 0) {
         setDebug(errors);
       } else {
+        const type = options.parameters.values.name;
+        const alerted = allRows.filter(
+          (r) => r.value === EVENT_LOG_VALUES[1]
+        ).length;
+        const corrected = allRows.filter(
+          (r) => r.value === EVENT_LOG_VALUES[4]
+        ).length;
+        if (alerted > 0 || corrected > 0) {
+          await db.runAsync(
+            "INSERT INTO event_history (type, alerted, corrected) VALUES (?, ?, ?)",
+            type,
+            alerted,
+            corrected
+          );
+        }
         setDebug({
-          type: options.parameters.values.name,
-          count: allRows.length,
-          alerted: allRows.filter((r) => r.value === EVENT_LOG_VALUES[1])
-            .length,
-          corrected: allRows.filter((r) => r.value === EVENT_LOG_VALUES[4])
-            .length,
+          type,
+          alerted,
+          corrected,
         });
       }
       await db.runAsync("DELETE FROM event_log");
@@ -132,6 +155,28 @@ export const Application = () => {
       setIsPositionOk(false);
     };
   }, [options, isBackgroundRunning]);
+
+  if (showLogs) {
+    return (
+      <View style={styles.container}>
+        <SQLite.SQLiteProvider databaseName="databaseName">
+          <CustomButton disabled={false} onPress={() => setShowLogs(false)}>
+            <View style={styles.buttonChildContainer}>
+              <Icon
+                size={ICON_SIZE}
+                source={"keyboard-backspace"}
+                color={styles.onBackground.color}
+              />
+              <Text variant="bodySmall" style={[styles.onBackground]}>
+                Back
+              </Text>
+            </View>
+          </CustomButton>
+          <Chart injectedStyles={styles} />
+        </SQLite.SQLiteProvider>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -519,7 +564,6 @@ export const Application = () => {
         </View>
       )}
       <Divider style={[styles.divider, { marginTop: 8 }]} />
-      {/* <Text style={}>${options.parameters.values.name}</Text> */}
       {isBackgroundRunning && (
         <>
           <Text variant="bodyMedium" style={[styles.textWarning]}>
@@ -539,12 +583,27 @@ export const Application = () => {
           </Text>
         </>
       )}
-      <Text>DEBUG:{JSON.stringify(debug, null, 2)}</Text>
+      <Divider style={[styles.divider, { marginTop: 8 }]} />
+      {!isBackgroundRunning && (
+        <CustomButton disabled={false} onPress={() => setShowLogs(true)}>
+          <View style={styles.buttonChildContainer}>
+            <Icon
+              size={ICON_SIZE}
+              source={"chart-bar-stacked"}
+              color={styles.onBackground.color}
+            />
+            <Text variant="bodySmall" style={[styles.onBackground]}>
+              View Statistics
+            </Text>
+          </View>
+        </CustomButton>
+      )}
+      {/* <Text>DEBUG:{JSON.stringify(debug, null, 2)}</Text> */}
     </View>
   );
 };
 //region styles
-const ICON_SIZE = 16;
+export const ICON_SIZE = 16;
 const GLOBAL_PADDING_HORIZONTAL = 20;
 const GLOBAL_PADDING_VERTICAL = 20;
 const stylesCallback = (theme: MD3Theme) =>
@@ -594,6 +653,7 @@ const stylesCallback = (theme: MD3Theme) =>
       backgroundColor: theme.colors.background,
     },
   });
+export type ApplicationStyles = ReturnType<typeof stylesCallback>;
 //region background task
 type BackgroundTaskParams = {
   delay: number; // power saving var
@@ -615,7 +675,8 @@ const angleValuesMap = {
 } satisfies {
   [key: string]: { y: number; z: number; angle: number; name: string };
 };
-type ANGLE_NAMES = (typeof angleValuesMap)[keyof typeof angleValuesMap]["name"];
+export type ANGLE_NAMES =
+  (typeof angleValuesMap)[keyof typeof angleValuesMap]["name"];
 const defaultConfig = {
   delay: 5000 as const,
   values: angleValuesMap["light"],
@@ -821,7 +882,7 @@ const veryIntensiveTask3 = async (taskData?: BackgroundTaskParams) => {
         // MIN_CORRECTION_TIME = APPROX_MAX_EVENT_RATE_MS * 1.5
         //slight overestimate. e.g 1 evt per 3 second if phone always at bad position.
         await db.runAsync(
-          "DELETE FROM event_log WHERE value = ? ORDER BY id DESC LIMIT 1",
+          "DELETE FROM event_log WHERE id = (SELECT id FROM event_log WHERE value = ? ORDER BY id DESC LIMIT 1)",
           EVENT_LOG_VALUES[4]
         );
       }
