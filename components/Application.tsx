@@ -15,6 +15,7 @@ import * as SQLite from "expo-sqlite";
 import { EventEmitter } from "expo-modules-core";
 import { CircleIcon } from "./CircleIcon";
 import { Chart } from "./Chart";
+// import { Image } from "expo-image";
 
 //region component
 export const Application = () => {
@@ -180,262 +181,46 @@ export const Application = () => {
 
   return (
     <View style={styles.container}>
-      <Divider style={styles.divider} />
-      <Text variant="titleMedium" style={styles.title}>
-        POSTURE KEEP
-      </Text>
-      <Divider style={styles.divider} />
-      <Text variant="bodyMedium" style={styles.onBackground}>
-        Posture tracking & monitoring
-      </Text>
-      <Icon
-        size={ICON_SIZE}
-        source={"arrow-down-thin"}
-        color={styles.onBackground.color}
-      />
-      {!isBackgroundRunning && (
-        <View style={{ alignItems: "center", justifyContent: "center" }}>
-          <CircleIcon iconName={"package-variant"} variant={"selected"} />
-          <Text variant="titleSmall">Configure </Text>
-          <Text variant="bodySmall">Choose the setting right for you.</Text>
-        </View>
-      )}
-      <CustomButton
-        containerStyle={[
-          options.parameters.values.name === angleValuesMap["veryLight"].name
-            ? styles.selectedButton
-            : {},
-        ]}
-        disabled={isBackgroundRunning}
-        onPress={() => {
-          myModule.selectionAsync();
-          setOptions({
-            ...defaultOptions,
-            parameters: {
-              ...defaultConfig,
-              values: angleValuesMap["veryLight"],
-            },
-          });
-        }}
-      >
-        <View style={styles.buttonChildContainer}>
-          <Icon
-            size={ICON_SIZE}
-            color={
-              options.parameters.values.name ===
-              angleValuesMap["veryLight"].name
-                ? styles.selectedButtonText.color
-                : isBackgroundRunning
-                ? styles.textDisabled.color
-                : styles.text.color
-            }
-            source={"tally-mark-1"}
-          />
-          <Text
-            variant="bodySmall"
-            style={[
-              styles.text,
-              options.parameters.values.name ===
-              angleValuesMap["veryLight"].name
-                ? styles.selectedButtonText
-                : isBackgroundRunning
-                ? styles.textDisabled
-                : {},
-            ]}
-          >
-            {angleValuesMap["veryLight"].name}
+      <Image />
+      <View style={styles.card}>
+        {/* <Divider style={styles.divider} /> */}
+        <View style={[styles.textWarning, styles.borderDashed]}>
+          <Text variant="titleMedium" style={styles.title}>
+            POSTURE KEEP
           </Text>
-          {options.parameters.values.name ===
-            angleValuesMap["veryLight"].name && (
-            <Icon
-              size={ICON_SIZE}
-              color={styles.selectedButtonText.color}
-              source={"check"}
-            />
-          )}
-        </View>
-      </CustomButton>
-      <CustomButton
-        containerStyle={[
-          options.parameters.values.name === angleValuesMap["light"].name
-            ? styles.selectedButton
-            : {},
-        ]}
-        disabled={isBackgroundRunning}
-        onPress={() => {
-          myModule.selectionAsync();
-          setOptions({
-            ...defaultOptions,
-            parameters: { ...defaultConfig, values: angleValuesMap["light"] },
-          });
-        }}
-      >
-        <View style={styles.buttonChildContainer}>
-          <Icon
-            size={ICON_SIZE}
-            color={
-              options.parameters.values.name === angleValuesMap["light"].name
-                ? styles.selectedButtonText.color
-                : isBackgroundRunning
-                ? styles.textDisabled.color
-                : styles.text.color
-            }
-            source={"tally-mark-2"}
-          />
-          <Text
-            variant="bodySmall"
-            style={[
-              styles.text,
-              options.parameters.values.name === angleValuesMap["light"].name
-                ? styles.selectedButtonText
-                : isBackgroundRunning
-                ? styles.textDisabled
-                : {},
-            ]}
-          >
-            {angleValuesMap["light"].name}
+          {/* <Divider style={styles.divider} /> */}
+          <Text variant="bodyMedium" style={styles.onBackground}>
+            Posture tracking & monitoring
           </Text>
-          {options.parameters.values.name === angleValuesMap["light"].name && (
-            <Icon
-              size={ICON_SIZE}
-              color={styles.selectedButtonText.color}
-              source={"check"}
-            />
-          )}
         </View>
-      </CustomButton>
-      <CustomButton
-        containerStyle={[
-          options.parameters.values.name === angleValuesMap["normal"].name
-            ? styles.selectedButton
-            : {},
-        ]}
-        disabled={isBackgroundRunning}
-        onPress={() => {
-          myModule.selectionAsync();
-          setOptions({
-            ...defaultOptions,
-            parameters: { ...defaultConfig, values: angleValuesMap["normal"] },
-          });
-        }}
-      >
-        <View style={styles.buttonChildContainer}>
-          <Icon
-            size={ICON_SIZE}
-            color={
-              options.parameters.values.name === angleValuesMap["normal"].name
-                ? styles.selectedButtonText.color
-                : isBackgroundRunning
-                ? styles.textDisabled.color
-                : styles.text.color
-            }
-            source={"tally-mark-3"}
-          />
-          <Text
-            variant="bodySmall"
-            style={[
-              styles.text,
-              options.parameters.values.name === angleValuesMap["normal"].name
-                ? styles.selectedButtonText
-                : isBackgroundRunning
-                ? styles.textDisabled
-                : {},
-            ]}
-          >
-            {angleValuesMap["normal"].name}
-          </Text>
-          {options.parameters.values.name === angleValuesMap["normal"].name && (
-            <Icon
-              size={ICON_SIZE}
-              color={styles.selectedButtonText.color}
-              source={"check"}
-            />
-          )}
-        </View>
-      </CustomButton>
-      <CustomButton
-        containerStyle={[
-          options.parameters.values.name === angleValuesMap["strict"].name
-            ? styles.selectedButton
-            : {},
-        ]}
-        disabled={isBackgroundRunning}
-        onPress={() => {
-          myModule.selectionAsync();
-          setOptions({
-            ...defaultOptions,
-            parameters: { ...defaultConfig, values: angleValuesMap["strict"] },
-          });
-        }}
-      >
-        <View style={styles.buttonChildContainer}>
-          <Icon
-            size={ICON_SIZE}
-            color={
-              options.parameters.values.name === angleValuesMap["strict"].name
-                ? styles.selectedButtonText.color
-                : isBackgroundRunning
-                ? styles.textDisabled.color
-                : styles.text.color
-            }
-            source={"tally-mark-4"}
-          />
-          <Text
-            variant="bodySmall"
-            style={[
-              styles.text,
-              options.parameters.values.name === angleValuesMap["strict"].name
-                ? styles.selectedButtonText
-                : isBackgroundRunning
-                ? styles.textDisabled
-                : {},
-            ]}
-          >
-            {angleValuesMap["strict"].name}
-          </Text>
-          {options.parameters.values.name === angleValuesMap["strict"].name && (
-            <Icon
-              size={ICON_SIZE}
-              color={styles.selectedButtonText.color}
-              source={"check"}
-            />
-          )}
-        </View>
-      </CustomButton>
-      {isBackgroundRunning && (
-        <View style={{ alignItems: "center", justifyContent: "center" }}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <CircleIcon iconName="chevron-right" variant="disabled" />
-            <Icon
-              size={ICON_SIZE}
-              source={"arrow-right-thin"}
-              color={styles.onBackground.color}
-            />
-            <CircleIcon iconName="chevron-double-right" variant="disabled" />
-            <Icon
-              size={ICON_SIZE}
-              source={"arrow-right-thin"}
-              color={styles.onBackground.color}
-            />
-            <CircleIcon iconName="chevron-triple-right" variant="selected" />
+
+        <Icon
+          size={ICON_SIZE}
+          source={"arrow-down-thin"}
+          color={styles.onBackground.color}
+        />
+        {!isBackgroundRunning && (
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <CircleIcon iconName={"package-variant"} variant={"selected"} />
+            <Text variant="titleSmall">Configure </Text>
+            <Text variant="bodySmall">Choose the setting right for you.</Text>
           </View>
-          <Text variant="bodySmall">Ready for monitoring & tracking.</Text>
-        </View>
-      )}
-      {isBackgroundRunning && (
+        )}
         <CustomButton
-          disabled={!isBackgroundRunning}
+          containerStyle={[
+            options.parameters.values.name === angleValuesMap["veryLight"].name
+              ? styles.selectedButton
+              : {},
+          ]}
+          disabled={isBackgroundRunning}
           onPress={() => {
-            myModule.warningAsync();
-            BackgroundService.stop().finally(async () => {
-              myModule.removeAllListeners("onLinearMovementDetected");
-              myModule.removeAllListeners("onOrientationChange");
-              await Promise.all([
-                myModule.stopLinearMovementDetection(),
-                myModule.stopOrientation(),
-              ]);
-              setIsBackgroundRunning(false);
-              isBackgroundRunningRef.current = false;
+            myModule.selectionAsync();
+            setOptions({
+              ...defaultOptions,
+              parameters: {
+                ...defaultConfig,
+                values: angleValuesMap["veryLight"],
+              },
             });
           }}
         >
@@ -443,158 +228,390 @@ export const Application = () => {
             <Icon
               size={ICON_SIZE}
               color={
-                !isBackgroundRunning
+                options.parameters.values.name ===
+                angleValuesMap["veryLight"].name
+                  ? styles.selectedButtonText.color
+                  : isBackgroundRunning
                   ? styles.textDisabled.color
                   : styles.text.color
               }
-              source={"stop"}
+              source={"tally-mark-1"}
             />
             <Text
               variant="bodySmall"
-              style={[!isBackgroundRunning ? styles.textDisabled : styles.text]}
+              style={[
+                styles.text,
+                options.parameters.values.name ===
+                angleValuesMap["veryLight"].name
+                  ? styles.selectedButtonText
+                  : isBackgroundRunning
+                  ? styles.textDisabled
+                  : {},
+              ]}
             >
-              stop background
+              {angleValuesMap["veryLight"].name}
             </Text>
+            {options.parameters.values.name ===
+              angleValuesMap["veryLight"].name && (
+              <Icon
+                size={ICON_SIZE}
+                color={styles.selectedButtonText.color}
+                source={"check"}
+              />
+            )}
           </View>
         </CustomButton>
-      )}
-
-      {!isBackgroundRunning && (
-        <View style={{ alignItems: "center", justifyContent: "center" }}>
-          <Icon
-            size={ICON_SIZE}
-            source={"arrow-down-thin"}
-            color={
-              isPositionOK
-                ? styles.onBackground.color
-                : styles.textDisabled.color
-            }
-          />
-          <CircleIcon
-            iconName={isPositionOK ? "graph-outline" : "angle-obtuse"}
-            variant={"selected"}
-          />
-          <Text
-            variant="titleSmall"
-            style={isPositionOK ? styles.onBackground : styles.onBackground}
-          >
-            {isPositionOK ? "Start Measuring" : "Put your phone upright"}
-          </Text>
-          <Text
-            variant="bodySmall"
-            style={isPositionOK ? styles.onBackground : styles.onBackground}
-          >
-            {isPositionOK
-              ? "You are ready, let's start measuring."
-              : "Then we can monitor & measure your posture"}
-          </Text>
-        </View>
-      )}
-
-      {!isBackgroundRunning && (
         <CustomButton
-          disabled={
-            isBackgroundRunning ||
-            !isPositionOK ||
-            options.parameters.values.name === "Init"
-          }
-          onPress={async () => {
-            if (BackgroundService.isRunning()) {
-              return;
-            }
-            if (
-              !myModule.isOrientationAvailable() ||
-              !myModule.isLinearMovementDetectionAvailable()
-            ) {
-              Alert.alert(
-                "Sensor Malfunction",
-                "Movement detection is unavailable at this time."
-              );
-              return;
-            }
-            myModule.warningAsync();
-            setIsBackgroundRunning(true);
-            isBackgroundRunningRef.current = true;
+          containerStyle={[
+            options.parameters.values.name === angleValuesMap["light"].name
+              ? styles.selectedButton
+              : {},
+          ]}
+          disabled={isBackgroundRunning}
+          onPress={() => {
+            myModule.selectionAsync();
+            setOptions({
+              ...defaultOptions,
+              parameters: { ...defaultConfig, values: angleValuesMap["light"] },
+            });
           }}
         >
           <View style={styles.buttonChildContainer}>
             <Icon
               size={ICON_SIZE}
-              source={"cursor-default-click-outline"}
               color={
-                isPositionOK && options.parameters.values.name !== "Init"
-                  ? styles.onBackground.color
-                  : styles.textDisabled.color
+                options.parameters.values.name === angleValuesMap["light"].name
+                  ? styles.selectedButtonText.color
+                  : isBackgroundRunning
+                  ? styles.textDisabled.color
+                  : styles.text.color
               }
+              source={"tally-mark-2"}
             />
             <Text
               variant="bodySmall"
               style={[
-                !isPositionOK || options.parameters.values.name === "Init"
+                styles.text,
+                options.parameters.values.name === angleValuesMap["light"].name
+                  ? styles.selectedButtonText
+                  : isBackgroundRunning
                   ? styles.textDisabled
-                  : styles.text,
+                  : {},
               ]}
             >
-              {options.parameters.values.name === "Init"
-                ? "Select a difficulty"
-                : isPositionOK
-                ? `Start in ${options.parameters.values.name} mode`
-                : "Put your phone upright"}
+              {angleValuesMap["light"].name}
             </Text>
+            {options.parameters.values.name ===
+              angleValuesMap["light"].name && (
+              <Icon
+                size={ICON_SIZE}
+                color={styles.selectedButtonText.color}
+                source={"check"}
+              />
+            )}
           </View>
         </CustomButton>
-      )}
-      {!isBackgroundRunning && (
-        <View style={{ alignItems: "center", justifyContent: "center" }}>
-          <Icon
-            size={ICON_SIZE}
-            source={"arrow-down-thin"}
-            color={
-              isPositionOK
-                ? styles.onBackground.color
-                : styles.textDisabled.color
+        <CustomButton
+          containerStyle={[
+            options.parameters.values.name === angleValuesMap["normal"].name
+              ? styles.selectedButton
+              : {},
+          ]}
+          disabled={isBackgroundRunning}
+          onPress={() => {
+            myModule.selectionAsync();
+            setOptions({
+              ...defaultOptions,
+              parameters: {
+                ...defaultConfig,
+                values: angleValuesMap["normal"],
+              },
+            });
+          }}
+        >
+          <View style={styles.buttonChildContainer}>
+            <Icon
+              size={ICON_SIZE}
+              color={
+                options.parameters.values.name === angleValuesMap["normal"].name
+                  ? styles.selectedButtonText.color
+                  : isBackgroundRunning
+                  ? styles.textDisabled.color
+                  : styles.text.color
+              }
+              source={"tally-mark-3"}
+            />
+            <Text
+              variant="bodySmall"
+              style={[
+                styles.text,
+                options.parameters.values.name === angleValuesMap["normal"].name
+                  ? styles.selectedButtonText
+                  : isBackgroundRunning
+                  ? styles.textDisabled
+                  : {},
+              ]}
+            >
+              {angleValuesMap["normal"].name}
+            </Text>
+            {options.parameters.values.name ===
+              angleValuesMap["normal"].name && (
+              <Icon
+                size={ICON_SIZE}
+                color={styles.selectedButtonText.color}
+                source={"check"}
+              />
+            )}
+          </View>
+        </CustomButton>
+        <CustomButton
+          containerStyle={[
+            options.parameters.values.name === angleValuesMap["strict"].name
+              ? styles.selectedButton
+              : {},
+          ]}
+          disabled={isBackgroundRunning}
+          onPress={() => {
+            myModule.selectionAsync();
+            setOptions({
+              ...defaultOptions,
+              parameters: {
+                ...defaultConfig,
+                values: angleValuesMap["strict"],
+              },
+            });
+          }}
+        >
+          <View style={styles.buttonChildContainer}>
+            <Icon
+              size={ICON_SIZE}
+              color={
+                options.parameters.values.name === angleValuesMap["strict"].name
+                  ? styles.selectedButtonText.color
+                  : isBackgroundRunning
+                  ? styles.textDisabled.color
+                  : styles.text.color
+              }
+              source={"tally-mark-4"}
+            />
+            <Text
+              variant="bodySmall"
+              style={[
+                styles.text,
+                options.parameters.values.name === angleValuesMap["strict"].name
+                  ? styles.selectedButtonText
+                  : isBackgroundRunning
+                  ? styles.textDisabled
+                  : {},
+              ]}
+            >
+              {angleValuesMap["strict"].name}
+            </Text>
+            {options.parameters.values.name ===
+              angleValuesMap["strict"].name && (
+              <Icon
+                size={ICON_SIZE}
+                color={styles.selectedButtonText.color}
+                source={"check"}
+              />
+            )}
+          </View>
+        </CustomButton>
+        {isBackgroundRunning && (
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <CircleIcon iconName="chevron-right" variant="disabled" />
+              <Icon
+                size={ICON_SIZE}
+                source={"arrow-right-thin"}
+                color={styles.onBackground.color}
+              />
+              <CircleIcon iconName="chevron-double-right" variant="disabled" />
+              <Icon
+                size={ICON_SIZE}
+                source={"arrow-right-thin"}
+                color={styles.onBackground.color}
+              />
+              <CircleIcon iconName="chevron-triple-right" variant="selected" />
+            </View>
+            <Text variant="bodySmall">Ready for monitoring & tracking.</Text>
+          </View>
+        )}
+        {isBackgroundRunning && (
+          <CustomButton
+            disabled={!isBackgroundRunning}
+            onPress={() => {
+              myModule.warningAsync();
+              BackgroundService.stop().finally(async () => {
+                myModule.removeAllListeners("onLinearMovementDetected");
+                myModule.removeAllListeners("onOrientationChange");
+                await Promise.all([
+                  myModule.stopLinearMovementDetection(),
+                  myModule.stopOrientation(),
+                ]);
+                setIsBackgroundRunning(false);
+                isBackgroundRunningRef.current = false;
+              });
+            }}
+          >
+            <View style={styles.buttonChildContainer}>
+              <Icon
+                size={ICON_SIZE}
+                color={
+                  !isBackgroundRunning
+                    ? styles.textDisabled.color
+                    : styles.text.color
+                }
+                source={"stop"}
+              />
+              <Text
+                variant="bodySmall"
+                style={[
+                  !isBackgroundRunning ? styles.textDisabled : styles.text,
+                ]}
+              >
+                stop background
+              </Text>
+            </View>
+          </CustomButton>
+        )}
+
+        {!isBackgroundRunning && (
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <Icon
+              size={ICON_SIZE}
+              source={"arrow-down-thin"}
+              color={
+                isPositionOK
+                  ? styles.onBackground.color
+                  : styles.textDisabled.color
+              }
+            />
+            <CircleIcon
+              iconName={isPositionOK ? "graph-outline" : "angle-obtuse"}
+              variant={"selected"}
+            />
+            <Text
+              variant="titleSmall"
+              style={isPositionOK ? styles.onBackground : styles.onBackground}
+            >
+              {isPositionOK ? "Start Measuring" : "Put your phone upright"}
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={isPositionOK ? styles.onBackground : styles.onBackground}
+            >
+              {isPositionOK
+                ? "You are ready, let's start measuring."
+                : "Then we can monitor & measure your posture"}
+            </Text>
+          </View>
+        )}
+
+        {!isBackgroundRunning && (
+          <CustomButton
+            disabled={
+              isBackgroundRunning ||
+              !isPositionOK ||
+              options.parameters.values.name === "Init"
             }
-          />
-          <CircleIcon
-            iconName={"angle-acute"}
-            variant={isPositionOK ? "selected" : "disabled"}
-          />
-          <Text
-            variant="titleSmall"
-            style={isPositionOK ? styles.onBackground : styles.textDisabled}
+            onPress={async () => {
+              if (BackgroundService.isRunning()) {
+                return;
+              }
+              if (
+                !myModule.isOrientationAvailable() ||
+                !myModule.isLinearMovementDetectionAvailable()
+              ) {
+                Alert.alert(
+                  "Sensor Malfunction",
+                  "Movement detection is unavailable at this time."
+                );
+                return;
+              }
+              myModule.warningAsync();
+              setIsBackgroundRunning(true);
+              isBackgroundRunningRef.current = true;
+            }}
           >
-            Adjust your phone
-          </Text>
-          <Text
-            style={isPositionOK ? styles.onBackground : styles.textDisabled}
-            variant="bodySmall"
-          >
-            When alerted, move your device to a better position.
-          </Text>
-        </View>
-      )}
-      <Divider style={[styles.divider, { marginTop: 8 }]} />
-      {isBackgroundRunning && (
-        <>
-          <Text variant="bodyMedium" style={[styles.textWarning]}>
-            Now switch to a different app and we will track your phone position
-            and angle.
-            {/* todow icons */}
-          </Text>
-          <Text variant="bodyMedium" style={[styles.textWarning]}>
-            When the phone vibrates, adjust your phone to a better position!
-            {/* todow icons */}
-          </Text>
-          <Text variant="bodySmall" style={[styles.textWarning]}>
-            Please set "Allow background activity" to true for this App in your
-            device's App battery management settings, to allow us to freely
-            track your phone's position
-            {/* todow text & icons*/}
-          </Text>
-        </>
-      )}
-      <Divider style={[styles.divider, { marginTop: 8 }]} />
-      {/* {!isBackgroundRunning && (
+            <View style={styles.buttonChildContainer}>
+              <Icon
+                size={ICON_SIZE}
+                source={"cursor-default-click-outline"}
+                color={
+                  isPositionOK && options.parameters.values.name !== "Init"
+                    ? styles.onBackground.color
+                    : styles.textDisabled.color
+                }
+              />
+              <Text
+                variant="bodySmall"
+                style={[
+                  !isPositionOK || options.parameters.values.name === "Init"
+                    ? styles.textDisabled
+                    : styles.text,
+                ]}
+              >
+                {options.parameters.values.name === "Init"
+                  ? "Select a difficulty"
+                  : isPositionOK
+                  ? `Start in ${options.parameters.values.name} mode`
+                  : "Put your phone upright"}
+              </Text>
+            </View>
+          </CustomButton>
+        )}
+        {!isBackgroundRunning && (
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <Icon
+              size={ICON_SIZE}
+              source={"arrow-down-thin"}
+              color={
+                isPositionOK
+                  ? styles.onBackground.color
+                  : styles.textDisabled.color
+              }
+            />
+            <CircleIcon
+              iconName={"angle-acute"}
+              variant={isPositionOK ? "selected" : "disabled"}
+            />
+            <Text
+              variant="titleSmall"
+              style={isPositionOK ? styles.onBackground : styles.textDisabled}
+            >
+              Adjust your phone
+            </Text>
+            <Text
+              style={isPositionOK ? styles.onBackground : styles.textDisabled}
+              variant="bodySmall"
+            >
+              When alerted, move your device to a better position.
+            </Text>
+          </View>
+        )}
+        {/* <Divider style={[styles.divider, { marginTop: 8 }]} /> */}
+        {isBackgroundRunning && (
+          <>
+            <Text variant="bodyMedium" style={[styles.textWarning]}>
+              Now switch to a different app and we will track your phone
+              position and angle.
+              {/* todow icons */}
+            </Text>
+            <Text variant="bodyMedium" style={[styles.textWarning]}>
+              When the phone vibrates, adjust your phone to a better position!
+              {/* todow icons */}
+            </Text>
+            <Text variant="bodySmall" style={[styles.textWarning]}>
+              Please set "Allow background activity" to true for this App in
+              your device's App battery management settings, to allow us to
+              freely track your phone's position
+              {/* todow text & icons*/}
+            </Text>
+          </>
+        )}
+        {/* <Divider style={[styles.divider, { marginTop: 8 }]} /> */}
+        {/* {!isBackgroundRunning && (
         <CustomButton disabled={false} onPress={() => setShowLogs(true)}>
           <View style={styles.buttonChildContainer}>
             <Icon
@@ -608,7 +625,8 @@ export const Application = () => {
           </View>
         </CustomButton>
       )} */}
-      {/* <Text>DEBUG:{JSON.stringify(debug, null, 2)}</Text> */}
+        {/* <Text>DEBUG:{JSON.stringify(debug, null, 2)}</Text> */}
+      </View>
     </View>
   );
 };
@@ -622,8 +640,28 @@ const stylesCallback = (theme: MD3Theme) =>
       backgroundColor: theme.colors.elevation.level5,
       flex: 1,
       alignItems: "center",
-      paddingVertical: GLOBAL_PADDING_VERTICAL,
-      paddingHorizontal: GLOBAL_PADDING_HORIZONTAL,
+      justifyContent: "center",
+      paddingVertical: GLOBAL_PADDING_VERTICAL * 0.5,
+      paddingHorizontal: GLOBAL_PADDING_HORIZONTAL * 0.5,
+    },
+    card: {
+      borderColor: theme.colors.outline,
+      paddingVertical: GLOBAL_PADDING_VERTICAL * 0.5,
+      paddingHorizontal: GLOBAL_PADDING_HORIZONTAL * 0.5,
+      borderWidth: 1,
+      width: "100%",
+      flex: 1,
+      overflow: "hidden",
+      borderStyle: "dashed",
+      borderRadius: 8,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: theme.colors.outlineVariant,
+    },
+    borderDashed: {
+      borderStyle: "dashed",
+      borderWidth: 1,
+      borderColor: theme.colors.outline,
     },
     divider: {
       backgroundColor: theme.colors.onBackground,
