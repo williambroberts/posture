@@ -181,7 +181,6 @@ export const Application = () => {
 
   return (
     <View style={styles.container}>
-      <Image />
       <View style={styles.card}>
         {/* <Divider style={styles.divider} /> */}
         <View style={[styles.textWarning, styles.borderDashed]}>
