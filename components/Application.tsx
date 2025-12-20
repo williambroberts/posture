@@ -493,7 +493,11 @@ export const Application = () => {
 
       {!isBackgroundRunning && (
         <CustomButton
-          disabled={isBackgroundRunning || !isPositionOK}
+          disabled={
+            isBackgroundRunning ||
+            !isPositionOK ||
+            options.parameters.values.name === "Init"
+          }
           onPress={async () => {
             if (BackgroundService.isRunning()) {
               return;
@@ -518,16 +522,22 @@ export const Application = () => {
               size={ICON_SIZE}
               source={"cursor-default-click-outline"}
               color={
-                isPositionOK
+                isPositionOK && options.parameters.values.name !== "Init"
                   ? styles.onBackground.color
                   : styles.textDisabled.color
               }
             />
             <Text
               variant="bodySmall"
-              style={[!isPositionOK ? styles.textDisabled : styles.text]}
+              style={[
+                !isPositionOK || options.parameters.values.name === "Init"
+                  ? styles.textDisabled
+                  : styles.text,
+              ]}
             >
-              {isPositionOK
+              {options.parameters.values.name === "Init"
+                ? "Select a difficulty"
+                : isPositionOK
                 ? `Start in ${options.parameters.values.name} mode`
                 : "Put your phone upright"}
             </Text>
@@ -584,7 +594,7 @@ export const Application = () => {
         </>
       )}
       <Divider style={[styles.divider, { marginTop: 8 }]} />
-      {!isBackgroundRunning && (
+      {/* {!isBackgroundRunning && (
         <CustomButton disabled={false} onPress={() => setShowLogs(true)}>
           <View style={styles.buttonChildContainer}>
             <Icon
@@ -597,15 +607,15 @@ export const Application = () => {
             </Text>
           </View>
         </CustomButton>
-      )}
+      )} */}
       {/* <Text>DEBUG:{JSON.stringify(debug, null, 2)}</Text> */}
     </View>
   );
 };
 //region styles
 export const ICON_SIZE = 16;
-const GLOBAL_PADDING_HORIZONTAL = 20;
-const GLOBAL_PADDING_VERTICAL = 20;
+export const GLOBAL_PADDING_HORIZONTAL = 20;
+export const GLOBAL_PADDING_VERTICAL = 20;
 const stylesCallback = (theme: MD3Theme) =>
   StyleSheet.create({
     container: {
@@ -668,6 +678,7 @@ const EVENT_LOG_VALUES = {
   4: "CORRECTED",
 } as const;
 const angleValuesMap = {
+  init: { y: 0, z: 9.81, angle: 0, name: "Init" as const }, //not selectable,alternative to nullable options
   veryLight: { y: 2.54, z: 9.47, angle: 15, name: "VeryLight" as const },
   light: { y: 4.9, z: 8.5, angle: 30, name: "Light" as const },
   normal: { y: 6.94, z: 6.94, angle: 45, name: "Normal" as const },
@@ -679,7 +690,7 @@ export type ANGLE_NAMES =
   (typeof angleValuesMap)[keyof typeof angleValuesMap]["name"];
 const defaultConfig = {
   delay: 5000 as const,
-  values: angleValuesMap["light"],
+  values: angleValuesMap["init"],
   strictness: 1,
 } satisfies BackgroundTaskParams;
 type RefType<T> = { current: T };

@@ -4,8 +4,12 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Icon, MD3Theme, Text } from "react-native-paper";
 import { CustomButton } from "./CustomButton";
-import { ApplicationStyles, ICON_SIZE } from "./Application";
-
+import {
+  ApplicationStyles,
+  GLOBAL_PADDING_HORIZONTAL,
+  ICON_SIZE,
+} from "./Application";
+//region main
 type Props = {
   injectedStyles: ApplicationStyles;
 };
@@ -24,7 +28,7 @@ export const Chart = ({ injectedStyles }: Props) => {
         setRows(null);
       }
       const out: Out = {};
-      for (let i = 0, L = allRows.length; i++; ) {
+      for (let i = 0, L = allRows.length; i < L; i++) {
         let cur = allRows[i];
         if (!out[cur.type]) {
           out[cur.type] = {
@@ -47,8 +51,8 @@ export const Chart = ({ injectedStyles }: Props) => {
       let formattedOut: Out = {};
       for (let [k, v] of Object.entries(out)) {
         formattedOut[k] = {
-          alerted: Math.ceil(v.alerted / max),
-          corrected: Math.ceil(v.corrected / max),
+          alerted: v.alerted / max,
+          corrected: v.corrected / max,
         };
       }
       setRows(formattedOut);
@@ -59,8 +63,34 @@ export const Chart = ({ injectedStyles }: Props) => {
   }, []);
   //jsx
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { padding: GLOBAL_PADDING_HORIZONTAL }]}>
       <Text variant="bodySmall">{JSON.stringify(rows, null, 2)}</Text>
+      <View style={styles.rowContainer}>
+        {rows &&
+          Object.entries(rows).map(([k, v]) => {
+            const widthAlerted = v.alerted * 100;
+            const widthCorrected = v.corrected * 100;
+            return (
+              <View
+                style={{
+                  width: `${widthAlerted}%`,
+                  height: 8,
+                  backgroundColor: "red",
+                  borderRadius: 8,
+                }}
+              >
+                <View
+                  style={{
+                    width: `${widthCorrected}%`,
+                    height: 8,
+                    borderRadius: 8,
+                    backgroundColor: "green",
+                  }}
+                />
+              </View>
+            );
+          })}
+      </View>
       {rows && (
         <CustomButton
           disabled={false}
@@ -88,6 +118,12 @@ export const Chart = ({ injectedStyles }: Props) => {
 const stylesCallback = (theme: MD3Theme) =>
   StyleSheet.create({
     container: { flex: 1 },
+    rowContainer: {
+      flexDirection: "column",
+      gap: 2,
+      // alignItems: "flex-end",
+      // justifyContent: "space-around",
+    },
   });
 
 type EVENT_HISTORY = {
