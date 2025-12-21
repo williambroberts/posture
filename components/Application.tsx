@@ -482,7 +482,7 @@ export const Application = () => {
                   !isBackgroundRunning ? styles.textDisabled : styles.text,
                 ]}
               >
-                stop background
+                stop
               </Text>
             </View>
           </CustomButton>
@@ -572,35 +572,6 @@ export const Application = () => {
               </Text>
             </View>
           </CustomButton>
-        )}
-        {!isBackgroundRunning && (
-          <View style={{ alignItems: "center", justifyContent: "center" }}>
-            <Icon
-              size={ICON_SIZE}
-              source={"arrow-down-thin"}
-              color={
-                isPositionOK
-                  ? styles.onBackground.color
-                  : styles.textDisabled.color
-              }
-            />
-            <CircleIcon
-              iconName={"angle-acute"}
-              variant={isPositionOK ? "selected" : "disabled"}
-            />
-            <Text
-              variant="titleSmall"
-              style={isPositionOK ? styles.onBackground : styles.textDisabled}
-            >
-              Adjust your phone
-            </Text>
-            <Text
-              style={isPositionOK ? styles.onBackground : styles.textDisabled}
-              variant="bodySmall"
-            >
-              When alerted, move your device to a better position.
-            </Text>
-          </View>
         )}
         {/* <Divider style={[styles.divider, { marginTop: 8 }]} /> */}
         {isBackgroundRunning && (
@@ -744,7 +715,7 @@ const EVENT_LOG_VALUES = {
 } as const;
 const angleValuesMap = {
   init: { y: 0, z: 9.81, angle: 0, name: "Init" as const }, //not selectable,alternative to nullable options
-  veryLight: { y: 2.54, z: 9.47, angle: 15, name: "VeryLight" as const },
+  veryLight: { y: 2.54, z: 9.47, angle: 15, name: "Gentle" as const },
   light: { y: 4.9, z: 8.5, angle: 30, name: "Light" as const },
   normal: { y: 6.94, z: 6.94, angle: 45, name: "Normal" as const },
   strict: { y: 8.5, z: 4.9, angle: 60, name: "Strict" as const },
