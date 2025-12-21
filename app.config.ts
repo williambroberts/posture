@@ -16,11 +16,11 @@ const config: ExpoConfig = {
   scheme: "postureKeep",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
-  // splash: {
-  //   image: "./assets/images/splash-icon.png",
-  //   resizeMode: "contain",
-  //   backgroundColor: BACKGROUND_COLOR,
-  // },
+  splash: {
+    image: "./assets/images/splash-icon.png",
+    resizeMode: "contain",
+    backgroundColor: BACKGROUND_COLOR,
+  },
   ios: {
     supportsTablet: true,
   },
@@ -29,6 +29,11 @@ const config: ExpoConfig = {
     adaptiveIcon: {
       foregroundImage: "./assets/images/adaptive-icon.png",
       backgroundColor: BACKGROUND_COLOR,
+    },
+    splash: {
+      image: "./assets/images/splash-icon.png",
+      backgroundColor: BACKGROUND_COLOR,
+      resizeMode: "contain",
     },
     package: "com.thew1lego.posture",
   },
