@@ -9,7 +9,7 @@ const withBackgroundActions = require("./plugins/withBackgroundActions");
 const BACKGROUND_COLOR = "#ffffff";
 const config: ExpoConfig = {
   name: "Posture Keep", //todow
-  slug: "postureKeep",
+  slug: "posture",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
