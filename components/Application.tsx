@@ -15,7 +15,7 @@ import * as SQLite from "expo-sqlite";
 import { EventEmitter } from "expo-modules-core";
 import { CircleIcon } from "./CircleIcon";
 import { Chart } from "./Chart";
-// import { Image } from "expo-image";
+import { Image, ImageBackground } from "expo-image";
 
 //region component
 export const Application = () => {
@@ -180,9 +180,19 @@ export const Application = () => {
   }
 
   return (
+    // <ImageBackground
+    //   style={styles.imageBackground}
+    //   contentFit="cover"
+    //   placeholder={"L28qfp~TIb4@kGbJ9caPoiogxoD-"}
+    //   source={require("../assets/images/trees.jpg")}
+    // >
     <View style={styles.container}>
       <View style={styles.card}>
         {/* <Divider style={styles.divider} /> */}
+        <Image
+          source={require("../assets/images/splash-icon.png")}
+          style={styles.logo}
+        />
         <View style={[styles.textWarning, styles.borderDashed]}>
           <Text variant="titleMedium" style={styles.title}>
             POSTURE KEEP
@@ -271,7 +281,10 @@ export const Application = () => {
             myModule.selectionAsync();
             setOptions({
               ...defaultOptions,
-              parameters: { ...defaultConfig, values: angleValuesMap["light"] },
+              parameters: {
+                ...defaultConfig,
+                values: angleValuesMap["light"],
+              },
             });
           }}
         >
@@ -627,6 +640,7 @@ export const Application = () => {
         {/* <Text>DEBUG:{JSON.stringify(debug, null, 2)}</Text> */}
       </View>
     </View>
+    // </ImageBackground>
   );
 };
 //region styles
@@ -636,7 +650,7 @@ export const GLOBAL_PADDING_VERTICAL = 20;
 const stylesCallback = (theme: MD3Theme) =>
   StyleSheet.create({
     container: {
-      backgroundColor: theme.colors.elevation.level5,
+      // backgroundColor: theme.colors.elevation.level5,
       flex: 1,
       alignItems: "center",
       justifyContent: "center",
@@ -661,6 +675,20 @@ const stylesCallback = (theme: MD3Theme) =>
       borderStyle: "dashed",
       borderWidth: 1,
       borderColor: theme.colors.outline,
+    },
+    imageBackground: {
+      flex: 1,
+      width: "100%",
+    },
+    logo: {
+      height: ICON_SIZE * 2,
+      aspectRatio: 1,
+      borderColor: theme.colors.onSurfaceDisabled,
+      borderWidth: 2,
+      borderRadius: 999,
+      outlineWidth: 2,
+      outlineOffset: 1,
+      outlineColor: theme.colors.backdrop,
     },
     divider: {
       backgroundColor: theme.colors.onBackground,
