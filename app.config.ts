@@ -7,6 +7,7 @@ const withBackgroundActions = require("./plugins/withBackgroundActions");
 // import { withSensorsAppBuildGradle, withSensorsMainApplication, withSensorsSettingsGradle } from './plugins/sensors';
 // import { withGyroscopeMainActivity, withGyroscopeMainApplication } from './plugins/my';
 const BACKGROUND_COLOR = "#ffffff";
+const BACKGROUND_COLOR_DARK = "#000";
 const config: ExpoConfig = {
   name: "Posture Keep", //todow
   slug: "posture",
@@ -34,6 +35,9 @@ const config: ExpoConfig = {
       image: "./assets/images/splash-icon.png",
       backgroundColor: BACKGROUND_COLOR,
       resizeMode: "contain",
+      dark: {
+        backgroundColor: BACKGROUND_COLOR_DARK,
+      },
     },
     package: "com.thew1lego.posture",
   },

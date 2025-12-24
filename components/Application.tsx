@@ -10,7 +10,7 @@ import myModule from "../modules/my-module";
 import { SensorEvent } from "@/modules/my-module/src/MyModule";
 import { Divider, Icon, MD3Theme, Text } from "react-native-paper";
 import { CustomButton } from "./CustomButton";
-import { useThemedStyles } from "@/utilities/theme";
+import { computeColorWithOpacity, useThemedStyles } from "@/utilities/theme";
 import * as SQLite from "expo-sqlite";
 import { EventEmitter } from "expo-modules-core";
 import { CircleIcon } from "./CircleIcon";
@@ -211,7 +211,7 @@ export const Application = () => {
         {!isBackgroundRunning && (
           <View style={{ alignItems: "center", justifyContent: "center" }}>
             <CircleIcon iconName={"package-variant"} variant={"selected"} />
-            <Text variant="titleSmall">Configure </Text>
+            <Text variant="titleSmall">Options</Text>
             <Text variant="bodySmall">Choose the setting right for you.</Text>
           </View>
         )}
@@ -494,24 +494,36 @@ export const Application = () => {
               size={ICON_SIZE}
               source={"arrow-down-thin"}
               color={
-                isPositionOK
+                isPositionOK && options.parameters.values.name !== "Init"
                   ? styles.onBackground.color
                   : styles.textDisabled.color
               }
             />
             <CircleIcon
               iconName={isPositionOK ? "graph-outline" : "angle-obtuse"}
-              variant={"selected"}
+              variant={
+                options.parameters.values.name !== "Init"
+                  ? "selected"
+                  : "disabled"
+              }
             />
             <Text
               variant="titleSmall"
-              style={isPositionOK ? styles.onBackground : styles.onBackground}
+              style={
+                options.parameters.values.name === "Init"
+                  ? styles.textDisabled
+                  : styles.onBackground
+              }
             >
               {isPositionOK ? "Start Measuring" : "Put your phone upright"}
             </Text>
             <Text
               variant="bodySmall"
-              style={isPositionOK ? styles.onBackground : styles.onBackground}
+              style={
+                options.parameters.values.name == "Init"
+                  ? styles.textDisabled
+                  : styles.onBackground
+              }
             >
               {isPositionOK
                 ? "You are ready, let's start measuring."
@@ -640,7 +652,10 @@ const stylesCallback = (theme: MD3Theme) =>
       borderRadius: 8,
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor: theme.colors.outlineVariant,
+      backgroundColor: computeColorWithOpacity(
+        theme.colors.outlineVariant,
+        0.9
+      ),
     },
     borderDashed: {
       borderStyle: "dashed",
