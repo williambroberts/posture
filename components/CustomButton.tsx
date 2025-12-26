@@ -1,4 +1,4 @@
-import { useThemedStyles } from "@/utilities/theme";
+import { COLOR, computeMixedColor, useThemedStyles } from "@/utilities/theme";
 import React, { useMemo } from "react";
 import { StyleProp, StyleSheet, TextStyle, ViewStyle } from "react-native";
 import {
@@ -44,16 +44,16 @@ export const CustomButton = ({
 const stylesCallback = (theme: MD3Theme) =>
   StyleSheet.create({
     container: {
-      backgroundColor: theme.colors.surface,
+      backgroundColor: computeMixedColor(theme.colors.surface, COLOR),
       padding: 8,
       marginVertical: 4,
       borderRadius: 8,
       minWidth: 160,
       borderWidth: 1,
-      borderColor: theme.colors.onSurface,
+      borderColor: computeMixedColor(theme.colors.onSurface, COLOR),
     },
     containerDisabled: {
-      backgroundColor: theme.colors.surfaceDisabled,
-      borderColor: theme.colors.onSurfaceDisabled,
+      backgroundColor: computeMixedColor(theme.colors.surfaceDisabled, COLOR),
+      borderColor: computeMixedColor(theme.colors.onSurfaceDisabled, COLOR),
     },
   });

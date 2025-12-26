@@ -1,4 +1,4 @@
-import { useThemedStyles } from "@/utilities/theme";
+import { COLOR, computeMixedColor, useThemedStyles } from "@/utilities/theme";
 import { StyleSheet, View } from "react-native";
 import { Icon, MD3Theme } from "react-native-paper";
 
@@ -29,7 +29,7 @@ type Variant = (typeof variants)[number];
 const stylesCallback = (theme: MD3Theme) =>
   StyleSheet.create({
     [`icon${variants[0]}`]: {
-      color: theme.colors.onSurfaceDisabled,
+      color: computeMixedColor(theme.colors.onSurfaceDisabled, COLOR),
     },
     [`outer${variants[0]}`]: {
       borderRadius: 999,
@@ -46,64 +46,64 @@ const stylesCallback = (theme: MD3Theme) =>
     [`inner${variants[0]}`]: {
       borderRadius: 999,
       overflow: "hidden",
-      backgroundColor: theme.colors.surfaceDisabled,
+      backgroundColor: computeMixedColor(theme.colors.surfaceDisabled, COLOR),
       padding: 2,
     },
     [`icon${variants[1]}`]: {
-      color: theme.colors.onBackground,
+      color: computeMixedColor(theme.colors.onBackground, COLOR),
     },
     [`outer${variants[1]}`]: {
       borderRadius: 999,
       overflow: "hidden",
-      backgroundColor: theme.colors.background,
+      backgroundColor: computeMixedColor(theme.colors.background, COLOR),
       padding: 2,
     },
     [`middle${variants[1]}`]: {
       borderRadius: 999,
       padding: 1,
       overflow: "hidden",
-      backgroundColor: theme.colors.onBackground,
+      backgroundColor: computeMixedColor(theme.colors.onBackground, COLOR),
     },
     [`inner${variants[1]}`]: {
       borderRadius: 999,
       overflow: "hidden",
-      backgroundColor: theme.colors.elevation.level4,
+      backgroundColor: computeMixedColor(theme.colors.elevation.level4, COLOR),
       padding: 2,
     },
     [`icon${variants[2]}`]: {
-      color: theme.colors.onSurface,
+      color: computeMixedColor(theme.colors.onSurface, COLOR),
     },
     [`outer${variants[2]}`]: {
       borderRadius: 999,
-      backgroundColor: theme.colors.surface,
+      backgroundColor: computeMixedColor(theme.colors.surface, COLOR),
       padding: 2,
     },
     [`middle${variants[2]}`]: {
       borderRadius: 999,
       padding: 1,
-      backgroundColor: theme.colors.surface,
+      backgroundColor: computeMixedColor(theme.colors.surface, COLOR),
     },
     [`inner${variants[2]}`]: {
       borderRadius: 999,
-      backgroundColor: theme.colors.surface,
+      backgroundColor: computeMixedColor(theme.colors.surface, COLOR),
       padding: 2,
     },
     [`icon${variants[3]}`]: {
-      color: theme.colors.elevation.level3,
+      color: computeMixedColor(theme.colors.elevation.level3, COLOR),
     },
     [`outer${variants[3]}`]: {
       borderRadius: 999,
-      backgroundColor: theme.colors.elevation.level3,
+      backgroundColor: computeMixedColor(theme.colors.elevation.level3, COLOR),
       padding: 2,
     },
     [`middle${variants[3]}`]: {
       borderRadius: 999,
       padding: 1,
-      backgroundColor: theme.colors.elevation.level3,
+      backgroundColor: computeMixedColor(theme.colors.elevation.level3, COLOR),
     },
     [`inner${variants[3]}`]: {
       borderRadius: 999,
-      backgroundColor: theme.colors.elevation.level3,
+      backgroundColor: computeMixedColor(theme.colors.elevation.level3, COLOR),
       padding: 2,
     },
   });

@@ -10,7 +10,13 @@ import myModule from "../modules/my-module";
 import { SensorEvent } from "@/modules/my-module/src/MyModule";
 import { Divider, Icon, MD3Theme, Text } from "react-native-paper";
 import { CustomButton } from "./CustomButton";
-import { computeColorWithOpacity, useThemedStyles } from "@/utilities/theme";
+import {
+  COLOR,
+  COLOR_2,
+  computeColorWithOpacity,
+  computeMixedColor,
+  useThemedStyles,
+} from "@/utilities/theme";
 import * as SQLite from "expo-sqlite";
 import { EventEmitter } from "expo-modules-core";
 import { CircleIcon } from "./CircleIcon";
@@ -184,25 +190,50 @@ export const Application = () => {
     //   style={styles.imageBackground}
     //   contentFit="cover"
     //   placeholder={"L28qfp~TIb4@kGbJ9caPoiogxoD-"}
-    //   source={require("../assets/images/trees.jpg")}
+    //   source={require("../assets/images/rock.jpg")}
     // >
     <View style={styles.container}>
       <View style={styles.card}>
         {/* <Divider style={styles.divider} /> */}
-        <Image
+        {/* <Image
           source={require("../assets/images/splash-icon.png")}
           style={styles.logo}
-        />
+        /> */}
         <View style={[styles.textWarning, styles.borderDashed]}>
           <Text variant="titleMedium" style={styles.title}>
             POSTURE KEEP
           </Text>
           {/* <Divider style={styles.divider} /> */}
-          <Text variant="bodyMedium" style={styles.onBackground}>
-            Posture tracking & monitoring
+          <Text variant="bodySmall" style={styles.onBackground}>
+            Tracking & Monitoring
           </Text>
         </View>
-
+        {!isBackgroundRunning && (
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <CircleIcon iconName={"cellphone"} variant={"selected"} />
+            <Text
+              variant="titleSmall"
+              style={[styles.text, { textAlign: "center" }]}
+            >
+              Monitor Your{" "}
+              {computeStyledText("Posture", styles.textHighlight.color)}
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={[
+                styles.text,
+                {
+                  textAlign: "center",
+                },
+              ]}
+            >
+              {computeStyledText("Select", styles.textHighlight.color)} a
+              sensitivity level and{" "}
+              {computeStyledText("hold", styles.textHighlight.color)} your phone
+              upright at eye level to begin
+            </Text>
+          </View>
+        )}
         <Icon
           size={ICON_SIZE}
           source={"arrow-down-thin"}
@@ -210,9 +241,20 @@ export const Application = () => {
         />
         {!isBackgroundRunning && (
           <View style={{ alignItems: "center", justifyContent: "center" }}>
-            <CircleIcon iconName={"package-variant"} variant={"selected"} />
-            <Text variant="titleSmall">Options</Text>
-            <Text variant="bodySmall">Choose the setting right for you.</Text>
+            <CircleIcon iconName={"numeric-1-circle"} variant={"selected"} />
+            <Text
+              variant="titleSmall"
+              style={[styles.text, { textAlign: "center" }]}
+            >
+              Choose your{" "}
+              {computeStyledText("sensitivity", styles.textHighlight.color)}
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={[styles.text, { textAlign: "center" }]}
+            >
+              Choose the setting right for you.
+            </Text>
           </View>
         )}
         <CustomButton
@@ -446,7 +488,11 @@ export const Application = () => {
               />
               <CircleIcon iconName="chevron-triple-right" variant="selected" />
             </View>
-            <Text variant="bodySmall">Ready for monitoring & tracking.</Text>
+            <Text variant="bodySmall">
+              Using device{" "}
+              {computeStyledText("sensors", styles.textHighlight.color)} for
+              posture detection
+            </Text>
           </View>
         )}
         {isBackgroundRunning && (
@@ -482,7 +528,7 @@ export const Application = () => {
                   !isBackgroundRunning ? styles.textDisabled : styles.text,
                 ]}
               >
-                stop
+                Stop
               </Text>
             </View>
           </CustomButton>
@@ -500,7 +546,7 @@ export const Application = () => {
               }
             />
             <CircleIcon
-              iconName={isPositionOK ? "graph-outline" : "angle-obtuse"}
+              iconName={isPositionOK ? "graph-outline" : "numeric-2-circle"}
               variant={
                 options.parameters.values.name !== "Init"
                   ? "selected"
@@ -589,18 +635,32 @@ export const Application = () => {
         {isBackgroundRunning && (
           <>
             <Text variant="bodyMedium" style={[styles.textWarning]}>
-              Now switch to a different app and we will track your phone
-              position and angle.
+              Now switch to a{" "}
+              {computeStyledText("different", styles.textHighlight.color)} app
+              and we will{" "}
+              {computeStyledText("track", styles.textHighlight.color)} your
+              phone position and angle.
               {/* todow icons */}
             </Text>
             <Text variant="bodyMedium" style={[styles.textWarning]}>
-              When the phone vibrates, adjust your phone to a better position!
+              When the phone vibrates,{" "}
+              {computeStyledText("adjust", styles.textHighlight.color)} your
+              phone to a better position!
               {/* todow icons */}
             </Text>
             <Text variant="bodySmall" style={[styles.textWarning]}>
-              Please set "Allow background activity" to true for this App in
-              your device's App battery management settings, to allow us to
-              freely track your phone's position
+              Please set{" "}
+              {computeStyledText(
+                "Allow background activity",
+                styles.textHighlight.color
+              )}{" "}
+              on for this App in your device's{" "}
+              {computeStyledText(
+                "App battery management settings",
+                styles.textHighlight.color
+              )}
+              , to allow us to freely track your phone's position, using the
+              device sensors.
               {/* todow text & icons*/}
             </Text>
           </>
@@ -630,6 +690,9 @@ export const Application = () => {
 export const ICON_SIZE = 16;
 export const GLOBAL_PADDING_HORIZONTAL = 20;
 export const GLOBAL_PADDING_VERTICAL = 20;
+const computeStyledText = (text: string, color: string) => (
+  <Text style={{ color, textAlign: "center" }}>{text}</Text>
+);
 const stylesCallback = (theme: MD3Theme) =>
   StyleSheet.create({
     container: {
@@ -654,13 +717,13 @@ const stylesCallback = (theme: MD3Theme) =>
       alignItems: "center",
       backgroundColor: computeColorWithOpacity(
         theme.colors.outlineVariant,
-        0.9
+        0.5
       ),
     },
     borderDashed: {
       borderStyle: "dashed",
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: computeMixedColor(theme.colors.outline, COLOR),
     },
     imageBackground: {
       flex: 1,
@@ -669,37 +732,37 @@ const stylesCallback = (theme: MD3Theme) =>
     logo: {
       height: ICON_SIZE * 2,
       aspectRatio: 1,
-      borderColor: theme.colors.onSurfaceDisabled,
+      borderColor: computeMixedColor(theme.colors.onSurfaceDisabled, COLOR),
       borderWidth: 2,
       borderRadius: 999,
       outlineWidth: 2,
       outlineOffset: 1,
-      outlineColor: theme.colors.backdrop,
+      outlineColor: computeMixedColor(theme.colors.backdrop, COLOR),
     },
     divider: {
-      backgroundColor: theme.colors.onBackground,
+      backgroundColor: computeMixedColor(theme.colors.onBackground, COLOR),
       width: "100%",
     },
     title: {
       textDecorationLine: "underline",
       alignSelf: "center",
-      textDecorationColor: theme.colors.onBackground,
-      color: theme.colors.onBackground,
+      textDecorationColor: computeMixedColor(theme.colors.onBackground, COLOR),
+      color: computeMixedColor(theme.colors.onBackground, COLOR),
     },
     selectedButton: {
-      backgroundColor: theme.colors.inverseSurface,
+      backgroundColor: computeMixedColor(theme.colors.inverseSurface, COLOR),
     },
     selectedButtonText: {
-      color: theme.colors.inverseOnSurface,
+      color: computeMixedColor(theme.colors.inverseOnSurface, COLOR),
     },
     text: {
-      color: theme.colors.onBackground,
+      color: computeMixedColor(theme.colors.onBackground, COLOR),
     },
     textDisabled: {
-      color: theme.colors.onSurfaceDisabled,
+      color: computeMixedColor(theme.colors.onSurfaceDisabled, COLOR),
     },
     onBackground: {
-      color: theme.colors.onBackground,
+      color: computeMixedColor(theme.colors.onBackground, COLOR),
     },
     buttonChildContainer: {
       flexDirection: "row",
@@ -710,8 +773,11 @@ const stylesCallback = (theme: MD3Theme) =>
       padding: 8,
       borderRadius: 8,
       marginVertical: 4,
-      color: theme.colors.onBackground,
-      backgroundColor: theme.colors.background,
+      color: computeMixedColor(theme.colors.onBackground, COLOR),
+      backgroundColor: computeMixedColor(theme.colors.background, COLOR),
+    },
+    textHighlight: {
+      color: computeMixedColor(theme.colors.onBackground, COLOR_2),
     },
   });
 export type ApplicationStyles = ReturnType<typeof stylesCallback>;
