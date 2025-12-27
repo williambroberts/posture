@@ -119,12 +119,27 @@ export function parseColorString(colorString: string) {
 export const computeStringColorFromObject = (obj: RGBAColor) => {
   return `rgba(${obj.r},${obj.g},${obj.b},${obj.a})`;
 };
-export const computeMixedColor = (first: string, second: string) => {
-  const [firstObj, secondObj] = [
-    parseColorString(first),
-    parseColorString(second),
-  ];
-  const out = computeStringColorFromObject(addColors(firstObj, secondObj));
+export const computeMixedColor = (
+  first: string,
+  second: string,
+  mixCount: number = 1
+) => {
+  let count: number = 0;
+  let out: string = first;
+  const computeOut = (color: string, toMix: string) => {
+    const [firstObj, secondObj] = [
+      parseColorString(color),
+      parseColorString(toMix),
+    ];
+    const out = computeStringColorFromObject(addColors(firstObj, secondObj));
+    return out;
+  };
+
+  while (count < mixCount) {
+    //mix the second color mixCount times with first
+    out = computeOut(out, second);
+    count++;
+  }
   console.log(out);
   return out;
 };
@@ -257,7 +272,8 @@ export const darkTheme: MD3Colors = {
   backdrop: "rgba(49, 49, 37, 0.4)",
 };
 export const COLOR = "rgb(135, 115, 94)";
-export const COLOR_2 = "rgba(251, 192, 45, 1)";
+export const COLOR_2 = "rgba(255, 183, 0, 1)";
+export const COLOR_3 = "rgba(56, 142, 60, 1)";
 export const useCustomTheme = () => {
   const colorScheme = useColorScheme();
   //https://oss.callstack.com/react-native-paper/docs/guides/theming

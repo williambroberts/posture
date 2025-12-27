@@ -13,6 +13,7 @@ import { CustomButton } from "./CustomButton";
 import {
   COLOR,
   COLOR_2,
+  COLOR_3,
   computeColorWithOpacity,
   computeMixedColor,
   useThemedStyles,
@@ -205,7 +206,8 @@ export const Application = () => {
           </Text>
           {/* <Divider style={styles.divider} /> */}
           <Text variant="bodySmall" style={styles.onBackground}>
-            Tracking & Monitoring
+            {computeStyledText("Tracking", COLOR_3)} &{" "}
+            {computeStyledText("Monitoring", COLOR_2)}
           </Text>
         </View>
         {!isBackgroundRunning && (
@@ -715,10 +717,7 @@ const stylesCallback = (theme: MD3Theme) =>
       borderRadius: 8,
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor: computeColorWithOpacity(
-        theme.colors.outlineVariant,
-        0.5
-      ),
+      backgroundColor: computeColorWithOpacity(theme.colors.background, 1),
     },
     borderDashed: {
       borderStyle: "dashed",
@@ -746,7 +745,6 @@ const stylesCallback = (theme: MD3Theme) =>
     title: {
       textDecorationLine: "underline",
       alignSelf: "center",
-      textDecorationColor: computeMixedColor(theme.colors.onBackground, COLOR),
       color: computeMixedColor(theme.colors.onBackground, COLOR),
     },
     selectedButton: {
@@ -777,7 +775,7 @@ const stylesCallback = (theme: MD3Theme) =>
       backgroundColor: computeMixedColor(theme.colors.background, COLOR),
     },
     textHighlight: {
-      color: computeMixedColor(theme.colors.onBackground, COLOR_2),
+      color: computeMixedColor(theme.colors.onBackground, COLOR_2, 3),
     },
   });
 export type ApplicationStyles = ReturnType<typeof stylesCallback>;
