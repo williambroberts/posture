@@ -201,21 +201,22 @@ export const Application = () => {
           style={styles.logo}
         /> */}
         <View style={[styles.textWarning, styles.borderDashed]}>
-          <Text variant="titleMedium" style={styles.title}>
-            {computeStyledText("P", COLOR_2)}
-            {computeStyledText("O", COLOR_3)}
-            {computeStyledText("S", COLOR_2)}
-            {computeStyledText("T", COLOR_3)}
-            {computeStyledText("U", COLOR_2)}
-            {computeStyledText("R", COLOR_3)}
-            {computeStyledText("E", COLOR_2)} {computeStyledText("K", COLOR_3)}
-            {computeStyledText("E", COLOR_2)}
-            {computeStyledText("E", COLOR_3)}
-            {computeStyledText("P", COLOR_2)}
+          <Text variant="titleMedium" style={[styles.title]}>
+            {computeStyledText("P", styles.text.color)}
+            {computeStyledText("O", styles.text.color)}
+            {computeStyledText("S", styles.text.color)}
+            {computeStyledText("T", styles.text.color)}
+            {computeStyledText("U", styles.text.color)}
+            {computeStyledText("R", styles.text.color)}
+            {computeStyledText("E", styles.text.color)}{" "}
+            {computeStyledText("K", styles.text.color)}
+            {computeStyledText("E", styles.text.color)}
+            {computeStyledText("E", styles.text.color)}
+            {computeStyledText("P", styles.text.color)}
           </Text>
           {/* <Divider style={styles.divider} /> */}
           <Text variant="bodySmall" style={styles.onBackground}>
-            {computeStyledText("Tracking", COLOR_3)} &{" "}
+            {computeStyledText("Tracking", styles.textHighlight.color)} &{" "}
             {computeStyledText("Monitoring", styles.textHighlight.color)}
           </Text>
         </View>
