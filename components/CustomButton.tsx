@@ -1,4 +1,9 @@
-import { COLOR, computeMixedColor, useThemedStyles } from "@/utilities/theme";
+import {
+  COLOR,
+  COLOR_3,
+  computeMixedColor,
+  useThemedStyles,
+} from "@/utilities/theme";
 import React, { useMemo } from "react";
 import { StyleProp, StyleSheet, TextStyle, ViewStyle } from "react-native";
 import {
@@ -16,6 +21,7 @@ type Props = {
   containerStyle?: StyleProp<ViewStyle>;
   // textStyle?:StyleProp<TextStyle>
   children: React.ReactNode;
+  variant?: "highlight" | "default";
 };
 //todow variants & compound component for the children / icon & text
 export const CustomButton = ({
@@ -23,6 +29,7 @@ export const CustomButton = ({
   disabled,
   containerStyle,
   children,
+  variant = "default",
 }: Props) => {
   //theme
   const styles = useThemedStyles(stylesCallback);
@@ -32,8 +39,8 @@ export const CustomButton = ({
       disabled={disabled}
       onPress={onPress}
       style={[
-        styles.container,
-        disabled ? styles.containerDisabled : undefined,
+        styles[`container__${variant}`],
+        disabled ? styles[`containerDisabled__${variant}`] : undefined,
         containerStyle,
       ]}
     >
@@ -41,19 +48,38 @@ export const CustomButton = ({
     </TouchableRipple>
   );
 };
-const stylesCallback = (theme: MD3Theme) =>
-  StyleSheet.create({
-    container: {
+const stylesCallback = (theme: MD3Theme) => {
+  const base = {
+    padding: 8,
+    marginVertical: 4,
+    borderRadius: 8,
+    minWidth: 160,
+    width: "100%",
+    minHeight: 40,
+    borderWidth: 1,
+  } as const satisfies ViewStyle;
+  return StyleSheet.create({
+    container__default: {
+      ...base,
       backgroundColor: computeMixedColor(theme.colors.surface, COLOR),
-      padding: 8,
-      marginVertical: 4,
-      borderRadius: 8,
-      minWidth: 160,
-      borderWidth: 1,
       borderColor: computeMixedColor(theme.colors.onSurface, COLOR),
     },
-    containerDisabled: {
+    container__highlight: {
+      ...base,
+      backgroundColor: computeMixedColor(theme.colors.surface, COLOR_3, 3),
+      borderColor: computeMixedColor(theme.colors.onSurface, COLOR, 5),
+    },
+    containerDisabled__default: {
       backgroundColor: computeMixedColor(theme.colors.surfaceDisabled, COLOR),
       borderColor: computeMixedColor(theme.colors.onSurfaceDisabled, COLOR),
     },
+    containerDisabled__highlight: {
+      backgroundColor: computeMixedColor(
+        theme.colors.surfaceDisabled,
+        COLOR_3,
+        3
+      ),
+      borderColor: computeMixedColor(theme.colors.onSurfaceDisabled, COLOR, 5),
+    },
   });
+};

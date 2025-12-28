@@ -8,7 +8,7 @@ import BackgroundService, {
 // import MyModule from '../modules/my-module';
 import myModule from "../modules/my-module";
 import { SensorEvent } from "@/modules/my-module/src/MyModule";
-import { Divider, Icon, MD3Theme, Text } from "react-native-paper";
+import { Icon, MD3Theme, Text } from "react-native-paper";
 import { CustomButton } from "./CustomButton";
 import {
   COLOR,
@@ -202,12 +202,21 @@ export const Application = () => {
         /> */}
         <View style={[styles.textWarning, styles.borderDashed]}>
           <Text variant="titleMedium" style={styles.title}>
-            POSTURE KEEP
+            {computeStyledText("P", COLOR_2)}
+            {computeStyledText("O", COLOR_3)}
+            {computeStyledText("S", COLOR_2)}
+            {computeStyledText("T", COLOR_3)}
+            {computeStyledText("U", COLOR_2)}
+            {computeStyledText("R", COLOR_3)}
+            {computeStyledText("E", COLOR_2)} {computeStyledText("K", COLOR_3)}
+            {computeStyledText("E", COLOR_2)}
+            {computeStyledText("E", COLOR_3)}
+            {computeStyledText("P", COLOR_2)}
           </Text>
           {/* <Divider style={styles.divider} /> */}
           <Text variant="bodySmall" style={styles.onBackground}>
             {computeStyledText("Tracking", COLOR_3)} &{" "}
-            {computeStyledText("Monitoring", COLOR_2)}
+            {computeStyledText("Monitoring", styles.textHighlight.color)}
           </Text>
         </View>
         {!isBackgroundRunning && (
@@ -497,44 +506,6 @@ export const Application = () => {
             </Text>
           </View>
         )}
-        {isBackgroundRunning && (
-          <CustomButton
-            disabled={!isBackgroundRunning}
-            onPress={() => {
-              myModule.warningAsync();
-              BackgroundService.stop().finally(async () => {
-                myModule.removeAllListeners("onLinearMovementDetected");
-                myModule.removeAllListeners("onOrientationChange");
-                await Promise.all([
-                  myModule.stopLinearMovementDetection(),
-                  myModule.stopOrientation(),
-                ]);
-                setIsBackgroundRunning(false);
-                isBackgroundRunningRef.current = false;
-              });
-            }}
-          >
-            <View style={styles.buttonChildContainer}>
-              <Icon
-                size={ICON_SIZE}
-                color={
-                  !isBackgroundRunning
-                    ? styles.textDisabled.color
-                    : styles.text.color
-                }
-                source={"stop"}
-              />
-              <Text
-                variant="bodySmall"
-                style={[
-                  !isBackgroundRunning ? styles.textDisabled : styles.text,
-                ]}
-              >
-                Stop
-              </Text>
-            </View>
-          </CustomButton>
-        )}
 
         {!isBackgroundRunning && (
           <View style={{ alignItems: "center", justifyContent: "center" }}>
@@ -582,6 +553,7 @@ export const Application = () => {
 
         {!isBackgroundRunning && (
           <CustomButton
+            variant="highlight"
             disabled={
               isBackgroundRunning ||
               !isPositionOK ||
@@ -612,7 +584,7 @@ export const Application = () => {
                 source={"cursor-default-click-outline"}
                 color={
                   isPositionOK && options.parameters.values.name !== "Init"
-                    ? styles.onBackground.color
+                    ? styles.textOnHighlight.color
                     : styles.textDisabled.color
                 }
               />
@@ -621,7 +593,7 @@ export const Application = () => {
                 style={[
                   !isPositionOK || options.parameters.values.name === "Init"
                     ? styles.textDisabled
-                    : styles.text,
+                    : styles.textOnHighlight,
                 ]}
               >
                 {options.parameters.values.name === "Init"
@@ -666,6 +638,47 @@ export const Application = () => {
               {/* todow text & icons*/}
             </Text>
           </>
+        )}
+        {isBackgroundRunning && (
+          <CustomButton
+            variant="highlight"
+            disabled={!isBackgroundRunning}
+            onPress={() => {
+              myModule.warningAsync();
+              BackgroundService.stop().finally(async () => {
+                myModule.removeAllListeners("onLinearMovementDetected");
+                myModule.removeAllListeners("onOrientationChange");
+                await Promise.all([
+                  myModule.stopLinearMovementDetection(),
+                  myModule.stopOrientation(),
+                ]);
+                setIsBackgroundRunning(false);
+                isBackgroundRunningRef.current = false;
+              });
+            }}
+          >
+            <View style={styles.buttonChildContainer}>
+              <Icon
+                size={ICON_SIZE}
+                color={
+                  !isBackgroundRunning
+                    ? styles.textDisabled.color
+                    : styles.textOnHighlight.color
+                }
+                source={"stop"}
+              />
+              <Text
+                variant="bodySmall"
+                style={[
+                  !isBackgroundRunning
+                    ? styles.textDisabled
+                    : styles.textOnHighlight,
+                ]}
+              >
+                Stop
+              </Text>
+            </View>
+          </CustomButton>
         )}
         {/* <Divider style={[styles.divider, { marginTop: 8 }]} /> */}
         {/* {!isBackgroundRunning && (
@@ -765,17 +778,22 @@ const stylesCallback = (theme: MD3Theme) =>
     buttonChildContainer: {
       flexDirection: "row",
       alignItems: "center",
+      justifyContent: "center",
       gap: 4,
+      flex: 1,
     },
     textWarning: {
       padding: 8,
       borderRadius: 8,
       marginVertical: 4,
-      color: computeMixedColor(theme.colors.onBackground, COLOR),
-      backgroundColor: computeMixedColor(theme.colors.background, COLOR),
+      color: computeMixedColor(theme.colors.onBackground, COLOR, 1),
+      backgroundColor: computeMixedColor(theme.colors.background, COLOR, 1),
     },
     textHighlight: {
-      color: computeMixedColor(theme.colors.onBackground, COLOR_2, 3),
+      color: computeMixedColor(theme.colors.onBackground, COLOR_2, 1),
+    },
+    textOnHighlight: {
+      color: theme.colors.shadow,
     },
   });
 export type ApplicationStyles = ReturnType<typeof stylesCallback>;

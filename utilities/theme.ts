@@ -273,7 +273,7 @@ export const darkTheme: MD3Colors = {
 };
 export const COLOR = "rgb(135, 115, 94)";
 export const COLOR_2 = "rgba(255, 183, 0, 1)";
-export const COLOR_3 = "rgba(56, 142, 60, 1)";
+export const COLOR_3 = "rgba(255, 248, 123, 1)";
 export const useCustomTheme = () => {
   const colorScheme = useColorScheme();
   //https://oss.callstack.com/react-native-paper/docs/guides/theming
