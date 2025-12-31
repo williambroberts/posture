@@ -1194,9 +1194,10 @@ const runWithLock = (args: RunWithLock) => {
 //todow custom function
 const defaultOptions = {
   taskName: "PostureKeep",
-  taskTitle: "MEASURING & TRACKING",
-  taskDesc: "Monitoring your phone position & angle",
+  taskTitle: "Posture Keep",
+  taskDesc: "Monitoring, tap to stop",
   taskIcon: {
+    //todow
     name: "ic_launcher",
     type: "mipmap",
   },
