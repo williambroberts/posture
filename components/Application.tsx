@@ -546,11 +546,23 @@ export const Application = () => {
               />
               <CircleIcon iconName="chevron-triple-right" variant="selected" />
             </View>
-            <Text variant="bodySmall">
-              Using device{" "}
-              {computeStyledText("sensors", styles.textHighlight.color)} for
-              posture detection
-            </Text>
+            <View style={styles.textContainer}>
+              <StyledText
+                text={"Using device "}
+                variant="bodySmall"
+                style={{ textAlign: "center", ...styles.text }}
+              />
+              <StyledText
+                text={"sensors"}
+                variant="bodySmall"
+                style={{ textAlign: "center", ...styles.textHighlight }}
+              />
+              <StyledText
+                text={" for posture detection"}
+                variant="bodySmall"
+                style={{ textAlign: "center", ...styles.text }}
+              />
+            </View>
           </View>
         )}
 
@@ -655,14 +667,34 @@ export const Application = () => {
         {/* <Divider style={[styles.divider, { marginTop: 8 }]} /> */}
         {isBackgroundRunning && (
           <>
-            <Text variant="bodyMedium" style={[styles.textWarning]}>
-              Now switch to a{" "}
-              {computeStyledText("different", styles.textHighlight.color)} app
-              and we will{" "}
-              {computeStyledText("track", styles.textHighlight.color)} your
-              phone position and angle.
+            <View style={[styles.textContainer, styles.textWarningContainer]}>
+              <StyledText
+                text={"Now switch to a "}
+                variant="bodyMedium"
+                style={{ textAlign: "center", ...styles.textWarning }}
+              />
+              <StyledText
+                text={"different"}
+                variant="bodyMedium"
+                style={{ textAlign: "center", ...styles.textHighlight }}
+              />
+              <StyledText
+                text={" app and we will "}
+                variant="bodyMedium"
+                style={{ textAlign: "center", ...styles.textWarning }}
+              />
+              <StyledText
+                text={"track"}
+                variant="bodyMedium"
+                style={{ textAlign: "center", ...styles.textHighlight }}
+              />
+              <StyledText
+                text={" your phone position and angle"}
+                variant="bodyMedium"
+                style={{ textAlign: "center", ...styles.textWarning }}
+              />
               {/* todow icons */}
-            </Text>
+            </View>
             <Text variant="bodyMedium" style={[styles.textWarning]}>
               When the phone vibrates,{" "}
               {computeStyledText("adjust", styles.textHighlight.color)} your
@@ -848,11 +880,7 @@ const stylesCallback = (theme: MD3Theme) =>
       flex: 1,
     },
     textWarning: {
-      padding: 8,
-      borderRadius: 8,
-      marginVertical: 4,
       color: computeMixedColor(theme.colors.onBackground, COLOR, 1),
-      backgroundColor: computeMixedColor(theme.colors.background, COLOR, 1),
     },
     textHighlight: {
       borderRadius: 999,
@@ -872,6 +900,13 @@ const stylesCallback = (theme: MD3Theme) =>
       // gap: 1,
       flexWrap: "wrap",
       justifyContent: "center",
+    },
+    textWarningContainer: {
+      padding: 8,
+      borderRadius: 8,
+      marginVertical: 4,
+      // color: computeMixedColor(theme.colors.onBackground, COLOR, 1),
+      backgroundColor: computeMixedColor(theme.colors.background, COLOR, 1),
     },
   });
 export type ApplicationStyles = ReturnType<typeof stylesCallback>;
