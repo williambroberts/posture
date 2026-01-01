@@ -201,32 +201,26 @@ export const Application = () => {
           source={require("../assets/images/splash-icon.png")}
           style={styles.logo}
         /> */}
-        <View style={[styles.textWarning, styles.borderDashed]}>
+        <View style={[styles.textWarningContainer, styles.borderDashed]}>
           <Text variant="titleMedium" style={[styles.title]}>
-            {computeStyledText("P", styles.text.color)}
-            {computeStyledText("O", styles.text.color)}
-            {computeStyledText("S", styles.text.color)}
-            {computeStyledText("T", styles.text.color)}
-            {computeStyledText("U", styles.text.color)}
-            {computeStyledText("R", styles.text.color)}
-            {computeStyledText("E", styles.text.color)}{" "}
-            {computeStyledText("K", styles.text.color)}
-            {computeStyledText("E", styles.text.color)}
-            {computeStyledText("E", styles.text.color)}
-            {computeStyledText("P", styles.text.color)}
+            POSTURE KEEP
           </Text>
           {/* <Divider style={styles.divider} /> */}
           <View style={styles.textContainer}>
             <StyledText
               text={"Tracking"}
-              variant="titleSmall"
+              variant="bodySmall"
               style={{ textAlign: "center", ...styles.textHighlight }}
             />
-            <Text variant="titleSmall"> & </Text>
+            <Text variant="bodySmall"> & </Text>
             <StyledText
               text={"Monitoring"}
-              variant="titleSmall"
-              style={{ textAlign: "center", ...styles.textHighlight }}
+              variant="bodySmall"
+              style={{
+                textAlign: "center",
+                ...styles.textHighlight,
+                color: COLOR_3,
+              }}
             />
           </View>
         </View>
@@ -910,6 +904,7 @@ const stylesCallback = (theme: MD3Theme) =>
       borderColor: computeMixedColor(theme.colors.onBackground, COLOR_2),
       borderWidth: 1,
       paddingHorizontal: 4,
+      paddingVertical: 0,
       // color: computeMixedColor(theme.colors.onBackground, COLOR_3, 1),
     },
     textOnHighlight: {
