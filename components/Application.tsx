@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, AppState, StyleSheet, View } from "react-native";
+import { Alert, AppState, StyleSheet, TextStyle, View } from "react-native";
 // import { gyroscope, SensorData } from "react-native-sensors";
 import BackgroundService, {
   BackgroundTaskOptions,
@@ -23,6 +23,7 @@ import { EventEmitter } from "expo-modules-core";
 import { CircleIcon } from "./CircleIcon";
 import { Chart } from "./Chart";
 import { Image, ImageBackground } from "expo-image";
+import { VariantProp } from "react-native-paper/lib/typescript/components/Typography/types";
 
 //region component
 export const Application = () => {
@@ -215,35 +216,69 @@ export const Application = () => {
             {computeStyledText("P", styles.text.color)}
           </Text>
           {/* <Divider style={styles.divider} /> */}
-          <Text variant="bodySmall" style={styles.onBackground}>
-            {computeStyledText("Tracking", styles.textHighlight.color)} &{" "}
-            {computeStyledText("Monitoring", styles.textHighlight.color)}
-          </Text>
+          <View style={styles.textContainer}>
+            <StyledText
+              text={"Tracking"}
+              variant="titleSmall"
+              style={{ textAlign: "center", ...styles.textHighlight }}
+            />
+            <Text variant="titleSmall"> & </Text>
+            <StyledText
+              text={"Monitoring"}
+              variant="titleSmall"
+              style={{ textAlign: "center", ...styles.textHighlight }}
+            />
+          </View>
         </View>
         {!isBackgroundRunning && (
           <View style={{ alignItems: "center", justifyContent: "center" }}>
             <CircleIcon iconName={"cellphone"} variant={"selected"} />
-            <Text
-              variant="titleSmall"
-              style={[styles.text, { textAlign: "center" }]}
-            >
-              Monitor Your{" "}
-              {computeStyledText("Posture", styles.textHighlight.color)}
-            </Text>
-            <Text
-              variant="bodySmall"
-              style={[
-                styles.text,
-                {
+            <View style={styles.textContainer}>
+              <StyledText
+                text={"Monitor Your "}
+                variant="titleSmall"
+                style={{ textAlign: "center", ...styles.text }}
+              />
+              <StyledText
+                text={"Posture"}
+                variant="titleSmall"
+                style={{ textAlign: "center", ...styles.textHighlight }}
+              />
+            </View>
+            <View style={styles.textContainer}>
+              <StyledText
+                variant="bodySmall"
+                text={"Select"}
+                style={{
+                  ...styles.textHighlight,
                   textAlign: "center",
-                },
-              ]}
-            >
-              {computeStyledText("Select", styles.textHighlight.color)} a
-              sensitivity level and{" "}
-              {computeStyledText("hold", styles.textHighlight.color)} your phone
-              upright at eye level to begin
-            </Text>
+                }}
+              />
+              <StyledText
+                variant="bodySmall"
+                text={" a sensitivity level and "}
+                style={{
+                  ...styles.text,
+                  textAlign: "center",
+                }}
+              />
+              <StyledText
+                variant="bodySmall"
+                text={"hold"}
+                style={{
+                  ...styles.textHighlight,
+                  textAlign: "center",
+                }}
+              />
+              <StyledText
+                variant="bodySmall"
+                text={" your phone upright at eye level to begin"}
+                style={{
+                  ...styles.text,
+                  textAlign: "center",
+                }}
+              />
+            </View>
           </View>
         )}
         <Icon
@@ -254,13 +289,24 @@ export const Application = () => {
         {!isBackgroundRunning && (
           <View style={{ alignItems: "center", justifyContent: "center" }}>
             <CircleIcon iconName={"numeric-1-circle"} variant={"selected"} />
-            <Text
-              variant="titleSmall"
-              style={[styles.text, { textAlign: "center" }]}
-            >
-              Choose your{" "}
-              {computeStyledText("sensitivity", styles.textHighlight.color)}
-            </Text>
+            <View style={styles.textContainer}>
+              <StyledText
+                variant="titleSmall"
+                text={"Choose your "}
+                style={{
+                  ...styles.text,
+                  textAlign: "center",
+                }}
+              />
+              <StyledText
+                variant="titleSmall"
+                text={"sensitivity"}
+                style={{
+                  ...styles.textHighlight,
+                  textAlign: "center",
+                }}
+              />
+            </View>
             <Text
               variant="bodySmall"
               style={[styles.text, { textAlign: "center" }]}
@@ -706,8 +752,26 @@ export const Application = () => {
 export const ICON_SIZE = 16;
 export const GLOBAL_PADDING_HORIZONTAL = 20;
 export const GLOBAL_PADDING_VERTICAL = 20;
-const computeStyledText = (text: string, color: string) => (
-  <Text style={{ color, textAlign: "center" }}>{text}</Text>
+type BadgeProps = {
+  text: string;
+  variant: VariantProp<never>;
+  style: TextStyle;
+};
+export const StyledText = (props: BadgeProps) => {
+  return (
+    <Text variant={props.variant} style={props.style}>
+      {props.text}
+    </Text>
+  );
+};
+export const computeStyledText = (
+  text: string,
+  color: string,
+  variant: VariantProp<never>
+) => (
+  <Text variant={variant} style={{ color, textAlign: "center" }}>
+    {text}
+  </Text>
 );
 const stylesCallback = (theme: MD3Theme) =>
   StyleSheet.create({
@@ -791,10 +855,23 @@ const stylesCallback = (theme: MD3Theme) =>
       backgroundColor: computeMixedColor(theme.colors.background, COLOR, 1),
     },
     textHighlight: {
-      color: computeMixedColor(theme.colors.onBackground, COLOR_2, 1),
+      borderRadius: 999,
+      // backgroundColor: computeMixedColor(theme.colors.background, COLOR_3, 1),
+      backgroundColor: COLOR_2,
+      color: theme.colors.shadow,
+      borderColor: computeMixedColor(theme.colors.onBackground, COLOR_2),
+      borderWidth: 1,
+      paddingHorizontal: 4,
+      // color: computeMixedColor(theme.colors.onBackground, COLOR_3, 1),
     },
     textOnHighlight: {
       color: theme.colors.shadow,
+    },
+    textContainer: {
+      flexDirection: "row",
+      // gap: 1,
+      flexWrap: "wrap",
+      justifyContent: "center",
     },
   });
 export type ApplicationStyles = ReturnType<typeof stylesCallback>;
