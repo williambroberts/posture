@@ -272,7 +272,7 @@ export const darkTheme: MD3Colors = {
   backdrop: "rgba(49, 49, 37, 0.4)",
 };
 export const COLOR = "rgb(135, 115, 94)";
-export const COLOR_2 = "rgba(255, 183, 0, 1)";
+export const COLOR_2 = "rgba(190, 255, 147, 1)"; //"rgba(255, 246, 151, 1)"; //rgba(255, 183, 0, 1)//rgba(190, 255, 147, 1)
 export const COLOR_3 = "rgba(147, 255, 199, 1)";
 export const useCustomTheme = () => {
   const colorScheme = useColorScheme();
