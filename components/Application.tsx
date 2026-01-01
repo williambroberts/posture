@@ -695,27 +695,47 @@ export const Application = () => {
               />
               {/* todow icons */}
             </View>
-            <Text variant="bodyMedium" style={[styles.textWarning]}>
-              When the phone vibrates,{" "}
-              {computeStyledText("adjust", styles.textHighlight.color)} your
-              phone to a better position!
-              {/* todow icons */}
-            </Text>
-            <Text variant="bodySmall" style={[styles.textWarning]}>
-              Please set{" "}
-              {computeStyledText(
-                "Allow background activity",
-                styles.textHighlight.color
-              )}{" "}
-              on for this App in your device's{" "}
-              {computeStyledText(
-                "App battery management settings",
-                styles.textHighlight.color
-              )}
-              , to allow us to freely track your phone's position, using the
-              device sensors.
-              {/* todow text & icons*/}
-            </Text>
+            <View style={[styles.textContainer, styles.textWarningContainer]}>
+              <StyledText
+                text={"When the phone vibrates, "}
+                variant="bodyMedium"
+                style={{ textAlign: "center", ...styles.textWarning }}
+              />
+              <StyledText
+                text={"adjust"}
+                variant="bodyMedium"
+                style={{ textAlign: "center", ...styles.textHighlight }}
+              />
+              <StyledText
+                text={"your phone to a better position!"}
+                variant="bodyMedium"
+                style={{ textAlign: "center", ...styles.textWarning }}
+              />
+            </View>
+            <View style={[styles.textContainer, styles.textWarningContainer]}>
+              <StyledText
+                text={"Please set "}
+                variant="bodySmall"
+                style={{ textAlign: "center", ...styles.textWarning }}
+              />
+              <StyledText
+                text={"Allow background activity"}
+                variant="bodySmall"
+                style={{ textAlign: "center", ...styles.textHighlight }}
+              />
+              <StyledText
+                text={"ON for this App in your device's "}
+                variant="bodySmall"
+                style={{ textAlign: "center", ...styles.textWarning }}
+              />
+              <StyledText
+                text={
+                  "App battery management settings, to allow us to freely track your phone's position, using the device sensors."
+                }
+                variant="bodySmall"
+                style={{ textAlign: "center", ...styles.textWarning }}
+              />
+            </View>
           </>
         )}
         {isBackgroundRunning && (
