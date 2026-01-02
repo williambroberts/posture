@@ -1,11 +1,19 @@
 import { Stack } from "expo-router";
 import { useEffect } from "react";
-import { Linking, useColorScheme } from "react-native";
+import { Linking } from "react-native";
+import { Inter_900Black, useFonts } from "@expo-google-fonts/inter";
+import * as SplashScreen from "expo-splash-screen";
 import myModule from "../modules/my-module";
-import { MD3DarkTheme, MD3LightTheme, PaperProvider } from "react-native-paper";
+import { PaperProvider } from "react-native-paper";
 import { useCustomTheme } from "@/utilities/theme";
 //https://egghead.io/lessons/react-native-create-a-development-build-for-android-with-eas
+
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    Inter_900Black,
+  });
   const theme = useCustomTheme();
   useEffect(() => {
     const handleOpenURL = (event: { url: string }) => {
@@ -19,6 +27,17 @@ export default function RootLayout() {
       Linking.removeAllListeners("url");
     };
   }, []);
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (!loaded && !error) {
+    return null;
+  }
+
   return (
     <PaperProvider theme={theme}>
       <Stack
