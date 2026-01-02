@@ -275,10 +275,10 @@ export const darkTheme: MD3Colors = {
   backdrop: "rgba(49, 49, 37, 0.4)",
 };
 export const COLOR = "rgb(135, 115, 94)";
-export const COLOR_2 = "rgba(190, 255, 147, 1)"; //"rgba(255, 246, 151, 1)"; //"rgba(190, 255, 147, 1)"; //"rgba(255, 246, 151, 1)"; //rgba(255, 183, 0, 1)//
+export const COLOR_2 = "#f1f5f9"; //"rgba(254, 252, 232, 1)"; //"rgba(190, 255, 147, 1)"; //"rgba(255, 246, 151, 1)"; //"rgba(190, 255, 147, 1)"; //"rgba(255, 246, 151, 1)"; //rgba(255, 183, 0, 1)//
 export const COLOR_3 = "rgba(147, 255, 199, 1)";
-const blackList = [COLOR];
-
+export const COLOR_4 = "rgba(2, 6, 23, 1)";
+const blackList: string[] = [COLOR];
 export const useCustomTheme = () => {
   const colorScheme = useColorScheme();
   //https://oss.callstack.com/react-native-paper/docs/guides/theming

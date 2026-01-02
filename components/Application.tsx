@@ -14,6 +14,7 @@ import {
   COLOR,
   COLOR_2,
   COLOR_3,
+  COLOR_4,
   computeColorWithOpacity,
   computeMixedColor,
   useThemedStyles,
@@ -219,7 +220,8 @@ export const Application = () => {
               style={{
                 textAlign: "center",
                 ...styles.textHighlight,
-                color: COLOR_3,
+                backgroundColor: COLOR_3,
+                color: styles.textOnHighlight.color,
               }}
             />
           </View>
@@ -229,15 +231,15 @@ export const Application = () => {
             <CircleIcon iconName={"cellphone"} variant={"selected"} />
             <View style={styles.textContainer}>
               <StyledText
-                text={"Monitor Your "}
+                text={"Monitor Your Posture"}
                 variant="titleSmall"
                 style={{ textAlign: "center", ...styles.text }}
               />
-              <StyledText
+              {/* <StyledText
                 text={"Posture"}
                 variant="titleSmall"
                 style={{ textAlign: "center", ...styles.textHighlight }}
-              />
+              /> */}
             </View>
             <View style={styles.textContainer}>
               <StyledText
@@ -286,20 +288,20 @@ export const Application = () => {
             <View style={styles.textContainer}>
               <StyledText
                 variant="titleSmall"
-                text={"Choose your "}
+                text={"Choose your sensitivity"}
                 style={{
                   ...styles.text,
                   textAlign: "center",
                 }}
               />
-              <StyledText
+              {/* <StyledText
                 variant="titleSmall"
                 text={"sensitivity"}
                 style={{
                   ...styles.textHighlight,
                   textAlign: "center",
                 }}
-              />
+              /> */}
             </View>
             <Text
               variant="bodySmall"
@@ -841,7 +843,10 @@ const stylesCallback = (theme: MD3Theme) =>
       borderRadius: 8,
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor: computeColorWithOpacity(theme.colors.background, 1),
+      backgroundColor: computeMixedColor(
+        computeColorWithOpacity(theme.colors.background, 0.25),
+        COLOR
+      ),
     },
     borderDashed: {
       borderStyle: "dashed",
@@ -897,12 +902,12 @@ const stylesCallback = (theme: MD3Theme) =>
       color: computeMixedColor(theme.colors.onBackground, COLOR, 1),
     },
     textHighlight: {
-      borderRadius: 999,
+      borderRadius: 4,
       // backgroundColor: computeMixedColor(theme.colors.background, COLOR_3, 1),
       backgroundColor: COLOR_2,
-      color: theme.colors.shadow,
-      borderColor: computeMixedColor(theme.colors.onBackground, COLOR_2),
-      borderWidth: 1,
+      color: COLOR_4,
+      borderColor: COLOR_4,
+      // borderWidth: 1,
       paddingHorizontal: 4,
       paddingVertical: 0,
       // color: computeMixedColor(theme.colors.onBackground, COLOR_3, 1),
