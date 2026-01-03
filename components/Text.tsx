@@ -6,7 +6,7 @@ export const Text = (props: P) => {
   return (
     <RNText
       {...props}
-      style={[props.style, { fontFamily: "Inter_900Black" }]}
+      style={[{ fontFamily: "Inter_900Black" }, props.style]}
     />
   );
 };

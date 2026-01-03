@@ -8,15 +8,15 @@ import BackgroundService, {
 // import MyModule from '../modules/my-module';
 import myModule from "../modules/my-module";
 import { SensorEvent } from "@/modules/my-module/src/MyModule";
-import { Icon, MD3Theme, Text } from "react-native-paper";
+import { Icon } from "react-native-paper";
+import { Text } from "./Text";
 import { CustomButton } from "./CustomButton";
 import {
   COLOR,
-  COLOR_2,
   COLOR_3,
-  COLOR_4,
   computeColorWithOpacity,
   computeMixedColor,
+  CustomTheme,
   useThemedStyles,
 } from "@/utilities/theme";
 import * as SQLite from "expo-sqlite";
@@ -233,7 +233,11 @@ export const Application = () => {
               <StyledText
                 text={"Monitor Your Posture"}
                 variant="titleSmall"
-                style={{ textAlign: "center", ...styles.text }}
+                style={{
+                  textAlign: "center",
+                  ...styles.text,
+                  ...styles.fontFamily700,
+                }}
               />
               {/* <StyledText
                 text={"Posture"}
@@ -292,6 +296,7 @@ export const Application = () => {
                 style={{
                   ...styles.text,
                   textAlign: "center",
+                  ...styles.fontFamily700,
                 }}
               />
               {/* <StyledText
@@ -311,220 +316,248 @@ export const Application = () => {
             </Text>
           </View>
         )}
-        <CustomButton
-          containerStyle={[
-            options.parameters.values.name === angleValuesMap["veryLight"].name
-              ? styles.selectedButton
-              : {},
-          ]}
-          disabled={isBackgroundRunning}
-          onPress={() => {
-            myModule.selectionAsync();
-            setOptions({
-              ...defaultOptions,
-              parameters: {
-                ...defaultConfig,
-                values: angleValuesMap["veryLight"],
-              },
-            });
-          }}
-        >
-          <View style={styles.buttonChildContainer}>
-            <Icon
-              size={ICON_SIZE}
-              color={
-                options.parameters.values.name ===
-                angleValuesMap["veryLight"].name
-                  ? styles.selectedButtonText.color
-                  : isBackgroundRunning
-                  ? styles.textDisabled.color
-                  : styles.text.color
-              }
-              source={"tally-mark-1"}
-            />
-            <Text
-              variant="bodySmall"
-              style={[
-                styles.text,
-                options.parameters.values.name ===
-                angleValuesMap["veryLight"].name
-                  ? styles.selectedButtonText
-                  : isBackgroundRunning
-                  ? styles.textDisabled
-                  : {},
-              ]}
-            >
-              {angleValuesMap["veryLight"].name}
-            </Text>
-            {options.parameters.values.name ===
-              angleValuesMap["veryLight"].name && (
+        {((isBackgroundRunning &&
+          options.parameters.values.name ===
+            angleValuesMap["veryLight"].name) ||
+          !isBackgroundRunning) && (
+          <CustomButton
+            containerStyle={[
+              options.parameters.values.name ===
+              angleValuesMap["veryLight"].name
+                ? styles.selectedButton
+                : {},
+            ]}
+            disabled={isBackgroundRunning}
+            onPress={() => {
+              myModule.selectionAsync();
+              setOptions({
+                ...defaultOptions,
+                parameters: {
+                  ...defaultConfig,
+                  values: angleValuesMap["veryLight"],
+                },
+              });
+            }}
+          >
+            <View style={styles.buttonChildContainer}>
               <Icon
                 size={ICON_SIZE}
-                color={styles.selectedButtonText.color}
-                source={"check"}
+                color={
+                  options.parameters.values.name ===
+                  angleValuesMap["veryLight"].name
+                    ? styles.selectedButtonText.color
+                    : isBackgroundRunning
+                    ? styles.textDisabled.color
+                    : styles.text.color
+                }
+                source={"tally-mark-1"}
               />
-            )}
-          </View>
-        </CustomButton>
-        <CustomButton
-          containerStyle={[
-            options.parameters.values.name === angleValuesMap["light"].name
-              ? styles.selectedButton
-              : {},
-          ]}
-          disabled={isBackgroundRunning}
-          onPress={() => {
-            myModule.selectionAsync();
-            setOptions({
-              ...defaultOptions,
-              parameters: {
-                ...defaultConfig,
-                values: angleValuesMap["light"],
-              },
-            });
-          }}
-        >
-          <View style={styles.buttonChildContainer}>
-            <Icon
-              size={ICON_SIZE}
-              color={
-                options.parameters.values.name === angleValuesMap["light"].name
-                  ? styles.selectedButtonText.color
-                  : isBackgroundRunning
-                  ? styles.textDisabled.color
-                  : styles.text.color
-              }
-              source={"tally-mark-2"}
-            />
-            <Text
-              variant="bodySmall"
-              style={[
-                styles.text,
-                options.parameters.values.name === angleValuesMap["light"].name
-                  ? styles.selectedButtonText
-                  : isBackgroundRunning
-                  ? styles.textDisabled
-                  : {},
-              ]}
-            >
-              {angleValuesMap["light"].name}
-            </Text>
-            {options.parameters.values.name ===
-              angleValuesMap["light"].name && (
+              <Text
+                variant="bodySmall"
+                style={[
+                  styles.text,
+                  styles.fontFamily900,
+                  options.parameters.values.name ===
+                  angleValuesMap["veryLight"].name
+                    ? styles.selectedButtonText
+                    : isBackgroundRunning
+                    ? styles.textDisabled
+                    : {},
+                ]}
+              >
+                {angleValuesMap["veryLight"].name}
+              </Text>
+              {options.parameters.values.name ===
+                angleValuesMap["veryLight"].name && (
+                <Icon
+                  size={ICON_SIZE}
+                  color={styles.selectedButtonText.color}
+                  source={"check"}
+                />
+              )}
+            </View>
+          </CustomButton>
+        )}
+        {((isBackgroundRunning &&
+          options.parameters.values.name === angleValuesMap["light"].name) ||
+          !isBackgroundRunning) && (
+          <CustomButton
+            containerStyle={[
+              options.parameters.values.name === angleValuesMap["light"].name
+                ? styles.selectedButton
+                : {},
+            ]}
+            disabled={isBackgroundRunning}
+            onPress={() => {
+              myModule.selectionAsync();
+              setOptions({
+                ...defaultOptions,
+                parameters: {
+                  ...defaultConfig,
+                  values: angleValuesMap["light"],
+                },
+              });
+            }}
+          >
+            <View style={styles.buttonChildContainer}>
               <Icon
                 size={ICON_SIZE}
-                color={styles.selectedButtonText.color}
-                source={"check"}
+                color={
+                  options.parameters.values.name ===
+                  angleValuesMap["light"].name
+                    ? styles.selectedButtonText.color
+                    : isBackgroundRunning
+                    ? styles.textDisabled.color
+                    : styles.text.color
+                }
+                source={"tally-mark-2"}
               />
-            )}
-          </View>
-        </CustomButton>
-        <CustomButton
-          containerStyle={[
-            options.parameters.values.name === angleValuesMap["normal"].name
-              ? styles.selectedButton
-              : {},
-          ]}
-          disabled={isBackgroundRunning}
-          onPress={() => {
-            myModule.selectionAsync();
-            setOptions({
-              ...defaultOptions,
-              parameters: {
-                ...defaultConfig,
-                values: angleValuesMap["normal"],
-              },
-            });
-          }}
-        >
-          <View style={styles.buttonChildContainer}>
-            <Icon
-              size={ICON_SIZE}
-              color={
-                options.parameters.values.name === angleValuesMap["normal"].name
-                  ? styles.selectedButtonText.color
-                  : isBackgroundRunning
-                  ? styles.textDisabled.color
-                  : styles.text.color
-              }
-              source={"tally-mark-3"}
-            />
-            <Text
-              variant="bodySmall"
-              style={[
-                styles.text,
-                options.parameters.values.name === angleValuesMap["normal"].name
-                  ? styles.selectedButtonText
-                  : isBackgroundRunning
-                  ? styles.textDisabled
-                  : {},
-              ]}
-            >
-              {angleValuesMap["normal"].name}
-            </Text>
-            {options.parameters.values.name ===
-              angleValuesMap["normal"].name && (
+              <Text
+                variant="bodySmall"
+                style={[
+                  styles.text,
+                  styles.fontFamily900,
+                  options.parameters.values.name ===
+                  angleValuesMap["light"].name
+                    ? styles.selectedButtonText
+                    : isBackgroundRunning
+                    ? styles.textDisabled
+                    : {},
+                ]}
+              >
+                {angleValuesMap["light"].name}
+              </Text>
+              {options.parameters.values.name ===
+                angleValuesMap["light"].name && (
+                <Icon
+                  size={ICON_SIZE}
+                  color={styles.selectedButtonText.color}
+                  source={"check"}
+                />
+              )}
+            </View>
+          </CustomButton>
+        )}
+        {((isBackgroundRunning &&
+          options.parameters.values.name === angleValuesMap["normal"].name) ||
+          !isBackgroundRunning) && (
+          <CustomButton
+            containerStyle={[
+              options.parameters.values.name === angleValuesMap["normal"].name
+                ? styles.selectedButton
+                : {},
+            ]}
+            disabled={isBackgroundRunning}
+            onPress={() => {
+              myModule.selectionAsync();
+              setOptions({
+                ...defaultOptions,
+                parameters: {
+                  ...defaultConfig,
+                  values: angleValuesMap["normal"],
+                },
+              });
+            }}
+          >
+            <View style={styles.buttonChildContainer}>
               <Icon
                 size={ICON_SIZE}
-                color={styles.selectedButtonText.color}
-                source={"check"}
+                color={
+                  options.parameters.values.name ===
+                  angleValuesMap["normal"].name
+                    ? styles.selectedButtonText.color
+                    : isBackgroundRunning
+                    ? styles.textDisabled.color
+                    : styles.text.color
+                }
+                source={"tally-mark-3"}
               />
-            )}
-          </View>
-        </CustomButton>
-        <CustomButton
-          containerStyle={[
-            options.parameters.values.name === angleValuesMap["strict"].name
-              ? styles.selectedButton
-              : {},
-          ]}
-          disabled={isBackgroundRunning}
-          onPress={() => {
-            myModule.selectionAsync();
-            setOptions({
-              ...defaultOptions,
-              parameters: {
-                ...defaultConfig,
-                values: angleValuesMap["strict"],
-              },
-            });
-          }}
-        >
-          <View style={styles.buttonChildContainer}>
-            <Icon
-              size={ICON_SIZE}
-              color={
-                options.parameters.values.name === angleValuesMap["strict"].name
-                  ? styles.selectedButtonText.color
-                  : isBackgroundRunning
-                  ? styles.textDisabled.color
-                  : styles.text.color
-              }
-              source={"tally-mark-4"}
-            />
-            <Text
-              variant="bodySmall"
-              style={[
-                styles.text,
-                options.parameters.values.name === angleValuesMap["strict"].name
-                  ? styles.selectedButtonText
-                  : isBackgroundRunning
-                  ? styles.textDisabled
-                  : {},
-              ]}
-            >
-              {angleValuesMap["strict"].name}
-            </Text>
-            {options.parameters.values.name ===
-              angleValuesMap["strict"].name && (
+              <Text
+                variant="bodySmall"
+                style={[
+                  styles.text,
+                  styles.fontFamily900,
+                  options.parameters.values.name ===
+                  angleValuesMap["normal"].name
+                    ? styles.selectedButtonText
+                    : isBackgroundRunning
+                    ? styles.textDisabled
+                    : {},
+                ]}
+              >
+                {angleValuesMap["normal"].name}
+              </Text>
+              {options.parameters.values.name ===
+                angleValuesMap["normal"].name && (
+                <Icon
+                  size={ICON_SIZE}
+                  color={styles.selectedButtonText.color}
+                  source={"check"}
+                />
+              )}
+            </View>
+          </CustomButton>
+        )}
+        {((isBackgroundRunning &&
+          options.parameters.values.name === angleValuesMap["strict"].name) ||
+          !isBackgroundRunning) && (
+          <CustomButton
+            containerStyle={[
+              options.parameters.values.name === angleValuesMap["strict"].name
+                ? styles.selectedButton
+                : {},
+            ]}
+            disabled={isBackgroundRunning}
+            onPress={() => {
+              myModule.selectionAsync();
+              setOptions({
+                ...defaultOptions,
+                parameters: {
+                  ...defaultConfig,
+                  values: angleValuesMap["strict"],
+                },
+              });
+            }}
+          >
+            <View style={styles.buttonChildContainer}>
               <Icon
                 size={ICON_SIZE}
-                color={styles.selectedButtonText.color}
-                source={"check"}
+                color={
+                  options.parameters.values.name ===
+                  angleValuesMap["strict"].name
+                    ? styles.selectedButtonText.color
+                    : isBackgroundRunning
+                    ? styles.textDisabled.color
+                    : styles.text.color
+                }
+                source={"tally-mark-4"}
               />
-            )}
-          </View>
-        </CustomButton>
+              <Text
+                variant="bodySmall"
+                style={[
+                  styles.text,
+                  styles.fontFamily900,
+                  options.parameters.values.name ===
+                  angleValuesMap["strict"].name
+                    ? styles.selectedButtonText
+                    : isBackgroundRunning
+                    ? styles.textDisabled
+                    : {},
+                ]}
+              >
+                {angleValuesMap["strict"].name}
+              </Text>
+              {options.parameters.values.name ===
+                angleValuesMap["strict"].name && (
+                <Icon
+                  size={ICON_SIZE}
+                  color={styles.selectedButtonText.color}
+                  source={"check"}
+                />
+              )}
+            </View>
+          </CustomButton>
+        )}
         {isBackgroundRunning && (
           <View style={{ alignItems: "center", justifyContent: "center" }}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -583,21 +616,24 @@ export const Application = () => {
             />
             <Text
               variant="titleSmall"
-              style={
+              style={[
+                styles.fontFamily700,
                 options.parameters.values.name === "Init"
                   ? styles.textDisabled
-                  : styles.onBackground
-              }
+                  : styles.onBackground,
+              ]}
             >
               {isPositionOK ? "Start Measuring" : "Put your phone upright"}
             </Text>
             <Text
               variant="bodySmall"
-              style={
+              style={[
+                styles.text,
                 options.parameters.values.name == "Init"
                   ? styles.textDisabled
-                  : styles.onBackground
-              }
+                  : styles.onBackground,
+                styles.fontFamily300,
+              ]}
             >
               {isPositionOK
                 ? "You are ready, let's start measuring."
@@ -675,20 +711,11 @@ export const Application = () => {
                 style={{ textAlign: "center", ...styles.textHighlight }}
               />
               <StyledText
-                text={" app and we will "}
+                text={" app and we will track your phone position and angle"}
                 variant="bodyMedium"
                 style={{ textAlign: "center", ...styles.textWarning }}
               />
-              <StyledText
-                text={"track"}
-                variant="bodyMedium"
-                style={{ textAlign: "center", ...styles.textHighlight }}
-              />
-              <StyledText
-                text={" your phone position and angle"}
-                variant="bodyMedium"
-                style={{ textAlign: "center", ...styles.textWarning }}
-              />
+
               {/* todow icons */}
             </View>
             <View style={[styles.textContainer, styles.textWarningContainer]}>
@@ -821,7 +848,7 @@ export const computeStyledText = (
     {text}
   </Text>
 );
-const stylesCallback = (theme: MD3Theme) =>
+const stylesCallback = (theme: CustomTheme) =>
   StyleSheet.create({
     container: {
       // backgroundColor: theme.colors.elevation.level5,
@@ -874,21 +901,31 @@ const stylesCallback = (theme: MD3Theme) =>
     title: {
       textDecorationLine: "underline",
       alignSelf: "center",
+      fontFamily: "Inter_700Bold",
       color: computeMixedColor(theme.colors.onBackground, COLOR),
     },
     selectedButton: {
+      fontFamily: "Inter_700Bold",
       backgroundColor: computeMixedColor(theme.colors.inverseSurface, COLOR),
     },
     selectedButtonText: {
+      fontFamily: "Inter_700Bold",
       color: computeMixedColor(theme.colors.inverseOnSurface, COLOR),
     },
     text: {
+      fontFamily: "Inter_400Regular",
       color: computeMixedColor(theme.colors.onBackground, COLOR),
     },
+    fontFamily300: { fontFamily: "Inter_300Light" },
+    fontFamily400: { fontFamily: "Inter_400Regular" },
+    fontFamily700: { fontFamily: "Inter_700Bold" },
+    fontFamily900: { fontFamily: "Inter_900Black" },
     textDisabled: {
+      fontFamily: "Inter_700Bold",
       color: computeMixedColor(theme.colors.onSurfaceDisabled, COLOR),
     },
     onBackground: {
+      fontFamily: "Inter_700Bold",
       color: computeMixedColor(theme.colors.onBackground, COLOR),
     },
     buttonChildContainer: {
@@ -899,21 +936,24 @@ const stylesCallback = (theme: MD3Theme) =>
       flex: 1,
     },
     textWarning: {
+      fontFamily: "Inter_400Regular",
       color: computeMixedColor(theme.colors.onBackground, COLOR, 1),
     },
     textHighlight: {
       borderRadius: 4,
       // backgroundColor: computeMixedColor(theme.colors.background, COLOR_3, 1),
-      backgroundColor: COLOR_2,
-      color: COLOR_4,
-      borderColor: COLOR_4,
+      backgroundColor: theme.colors.badge,
+      color: theme.colors.onBadge,
+      borderColor: theme.colors.onBadge,
       // borderWidth: 1,
       paddingHorizontal: 4,
       paddingVertical: 0,
+      fontFamily: "Inter_700Bold",
       // color: computeMixedColor(theme.colors.onBackground, COLOR_3, 1),
     },
     textOnHighlight: {
       color: theme.colors.shadow,
+      fontFamily: "Inter_700Bold",
     },
     textContainer: {
       flexDirection: "row",
@@ -1333,7 +1373,7 @@ const defaultOptions = {
     name: "ic_launcher",
     type: "mipmap",
   },
-  color: "#75e371",
+  color: COLOR_3,
   linkingURI: "postureKeep://", // See Deep Linking for more info
   parameters: defaultConfig satisfies BackgroundTaskParams,
 } satisfies ExtendedOptions;

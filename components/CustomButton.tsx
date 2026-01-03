@@ -4,15 +4,9 @@ import {
   computeMixedColor,
   useThemedStyles,
 } from "@/utilities/theme";
-import React, { useMemo } from "react";
-import { StyleProp, StyleSheet, TextStyle, ViewStyle } from "react-native";
-import {
-  MD3Theme,
-  MD3TypescaleKey,
-  Text,
-  TouchableRipple,
-  useTheme,
-} from "react-native-paper";
+import React from "react";
+import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { MD3Theme, TouchableRipple } from "react-native-paper";
 
 type Props = {
   // text:string;

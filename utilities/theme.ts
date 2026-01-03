@@ -9,11 +9,11 @@ import {
 import { MD3Colors } from "react-native-paper/lib/typescript/types";
 
 //region theme
-type StylesCallback<R> = (theme: MD3Theme) => R;
+type StylesCallback<R> = (theme: CustomTheme) => R;
 
 export const useThemedStyles = <R>(callback: StylesCallback<R>) => {
   const theme = useTheme();
-  return useMemo(() => callback(theme), [theme, callback]);
+  return useMemo(() => callback(theme as CustomTheme), [theme, callback]);
 };
 
 /**
@@ -146,50 +146,13 @@ export const computeMixedColor = (
   console.log(out);
   return out;
 };
-// let t = {
-//   backdrop: "rgba(50, 47, 55, 0.4)",
-//   background: "rgba(28, 27, 31, 1)",
-//   elevation: {
-//     level0: "transparent",
-//     level1: "rgb(37, 35, 42)",
-//     level2: "rgb(44, 40, 49)",
-//     level3: "rgb(49, 44, 56)",
-//     level4: "rgb(51, 46, 58)",
-//     level5: "rgb(52, 49, 63)",
-//   },
-//   error: "rgba(242, 184, 181, 1)",
-//   errorContainer: "rgba(140, 29, 24, 1)",
-//   inverseOnSurface: "rgba(49, 48, 51, 1)",
-//   inversePrimary: "rgba(103, 80, 164, 1)",
-//   inverseSurface: "rgba(230, 225, 229, 1)",
-//   onBackground: "rgba(230, 225, 229, 1)",
-//   onError: "rgba(96, 20, 16, 1)",
-//   onErrorContainer: "rgba(242, 184, 181, 1)",
-//   onPrimary: "rgba(56, 30, 114, 1)",
-//   onPrimaryContainer: "rgba(234, 221, 255, 1)",
-//   onSecondary: "rgba(51, 45, 65, 1)",
-//   onSecondaryContainer: "rgba(232, 222, 248, 1)",
-//   onSurface: "rgba(230, 225, 229, 1)",
-//   onSurfaceDisabled: "rgba(230, 225, 229, 0.38)",
-//   onSurfaceVariant: "rgba(202, 196, 208, 1)",
-//   onTertiary: "rgba(73, 37, 50, 1)",
-//   onTertiaryContainer: "rgba(255, 216, 228, 1)",
-//   outline: "rgba(147, 143, 153, 1)",
-//   outlineVariant: "rgba(73, 69, 79, 1)",
-//   primary: "rgba(208, 188, 255, 1)",
-//   primaryContainer: "rgba(79, 55, 139, 1)",
-//   scrim: "rgba(0, 0, 0, 1)",
-//   secondary: "rgba(204, 194, 220, 1)",
-//   secondaryContainer: "rgba(74, 68, 88, 1)",
-//   shadow: "rgba(0, 0, 0, 1)",
-//   surface: "rgba(28, 27, 31, 1)",
-//   surfaceDisabled: "rgba(230, 225, 229, 0.12)",
-//   surfaceVariant: "rgba(73, 69, 79, 1)",
-//   tertiary: "rgba(239, 184, 200, 1)",
-//   tertiaryContainer: "rgba(99, 59, 72, 1)",
-// };
+export type Colors = MD3Colors & {
+  badge: string;
+  onBadge: string;
+};
+export type CustomTheme = MD3Theme & { colors: Colors };
 //region light theme
-export const lightTheme: MD3Colors = {
+export const lightTheme: Colors = {
   primary: "rgb(95, 98, 0)",
   onPrimary: "rgb(255, 255, 255)",
   primaryContainer: "rgb(229, 234, 93)",
@@ -230,9 +193,11 @@ export const lightTheme: MD3Colors = {
   surfaceDisabled: "rgba(28, 28, 23, 0.12)",
   onSurfaceDisabled: "rgba(28, 28, 23, 0.38)",
   backdrop: "rgba(49, 49, 37, 0.4)",
+  badge: "rgba(241, 245, 249, 1)",
+  onBadge: "rgba(2, 6, 23, 1)",
 };
 //region dark theme
-export const darkTheme: MD3Colors = {
+export const darkTheme: Colors = {
   primary: "rgb(200, 206, 68)",
   onPrimary: "rgb(49, 51, 0)",
   primaryContainer: "rgb(71, 74, 0)",
@@ -273,11 +238,12 @@ export const darkTheme: MD3Colors = {
   surfaceDisabled: "rgba(229, 226, 218, 0.12)",
   onSurfaceDisabled: "rgba(229, 226, 218, 0.38)",
   backdrop: "rgba(49, 49, 37, 0.4)",
+  badge: "rgb(69 85 108)",
+  onBadge: "rgb(249 243 244)",
 };
 export const COLOR = "rgb(135, 115, 94)";
-export const COLOR_2 = "#f1f5f9"; //"rgba(254, 252, 232, 1)"; //"rgba(190, 255, 147, 1)"; //"rgba(255, 246, 151, 1)"; //"rgba(190, 255, 147, 1)"; //"rgba(255, 246, 151, 1)"; //rgba(255, 183, 0, 1)//
-export const COLOR_3 = "rgba(147, 255, 199, 1)";
-export const COLOR_4 = "rgba(2, 6, 23, 1)";
+export const COLOR_2 = "rgba(241, 245, 249, 1)"; //"rgba(254, 252, 232, 1)"; //"rgba(190, 255, 147, 1)"; //"rgba(255, 246, 151, 1)"; //"rgba(190, 255, 147, 1)"; //"rgba(255, 246, 151, 1)"; //rgba(255, 183, 0, 1)//
+export const COLOR_3 = "#93ffc7ff";
 const blackList: string[] = [COLOR];
 export const useCustomTheme = () => {
   const colorScheme = useColorScheme();

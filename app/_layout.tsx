@@ -1,7 +1,13 @@
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { Linking } from "react-native";
-import { Inter_900Black, useFonts } from "@expo-google-fonts/inter";
+import {
+  Inter_900Black,
+  Inter_400Regular,
+  Inter_700Bold,
+  Inter_300Light,
+  useFonts,
+} from "@expo-google-fonts/inter";
 import * as SplashScreen from "expo-splash-screen";
 import myModule from "../modules/my-module";
 import { PaperProvider } from "react-native-paper";
@@ -13,6 +19,9 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     Inter_900Black,
+    Inter_400Regular,
+    Inter_700Bold,
+    Inter_300Light,
   });
   const theme = useCustomTheme();
   useEffect(() => {
